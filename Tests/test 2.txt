@@ -1,0 +1,39 @@
+import { bootstrapApplication } from '@angular/platform-browser';
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
+  `,
+})
+export class AppComponent {
+
+  items = [
+    { name: 'Product 1', image: 'assets/images/image1.jpg', details: 'Beautiful' },
+    { name: 'Product 2', image: 'assets/images/image2.jpg', details: 'Sweet' },
+    { name: 'Product 3', image: 'assets/images/image3.jpg', details: 'Nice' }
+  ];
+
+  selectedItem: number | null = null;
+
+  selectItem(index: number): void {
+    this.selectedItem = index;
+  }
+}
+
+// تفعيل التطبيق باستخدام bootstrapApplication
+
+bootstrapApplication(AppComponent)
+  .catch((err: any) => console.error(err));
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,624 @@
+package Visitor;
+
+import Semantic_Check.SemanticCheck;
+import SymbolTable.SymbolTable;
+import antlr.TypeScripteParser;
+import SymbolTable.Symbol;
+import antlr.TypeScripteParserBaseVisitor;
+import ast.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
+import java.util.stream.Collectors;
+
+public class BaseVisitor extends TypeScripteParserBaseVisitor {
+    SymbolTable symbolTable = new SymbolTable();
+    private final Stack<String> scopeStack = new Stack<>();
+    @Override
+    public AST visitProgram(TypeScripteParser.ProgramContext ctx) {
+        System.out.println();
+
+        //System.out.println("Entering Program Scope");
+        SymbolTable.createScope("Program Scope");
+        Program program = new Program();
+        for (int i = 0; i < ctx.statement().size(); i++) {
+            if (ctx.statement(i) != null) {
+                program.addChild((AST) visit(ctx.statement(i)));
+            }
+        }
+        SymbolTable.endCurrentScope();
+        //System.out.println("Exiting Program Scope");
+        SemanticCheck semanticCheck = new SemanticCheck();
+        semanticCheck.setSymbolTable(symbolTable);
+        boolean ok = semanticCheck.check();
+        if (!ok) {
+            System.err.println("Semantic errors found:");
+            for (String err : semanticCheck.getSemanticErrors()) {
+                System.err.println(err);
+            }
+        }
+        return program;
+    }
+
+    @Override
+    public AST visitImportStmt(TypeScripteParser.ImportStmtContext ctx) {
+        TypeScripteParser.ImportStatementContext innerCtx = ctx.importStatement();
+
+        String module ;
+
+        if (innerCtx.STRING() != null) {
+            module  = innerCtx.STRING().getText().replace("\"", "").replace("'", "");
+        } else if (ctx.getText().contains("Component")) {
+            module = "Component";
+        } else {
+            throw new IllegalArgumentException("Invalid import statement: " + ctx.getText());
+        }
+
+        ImportStatement importStatement = new ImportStatement(module);
+
+        for (int i = 0; i < ctx.children.size(); i++) {
+            String text = ctx.getChild(i).getText();
+            if (text.equals("import") || text.equals("from") || text.equals("{") || text.equals("}") || text.equals(",")|| text.equals(";")) {
+                continue;
+            }
+            if (!text.isEmpty()) {
+                importStatement.addIdentifiers(text);
+            }
+        }
+        return importStatement;
+    }
+
+    @Override
+    public AST visitComponentStmt(TypeScripteParser.ComponentStmtContext ctx) {
+        TypeScripteParser.ComponentDeclarationContext innerCtx = ctx.componentDeclaration();
+
+        //System.out.println("Entering Component Scope");
+        SymbolTable.createScope("Component Scope");
+        ComponentBody componentBody = (ComponentBody) visit(innerCtx.componentBody());
+        ComponentDeclaration componentDeclaration = new ComponentDeclaration();
+        componentDeclaration.setComponentBody(componentBody);
+        SymbolTable.endCurrentScope();
+        //System.out.println("Exiting Program Scope");
+        return componentDeclaration;    }
+
+    @Override
+    public AST visitVariableStmt(TypeScripteParser.VariableStmtContext ctx) {
+        TypeScripteParser.VariableDeclarationContext innerCtx = ctx.variableDeclaration();
+
+        String name;
+        String typeName = null;
+        Expression expression;
+
+        if (innerCtx instanceof TypeScripteParser.VarDeclWithKeywordContext varCtx) {
+            name = varCtx.IDENTIFIER().getText();
+            typeName = varCtx.getChild(0).getText(); // VAR | CONST | LET
+            expression = (Expression) visit(varCtx.expression());
+        } else if (innerCtx instanceof TypeScripteParser.VarReassignmentContext expCtx) {
+            name = expCtx.IDENTIFIER().getText();
+            expression = (Expression) visit(expCtx.expression());
+        } else {
+            throw new RuntimeException("Unknown variable declaration type");
+        }
+
+        String rawValue = expression.toString();
+        if (expression.toString().startsWith("\"") && expression.toString().endsWith("\"")) {
+            rawValue = "\"" + rawValue + "\"";
+        }
+
+        SymbolTable.addSymbolToCurrentScope(name, typeName, rawValue);
+        Symbol symbol = new Symbol(name, typeName, rawValue, SymbolTable.currentScope.getName());
+        SymbolTable.getSymbols().add(symbol);
+
+        return new VariableDeclaration(name, typeName != null ? new Type(typeName) : null, expression);
+    }
+
+    @Override
+    public AST visitObjectLiteralStmt(TypeScripteParser.ObjectLiteralStmtContext ctx) {
+        TypeScripteParser.ObjectLiteralContext innerCtx = ctx.objectLiteral();
+
+        ObjectLiteral objectLiteral = new ObjectLiteral();
+        for (int i = 0; i < innerCtx.propertyAssignment().size(); i++) {
+            PropertyAssignment property = (PropertyAssignment) visit(innerCtx.propertyAssignment(i));
+            objectLiteral.addProperty(property);
+        }
+        return objectLiteral;
+    }
+
+    @Override
+    public AST visitExprStmt(TypeScripteParser.ExprStmtContext ctx) {
+        TypeScripteParser.ExpressionStatementContext innerCtx = ctx.expressionStatement();
+        Expression expression = (Expression) visit(innerCtx.expression());
+        return new ExpressionStatement(expression);
+    }
+
+    @Override
+    public AST visitClassStmt(TypeScripteParser.ClassStmtContext ctx) {
+        TypeScripteParser.ClassDeclarationContext innerCtx = ctx.classDeclaration();
+
+        //System.out.println("Entering Class Scope");
+        SymbolTable.createScope("Class Scope");
+        String name = innerCtx.IDENTIFIER().getText();
+        ClassDeclaration classDeclaration = new ClassDeclaration(name);
+        if (innerCtx.classBody() != null) {
+            ClassBody classBody = (ClassBody) visit(innerCtx.classBody());
+            if (classBody != null) {
+                for (AST member : classBody.members) {
+                    classDeclaration.addBody(member);
+                }
+            } else {
+                System.err.println("Warning: visit(classBody) returned null for class " + name);
+            }}
+        SymbolTable.addSymbolToCurrentScope(name, "Class", "");
+        Symbol symbol = new Symbol(name, "Class", "", SymbolTable.currentScope.getName());
+        SymbolTable.getSymbols().add(symbol);
+        SymbolTable.endCurrentScope();
+        //System.out.println("Exiting Program Scope");
+        return classDeclaration;    }
+
+    @Override
+    public Object visitClassBody(TypeScripteParser.ClassBodyContext ctx) {
+        ClassBody classBody = new ClassBody();
+        for (int i = 0; i < ctx.children.size(); i++) {
+            if (ctx.children.get(i) != null) {
+                AST members = (AST) visit(ctx.children.get(i));
+                if (members != null) {
+                    classBody.addMember(members);
+                }
+            }
+        }
+        return classBody;    }
+
+    @Override
+    public AST visitForLoopStmt(TypeScripteParser.ForLoopStmtContext ctx) {
+        TypeScripteParser.ForLoopContext innerCtx = ctx.forLoop();
+        VariableDeclaration init = null;
+        if (innerCtx.variableDeclaration() != null) {
+            init = (VariableDeclaration) visit(innerCtx.variableDeclaration());
+
+        }
+        Expression condition = null;
+        if (innerCtx.expression(0) != null) {
+            condition = (Expression) visit(innerCtx.expression(0));
+        }
+
+        Expression operation = null;
+        if (innerCtx.expression(1) != null) {
+            operation = (Expression) visit(innerCtx.expression(1));
+        }
+        ForLoop forLoop = new ForLoop(init, condition, operation);
+        //System.out.println("Entering ForLoop Scope");
+        SymbolTable.createScope("ForLoop Scope");
+        for (int i = 0; i < innerCtx.statement().size(); i++) {
+            if (innerCtx.statement(i) != null) {
+                AST bodyStatement = (AST) visit(innerCtx.statement(i));
+                forLoop.addBodyStatement(bodyStatement);
+            }
+        }
+        SymbolTable.endCurrentScope();
+        //System.out.println("Exiting ForLoop Scope");
+        return forLoop;
+    }
+
+    @Override
+    public AST visitIfStmt(TypeScripteParser.IfStmtContext ctx) {
+        TypeScripteParser.IfStatementContext innerCtx = ctx.ifStatement();
+        Expression condition = (Expression) visit(innerCtx.expression());
+        //System.out.println("Entering If Scope");
+        SymbolTable.createScope("If Scope");
+        SymbolTable.addSymbolToCurrentScope("Condition", "Boolean", condition.toString());
+
+        Statement ifBodyAST = (Statement) visit(innerCtx.statement(0));
+        SymbolTable.endCurrentScope();
+        //System.out.println("Exiting ForLoop Scope");
+        Statement elseBodyAST = null;
+        if (innerCtx.ELSE() != null) {
+            //System.out.println("Entering Else Scope");
+            SymbolTable.createScope("Else Scope");
+            elseBodyAST = (Statement) visit(innerCtx.statement(1));
+            SymbolTable.endCurrentScope();
+            //System.out.println("Exiting ForLoop Scope");
+        }
+        return new IfStatement(condition, ifBodyAST, elseBodyAST);
+    }
+
+    @Override
+    public AST visitComponentBody(TypeScripteParser.ComponentBodyContext ctx) {
+        ComponentBody componentBody = new ComponentBody();
+        for (TypeScripteParser.FieldContext fieldContext : ctx.field()) {
+            Field field = (Field) visit(fieldContext);
+            componentBody.addField(field);
+        }
+
+        return componentBody;    }
+
+    @Override
+    public AST visitSelectorFld(TypeScripteParser.SelectorFldContext ctx) {
+        TypeScripteParser.SelectorFieldContext innerCtx = ctx.selectorField();
+        String selctor = innerCtx.STRING().getText();
+        SymbolTable.addSymbolToCurrentScope("selctor", "String", selctor);
+        Symbol symbol = new Symbol("selctor", "String", selctor, SymbolTable.currentScope.getName());
+        SymbolTable.getSymbols().add(symbol);
+        return new SelectorField(selctor);
+    }
+
+    @Override
+    public AST visitStandaloneFld(TypeScripteParser.StandaloneFldContext ctx) {
+        TypeScripteParser.StandaloneFieldContext innerCtx = ctx.standaloneField();
+        String standalone = innerCtx.TRUE() != null ? innerCtx.TRUE().getText() : innerCtx.FALSE().getText();
+        SymbolTable.addSymbolToCurrentScope("standalone", "boolean", standalone);
+        Symbol symbol = new Symbol("standalone", "boolean", standalone, SymbolTable.currentScope.getName());
+        SymbolTable.getSymbols().add(symbol);
+        return new StandalongField(standalone);
+    }
+
+    @Override
+    public AST visitImportsFld(TypeScripteParser.ImportsFldContext ctx) {
+        ImportsField importsField = new ImportsField();
+        String id = ctx.getText();
+        importsField.addImport(id);
+        SymbolTable.addSymbolToCurrentScope(id, "imports", id);
+        Symbol symbol = new Symbol(id, "imports", id, SymbolTable.currentScope.getName());
+        SymbolTable.getSymbols().add(symbol);
+
+        return importsField;
+    }
+
+    @Override
+    public AST visitTemplateFld(TypeScripteParser.TemplateFldContext ctx) {
+        TypeScripteParser.TemplateFieldContext innerCtx = ctx.templateField();
+
+        if (innerCtx == null) {
+            System.out.println("TemplateFieldContext is null");
+            return null;
+        }
+        String templateString = innerCtx.BACKTICK(0).getText();
+        List<Node> elements = innerCtx.element().stream()
+                .map(elementCtx -> {
+                    if (elementCtx == null) {
+                        System.out.println("Null element in template");
+                        return null;
+                    }
+                    return (Node) visit(elementCtx);
+                })
+                .collect(Collectors.toList());
+        SymbolTable.addSymbolToCurrentScope("Template", "String", "");
+        Symbol symbol = new Symbol("Template", "String", "", SymbolTable.currentScope.getName());
+        SymbolTable.getSymbols().add(symbol);
+        return new TemplateField(templateString, elements);    }
+
+    @Override
+    public AST visitOtherFlds(TypeScripteParser.OtherFldsContext ctx) {
+        TypeScripteParser.OtherFieldsContext innerCtx = ctx.otherFields();
+
+        String fieldName = innerCtx.getText();
+        Expression expression = (Expression) visit(innerCtx.expression());
+        SymbolTable.addSymbolToCurrentScope(fieldName, fieldName, expression.toString());
+        Symbol symbol = new Symbol(fieldName, fieldName, expression.toString(), SymbolTable.currentScope.getName());
+        SymbolTable.getSymbols().add(symbol);
+        return new OtherField(fieldName, expression);
+    }
+
+    @Override
+    public AST visitPropertyDeclaration(TypeScripteParser.PropertyDeclarationContext ctx) {
+
+        String name = ctx.IDENTIFIER().getText();
+        Type type = ctx.type() != null ? new Type(ctx.type().getText()) : null;
+        Expression value = ctx.expression() != null ? (Expression) visit(ctx.expression()) : null;
+
+        assert value != null;
+        SymbolTable.addSymbolToCurrentScope(name,"", value.toString());
+        Symbol symbol = new Symbol(name, "", value.toString(), SymbolTable.currentScope.getName());
+        SymbolTable.getSymbols().add(symbol);
+
+
+        return new PropertyDeclaration(name, type, value);
+    }
+
+    @Override
+    public AST visitMethodDeclaration(TypeScripteParser.MethodDeclarationContext ctx) {
+        //System.out.println("Entering Function Scope");
+        SymbolTable.createScope("Function Scope");
+        String name = ctx.IDENTIFIER().getText();
+        ParameterList parameterList = ctx.parameterList() != null ? (ParameterList) visit(ctx.parameterList()) : null;
+        Type type = ctx.type() != null
+                ? new Type(ctx.type().getText())
+                : new Type("void");
+        MethodBody methodBody = ctx.methodBody() != null
+                ? (MethodBody) visit(ctx.methodBody())
+                : new MethodBody();
+        SymbolTable.addSymbolToCurrentScope(name, "Function", type.getTypeName());
+        Symbol symbol = new Symbol(name, "Function", type.getTypeName(), SymbolTable.currentScope.getName());
+        SymbolTable.getSymbols().add(symbol);
+        SymbolTable.endCurrentScope();
+        //System.out.println("Exiting Program Scope");
+        return new MethodDeclaration(name, parameterList, type, methodBody);    }
+
+    @Override
+    public AST visitParameterList(TypeScripteParser.ParameterListContext ctx)   {
+        ParameterList parameterList = new ParameterList();
+        for (int i = 0; i < ctx.parameter().size(); i++) {
+            if (ctx.parameter(i) != null) {
+                Parameter parameter = (Parameter) visit(ctx.parameter(i));
+                parameterList.addParameter(parameter);
+            }
+        }
+        return parameterList;    }
+
+    @Override
+    public AST visitParameter(TypeScripteParser.ParameterContext ctx) {
+        String name = (ctx.IDENTIFIER() != null) ? ctx.IDENTIFIER().getText() : "undefined";
+        String typeName = (ctx.type() != null) ? ctx.type().getText() : "undefined";
+        Type type = new Type(typeName);
+
+        SymbolTable.addSymbolToCurrentScope(name, typeName, "");
+        Symbol symbol = new Symbol(name, typeName, "", SymbolTable.currentScope.getName());
+        SymbolTable.getSymbols().add(symbol);
+        return new Parameter(name, type);    }
+
+    @Override
+    public AST visitMethodBody(TypeScripteParser.MethodBodyContext ctx) {
+        MethodBody methodBody = new MethodBody();
+        for (int i = 0; i < ctx.statement().size(); i++) {
+            if (ctx.statement(i) != null) {
+                AST statement = (AST) visit(ctx.statement(i));
+                methodBody.addStatement(statement);
+            }
+        }
+        return methodBody;    }
+
+    @Override
+    public AST visitType(TypeScripteParser.TypeContext ctx) {
+        if (ctx.primitiveType() != null) {
+            return (AST) visit(ctx.primitiveType());
+        }
+
+        if (ctx.PIPE() != null) {
+            Type leftType = (Type) visit(ctx.primitiveType());
+            Type rightType = (Type) visit(ctx.type());
+
+            List<Type> unionTypes = new ArrayList<>();
+            if (leftType != null && leftType.getUnionTypes() != null) {
+                unionTypes.addAll(leftType.getUnionTypes());
+            } else {
+                unionTypes.add(leftType);
+            }
+
+            if (rightType != null && rightType.getUnionTypes() != null) {
+                unionTypes.addAll(rightType.getUnionTypes());
+            } else {
+                unionTypes.add(rightType);
+            }
+
+            return new Type(unionTypes);
+        }
+
+        return null;    }
+
+    @Override
+    public AST visitPrimitiveType(TypeScripteParser.PrimitiveTypeContext ctx) {
+        if (ctx.NUMBER() != null) {
+            return new PrimitiveType("number");
+        } else if (ctx.STRING() != null) {
+            return new PrimitiveType("string");
+        } else if (ctx.BOOLEAN() != null) {
+            return new PrimitiveType("boolean");
+        } else if (ctx.VOID() != null) {
+            return new PrimitiveType("void");
+        } else if (ctx.NULL() != null) {
+            return new PrimitiveType("null");
+        } else if (ctx.IDENTIFIER() != null) {
+            return new PrimitiveType(ctx.IDENTIFIER().getText());
+        }
+        return null;    }
+    @Override
+    public AST visitArrayExpr(TypeScripteParser.ArrayExprContext ctx) {
+        TypeScripteParser.ArrayLiteralContext innerCtx = ctx.arrayLiteral();
+
+        ArrayLiteral arrayLiteral = new ArrayLiteral();
+        for (int i = 0; i < innerCtx.expression().size(); i++) {
+            if (innerCtx.expression(i) != null) {
+                Expression element = (Expression) visit(innerCtx.expression(i));
+                arrayLiteral.addElement(element);
+            }
+        }
+        return arrayLiteral;    }
+
+    @Override
+    public AST visitFunctionCallExpr(TypeScripteParser.FunctionCallExprContext ctx) {
+        TypeScripteParser.FunctionCallContext innerCtx = ctx.functionCall();
+
+        String functionName = innerCtx.getChild(0).getText();
+        FunctionCall functionCall = new FunctionCall(functionName);
+        List<String> arguments = new ArrayList<>();
+
+        if (innerCtx.expression() != null) {
+            for (int i = 0; i < innerCtx.expression().size(); i++) {
+                Expression argument = (Expression) visit(innerCtx.expression(i));
+                functionCall.addArgument(argument);
+                arguments.add(argument.toString());
+
+            }
+        }
+        for (int i = 0; i < innerCtx.DOT().size(); i++) {
+            String chainedFunctionName = innerCtx.getChild(4 + i * 4).getText();
+            FunctionCall chainedCall = new FunctionCall(chainedFunctionName);
+
+            if (innerCtx.expression(i) != null) {
+                for (int j = 0; j < innerCtx.expression().size(); j++) {
+                    Expression chainedArgument = (Expression) visit(innerCtx.expression(j));
+                    chainedCall.addArgument(chainedArgument);
+                }
+            }
+            functionCall.addChainedCall(chainedCall);
+        }
+        SymbolTable.addSymbolToCurrentScope(functionName, "FunctionCall", "Arguments: " + arguments);
+
+        return functionCall;    }
+
+    @Override
+    public AST visitArrowFunctionExpr(TypeScripteParser.ArrowFunctionExprContext ctx) {
+        TypeScripteParser.ArrowFunctionContext innerCtx = ctx.arrowFunction();
+
+        //System.out.println("Entering ArrowFunction Scope");
+        SymbolTable.createScope("ArrowFunction Scope");
+        ParameterList parameterList = null;
+        if (innerCtx.parameterList() != null) {
+            parameterList = (ParameterList) visit(innerCtx.parameterList());
+        } else {
+            parameterList = new ParameterList();
+        }
+
+        Expression expression = null;
+        if (innerCtx.propertyAccess() != null) {
+            expression = (Expression) visit(innerCtx.propertyAccess());
+        } else {
+            expression = new Literal("default expression");
+        }
+        SymbolTable.addSymbolToCurrentScope("ArrowFunction", "Function", "Parameters: " + parameterList.toString());
+
+        SymbolTable.endCurrentScope();
+        //System.out.println("Exiting ArrowFunction Scope");
+        return new ArrowFunction(parameterList, expression);    }
+
+    @Override
+    public AST visitOperationExpr(TypeScripteParser.OperationExprContext ctx) {
+        TypeScripteParser.OperationContext innerCtx = ctx.operation();
+
+        if (innerCtx.PLUS() != null || innerCtx.MINUS() != null || innerCtx.SLASH() != null || innerCtx.STAR() != null || innerCtx.MOD() != null || innerCtx.CLOSED_SYMBOL() != null || innerCtx.lt() != null) {
+            String operator = innerCtx.getChild(1).getText();
+            Expression left = new Identifier(innerCtx.IDENTIFIER().getText());
+
+            Expression right = null;
+            if (innerCtx.expression() != null) {
+                right = (Expression) visit(innerCtx.expression());
+            }
+
+            return new Operation(left, operator, right);
+        } else if ((innerCtx.PLUS() != null && innerCtx.getChild(2).getText().equals("+")) ||
+                (innerCtx.MINUS() != null && innerCtx.getChild(2).getText().equals("-"))) {
+            Expression identifier = new Identifier(innerCtx.IDENTIFIER().getText());
+            String operator = innerCtx.getChild(1).getText() + innerCtx.getChild(2).getText();
+            return new Operation(identifier, operator, null);
+        } else {
+            throw new IllegalArgumentException("Invalid operation");
+        }    }
+
+    @Override
+    public AST visitAssignmentExpr(TypeScripteParser.AssignmentExprContext ctx) {
+        TypeScripteParser.AssignmentExpressionContext innerCtx = ctx.assignmentExpression();
+        PropertyAccess propertyAccess = (PropertyAccess) visit(innerCtx.propertyAccess());
+        Expression expression = (Expression) visit(innerCtx.expression());
+        return new AssignmentExpression(propertyAccess, expression);    }
+
+    @Override
+    public AST visitPropertyAccessExpr(TypeScripteParser.PropertyAccessExprContext ctx) {
+        if (ctx.getChildCount() < 1) {
+            throw new IllegalArgumentException("Invalid property access: no children found.");
+        }
+        String objectName = ctx.getChild(0).getText();
+
+        StringBuilder propertyChain = new StringBuilder(objectName);
+        for (int i = 1; i < ctx.getChildCount(); i += 2) {
+            if (ctx.getChild(i) == null || !".".equals(ctx.getChild(i).getText())) {
+                throw new IllegalArgumentException("Expected '.' in property access.");
+            }
+            if (ctx.getChild(i + 1) == null) {
+                throw new IllegalArgumentException("Expected property identifier after '.'.");
+            }
+            propertyChain.append(".").append(ctx.getChild(i + 1).getText());
+        }
+
+        return new PropertyAccess(objectName, propertyChain.toString());    }
+
+    @Override
+    public AST visitLiteral(TypeScripteParser.LiteralContext ctx) {
+        if (ctx.NULL() != null) {
+            return new Literal();
+        }
+        if (ctx.STRING() != null) {
+            String stringVal = ctx.STRING().getText().replace("\"", "");
+            return new Literal(stringVal);
+        }
+        if (ctx.NUMBER() != null) {
+            Integer integerVal = Integer.parseInt(ctx.NUMBER().getText());
+            return new Literal(integerVal);
+        }
+        if (ctx.TRUE() != null) {
+            return new Literal(true);
+        } else if (ctx.FALSE() != null) {
+            return new Literal(false);
+        }
+        String ctxText = ctx.getText();
+        throw new UnsupportedOperationException("Unknown literal type: " + ctxText);    }
+
+    @Override
+    public AST visitPropertyAssignment(TypeScripteParser.PropertyAssignmentContext ctx) {
+        String key = ctx.IDENTIFIER().getText();
+        Expression value = (Expression) visit(ctx.expression());
+        SymbolTable.addSymbolToCurrentScope(key, "String", value.toString());
+        Symbol symbol = new Symbol(key, "String", value.toString(), SymbolTable.currentScope.getName());
+        SymbolTable.getSymbols().add(symbol);
+        return new PropertyAssignment(key, value);
+    }
+
+    @Override
+    public AST visitExpressionStatement(TypeScripteParser.ExpressionStatementContext ctx) {
+        if (ctx == null || ctx.expression() == null) {
+            System.out.println("Visiting an empty or null expression");
+            return null;
+        }
+        return (AST) visit(ctx.expression());
+    }
+
+
+    @Override
+    public Object visitCompleteElement(TypeScripteParser.CompleteElementContext ctx) {
+        return super.visitCompleteElement(ctx);
+    }
+
+    @Override
+    public Object visitSelfClosingElement(TypeScripteParser.SelfClosingElementContext ctx) {
+        return super.visitSelfClosingElement(ctx);
+    }
+
+
+    @Override
+    public Object visitOpenTag(TypeScripteParser.OpenTagContext ctx) {
+        return super.visitOpenTag(ctx);
+    }
+
+    @Override
+    public Object visitClosedTag(TypeScripteParser.ClosedTagContext ctx) {
+        return super.visitClosedTag(ctx);
+    }
+
+    @Override
+    public Object visitAngularExpression(TypeScripteParser.AngularExpressionContext ctx) {
+        return super.visitAngularExpression(ctx);
+    }
+
+    @Override
+    public Object visitNormalAttr(TypeScripteParser.NormalAttrContext ctx) {
+        return super.visitNormalAttr(ctx);
+    }
+
+    @Override
+    public Object visitBindingAttr(TypeScripteParser.BindingAttrContext ctx) {
+        return super.visitBindingAttr(ctx);
+    }
+
+    @Override
+    public Object visitDirectiveAttr(TypeScripteParser.DirectiveAttrContext ctx) {
+        return super.visitDirectiveAttr(ctx);
+    }
+
+    @Override
+    public Object visitEventAttr(TypeScripteParser.EventAttrContext ctx) {
+        return super.visitEventAttr(ctx);
+    }
+
+
+
+
+}
