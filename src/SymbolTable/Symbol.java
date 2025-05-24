@@ -5,14 +5,18 @@ public class Symbol {
     private String type;   // نوع المتغير (مثل int، String)
     private String value;  // القيمة
     private String scope;  // نطاق المتغير
-
-    public Symbol(String name, String type, String value, String scope) {
+    private final int lineNumber;
+    public Symbol(String name, String type, String value, String scope, int lineNumber) {
         this.name = name;
         this.type = type;
         this.value = value;
         this.scope = scope;
+        this.lineNumber=lineNumber;
     }
 
+    public int getLineNumber() {
+        return lineNumber;
+    }
     // Getters and Setters
     public String getName() {
         return name;

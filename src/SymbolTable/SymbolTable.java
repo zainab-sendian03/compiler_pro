@@ -9,7 +9,7 @@ public class SymbolTable {
     private static final List<Scope> scopes = new ArrayList<>();
 
     public void setSymbols(ArrayList<Symbol> symbols) {
-        this.symbols = symbols;
+        SymbolTable.symbols = symbols;
     }
 
     public static ArrayList<Symbol> getSymbols() {
@@ -17,34 +17,35 @@ public class SymbolTable {
     }
 
     public static void print() {
-        System.out.println("Name\t\tType\t\tValue\t\tScope");
-        System.out.println("*============================================*");
+        System.out.println("Name\t\tType\t\tValue\t\tScope\t\t line");
+        System.out.println("*=====================================================*");
         for (Symbol s : symbols) {
-                System.out.printf("%s\t\t%s\t\t%s\t\t%s%n",
-                        s.getName(),
-                        s.getType(),
-                        s.getValue(),
-                        s.getScope());
-                System.out.println("____________________________________________________________________________________");
+            System.out.printf("%s\t\t%s\t\t%s\t\t%s\t\t%d%n",
+                    s.getName(),
+                    s.getType(),
+                    s.getValue(),
+                    s.getScope(),
+            s.getLineNumber());
+            System.out.println("____________________________________________________________________________________");
 
         }
     }
 
-// جميع النطاقات
+    // جميع النطاقات
     public static Scope currentScope = null; // النطاق الحالي
 
     // إنشاء نطاق جديد
-        public static void createScope(String name) {
+    public static void createScope(String name) {
         Scope newScope = new Scope(name, currentScope);
         scopes.add(newScope);
         currentScope = newScope; // تحديث النطاق الحالي
-      //  System.out.println("Scope created: " + name);
+        //  System.out.println("Scope created: " + name);
     }
 
-//    // إنهاء النطاق الحالي
+    //    // إنهاء النطاق الحالي
     public static void endCurrentScope() {
         if (currentScope != null) {
-       //     System.out.println("Scope ended: " + currentScope.getName());
+            //     System.out.println("Scope ended: " + currentScope.getName());
             currentScope = currentScope.getParentScope(); // العودة إلى النطاق الأب
         } else {
             System.out.println("No scope to end!");
@@ -52,12 +53,12 @@ public class SymbolTable {
     }
 
     // إضافة رمز إلى النطاق الحالي
-    public static void addSymbolToCurrentScope(String name, String type, String value) {
+    public static void addSymbolToCurrentScope(String name, String type, String value, int lineNum) {
         if (currentScope == null) {
             System.out.println("No current scope to add symbol!");
             return;
         }
-        Symbol symbol = new Symbol(name, type, value, currentScope.getName());
+        Symbol symbol = new Symbol(name, type, value, currentScope.getName(), lineNum);
         currentScope.addSymbol(symbol);
     }
 

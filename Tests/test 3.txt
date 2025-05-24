@@ -1,5 +1,5 @@
-var a = 10;
-var b = 20;
+
+int b = "20";
 let result = a + b;
 
 if (result > 25) {

@@ -97,7 +97,7 @@ type
 
 
 primitiveType
-  : NUMBER | STRING | BOOLEAN | VOID | NULL | IDENTIFIER;
+  : NUMBER | MYSTRING | BOOLEAN | VOID | NULL | IDENTIFIER;
 
 expression
   : literal                  #LiteralExpr
@@ -172,7 +172,7 @@ ifStatement
   ;
 
 variableDeclaration
-  : (VAR | CONST | LET) IDENTIFIER EQUALS expression SEMICOLON  #VarDeclWithKeyword
+  : (VAR | CONST | LET | MYSTRING | INT ) IDENTIFIER EQUALS expression SEMICOLON  #VarDeclWithKeyword
   | IDENTIFIER EQUALS expression                                #VarReassignment
   ;
 

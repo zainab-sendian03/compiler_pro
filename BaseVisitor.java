@@ -1,7 +1,6 @@
 package Visitor;
 
 
-import Semantic_Check.SemanticCheck;
 import SymbolTable.SymbolTable;
 import SymbolTable.Symbol;
 

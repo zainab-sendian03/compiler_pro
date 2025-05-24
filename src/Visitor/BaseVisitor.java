@@ -1,6 +1,6 @@
 package Visitor;
 
-import Semantic_Check.SemanticCheck;
+import Semantic_Check.SemanticAnalyzer;
 import SymbolTable.SymbolTable;
 import antlr.TypeScripteParser;
 import SymbolTable.Symbol;
@@ -13,7 +13,9 @@ import java.util.Stack;
 import java.util.stream.Collectors;
 
 public class BaseVisitor extends TypeScripteParserBaseVisitor {
-    SymbolTable symbolTable = new SymbolTable();
+//    SymbolTable symbolTable = new SymbolTable();
+private boolean insideArrayLiteral = false;
+
     private final Stack<String> scopeStack = new Stack<>();
     @Override
     public AST visitProgram(TypeScripteParser.ProgramContext ctx) {
@@ -29,15 +31,7 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
         }
         SymbolTable.endCurrentScope();
         //System.out.println("Exiting Program Scope");
-        SemanticCheck semanticCheck = new SemanticCheck();
-        semanticCheck.setSymbolTable(symbolTable);
-        boolean ok = semanticCheck.check();
-        if (!ok) {
-            System.err.println("Semantic errors found:");
-            for (String err : semanticCheck.getSemanticErrors()) {
-                System.err.println(err);
-            }
-        }
+
         return program;
     }
 
@@ -89,11 +83,17 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
         String name;
         String typeName = null;
         Expression expression;
-
+        String rawValue = null;
+        Type type = null;
         if (innerCtx instanceof TypeScripteParser.VarDeclWithKeywordContext varCtx) {
             name = varCtx.IDENTIFIER().getText();
             typeName = varCtx.getChild(0).getText(); // VAR | CONST | LET
+            type = new Type(typeName);
             expression = (Expression) visit(varCtx.expression());
+            rawValue = varCtx.expression().getText();
+            if (expression.toString().startsWith("\"") && expression.toString().endsWith("\"")) {
+                rawValue = "\"" + rawValue + "\"";
+            }
         } else if (innerCtx instanceof TypeScripteParser.VarReassignmentContext expCtx) {
             name = expCtx.IDENTIFIER().getText();
             expression = (Expression) visit(expCtx.expression());
@@ -101,16 +101,11 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
             throw new RuntimeException("Unknown variable declaration type");
         }
 
-        String rawValue = expression.toString();
-        if (expression.toString().startsWith("\"") && expression.toString().endsWith("\"")) {
-            rawValue = "\"" + rawValue + "\"";
-        }
-
-        SymbolTable.addSymbolToCurrentScope(name, typeName, rawValue);
-        Symbol symbol = new Symbol(name, typeName, rawValue, SymbolTable.currentScope.getName());
+        SymbolTable.addSymbolToCurrentScope(name, typeName, rawValue,innerCtx.getStart().getLine());
+        Symbol symbol = new Symbol(name, typeName, rawValue, SymbolTable.currentScope.getName(),innerCtx.getStart().getLine());
         SymbolTable.getSymbols().add(symbol);
 
-        return new VariableDeclaration(name, typeName != null ? new Type(typeName) : null, expression);
+        return new VariableDeclaration(name, type, expression);
     }
 
     @Override
@@ -149,8 +144,8 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
             } else {
                 System.err.println("Warning: visit(classBody) returned null for class " + name);
             }}
-        SymbolTable.addSymbolToCurrentScope(name, "Class", "");
-        Symbol symbol = new Symbol(name, "Class", "", SymbolTable.currentScope.getName());
+        SymbolTable.addSymbolToCurrentScope(name, "Class", "",innerCtx.getStart().getLine());
+        Symbol symbol = new Symbol(name, "Class", "", SymbolTable.currentScope.getName(),innerCtx.getStart().getLine());
         SymbolTable.getSymbols().add(symbol);
         SymbolTable.endCurrentScope();
         //System.out.println("Exiting Program Scope");
@@ -206,7 +201,7 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
         Expression condition = (Expression) visit(innerCtx.expression());
         //System.out.println("Entering If Scope");
         SymbolTable.createScope("If Scope");
-        SymbolTable.addSymbolToCurrentScope("Condition", "Boolean", condition.toString());
+        SymbolTable.addSymbolToCurrentScope("Condition", "Boolean", condition.toString(),innerCtx.getStart().getLine());
 
         Statement ifBodyAST = (Statement) visit(innerCtx.statement(0));
         SymbolTable.endCurrentScope();
@@ -236,8 +231,8 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
     public AST visitSelectorFld(TypeScripteParser.SelectorFldContext ctx) {
         TypeScripteParser.SelectorFieldContext innerCtx = ctx.selectorField();
         String selctor = innerCtx.STRING().getText();
-        SymbolTable.addSymbolToCurrentScope("selctor", "String", selctor);
-        Symbol symbol = new Symbol("selctor", "String", selctor, SymbolTable.currentScope.getName());
+        SymbolTable.addSymbolToCurrentScope("selctor", "String", selctor,innerCtx.getStart().getLine());
+        Symbol symbol = new Symbol("selctor", "String", selctor, SymbolTable.currentScope.getName(),innerCtx.getStart().getLine());
         SymbolTable.getSymbols().add(symbol);
         return new SelectorField(selctor);
     }
@@ -246,8 +241,8 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
     public AST visitStandaloneFld(TypeScripteParser.StandaloneFldContext ctx) {
         TypeScripteParser.StandaloneFieldContext innerCtx = ctx.standaloneField();
         String standalone = innerCtx.TRUE() != null ? innerCtx.TRUE().getText() : innerCtx.FALSE().getText();
-        SymbolTable.addSymbolToCurrentScope("standalone", "boolean", standalone);
-        Symbol symbol = new Symbol("standalone", "boolean", standalone, SymbolTable.currentScope.getName());
+        SymbolTable.addSymbolToCurrentScope("standalone", "boolean", standalone,innerCtx.getStart().getLine());
+        Symbol symbol = new Symbol("standalone", "boolean", standalone, SymbolTable.currentScope.getName(),innerCtx.getStart().getLine());
         SymbolTable.getSymbols().add(symbol);
         return new StandalongField(standalone);
     }
@@ -257,8 +252,8 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
         ImportsField importsField = new ImportsField();
         String id = ctx.getText();
         importsField.addImport(id);
-        SymbolTable.addSymbolToCurrentScope(id, "imports", id);
-        Symbol symbol = new Symbol(id, "imports", id, SymbolTable.currentScope.getName());
+        SymbolTable.addSymbolToCurrentScope(id, "imports", id,ctx.getStart().getLine());
+        Symbol symbol = new Symbol(id, "imports", id, SymbolTable.currentScope.getName(),ctx.getStart().getLine());
         SymbolTable.getSymbols().add(symbol);
 
         return importsField;
@@ -282,8 +277,8 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
                     return (Node) visit(elementCtx);
                 })
                 .collect(Collectors.toList());
-        SymbolTable.addSymbolToCurrentScope("Template", "String", "");
-        Symbol symbol = new Symbol("Template", "String", "", SymbolTable.currentScope.getName());
+        SymbolTable.addSymbolToCurrentScope("Template", "String", "",innerCtx.getStart().getLine());
+        Symbol symbol = new Symbol("Template", "String", "", SymbolTable.currentScope.getName(), innerCtx.getStart().getLine());
         SymbolTable.getSymbols().add(symbol);
         return new TemplateField(templateString, elements);    }
 
@@ -293,8 +288,8 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
 
         String fieldName = innerCtx.getText();
         Expression expression = (Expression) visit(innerCtx.expression());
-        SymbolTable.addSymbolToCurrentScope(fieldName, fieldName, expression.toString());
-        Symbol symbol = new Symbol(fieldName, fieldName, expression.toString(), SymbolTable.currentScope.getName());
+        SymbolTable.addSymbolToCurrentScope(fieldName, fieldName, expression.toString(),innerCtx.getStart().getLine());
+        Symbol symbol = new Symbol(fieldName, fieldName, expression.toString(), SymbolTable.currentScope.getName(),innerCtx.getStart().getLine());
         SymbolTable.getSymbols().add(symbol);
         return new OtherField(fieldName, expression);
     }
@@ -307,8 +302,8 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
         Expression value = ctx.expression() != null ? (Expression) visit(ctx.expression()) : null;
 
         assert value != null;
-        SymbolTable.addSymbolToCurrentScope(name,"", value.toString());
-        Symbol symbol = new Symbol(name, "", value.toString(), SymbolTable.currentScope.getName());
+        SymbolTable.addSymbolToCurrentScope(name,"", value.toString(),ctx.getStart().getLine());
+        Symbol symbol = new Symbol(name, "", value.toString(), SymbolTable.currentScope.getName(),ctx.getStart().getLine());
         SymbolTable.getSymbols().add(symbol);
 
 
@@ -327,8 +322,8 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
         MethodBody methodBody = ctx.methodBody() != null
                 ? (MethodBody) visit(ctx.methodBody())
                 : new MethodBody();
-        SymbolTable.addSymbolToCurrentScope(name, "Function", type.getTypeName());
-        Symbol symbol = new Symbol(name, "Function", type.getTypeName(), SymbolTable.currentScope.getName());
+        SymbolTable.addSymbolToCurrentScope(name, "Function", type.getTypeName(),ctx.getStart().getLine());
+        Symbol symbol = new Symbol(name, "Function", type.getTypeName(), SymbolTable.currentScope.getName(),ctx.getStart().getLine());
         SymbolTable.getSymbols().add(symbol);
         SymbolTable.endCurrentScope();
         //System.out.println("Exiting Program Scope");
@@ -351,8 +346,8 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
         String typeName = (ctx.type() != null) ? ctx.type().getText() : "undefined";
         Type type = new Type(typeName);
 
-        SymbolTable.addSymbolToCurrentScope(name, typeName, "");
-        Symbol symbol = new Symbol(name, typeName, "", SymbolTable.currentScope.getName());
+        SymbolTable.addSymbolToCurrentScope(name, typeName, "",ctx.getStart().getLine());
+        Symbol symbol = new Symbol(name, typeName, "", SymbolTable.currentScope.getName(),ctx.getStart().getLine());
         SymbolTable.getSymbols().add(symbol);
         return new Parameter(name, type);    }
 
@@ -399,7 +394,7 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
     public AST visitPrimitiveType(TypeScripteParser.PrimitiveTypeContext ctx) {
         if (ctx.NUMBER() != null) {
             return new PrimitiveType("number");
-        } else if (ctx.STRING() != null) {
+        } else if (ctx.MYSTRING() != null) {
             return new PrimitiveType("string");
         } else if (ctx.BOOLEAN() != null) {
             return new PrimitiveType("boolean");
@@ -415,6 +410,7 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
     public AST visitArrayExpr(TypeScripteParser.ArrayExprContext ctx) {
         TypeScripteParser.ArrayLiteralContext innerCtx = ctx.arrayLiteral();
 
+        insideArrayLiteral = true; // ✅ نحن داخل مصفوفة الآن
         ArrayLiteral arrayLiteral = new ArrayLiteral();
         for (int i = 0; i < innerCtx.expression().size(); i++) {
             if (innerCtx.expression(i) != null) {
@@ -422,7 +418,9 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
                 arrayLiteral.addElement(element);
             }
         }
-        return arrayLiteral;    }
+        insideArrayLiteral = false; // ❌ خرجنا من المصفوفة
+        return arrayLiteral;
+    }
 
     @Override
     public AST visitFunctionCallExpr(TypeScripteParser.FunctionCallExprContext ctx) {
@@ -452,7 +450,7 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
             }
             functionCall.addChainedCall(chainedCall);
         }
-        SymbolTable.addSymbolToCurrentScope(functionName, "FunctionCall", "Arguments: " + arguments);
+        SymbolTable.addSymbolToCurrentScope(functionName, "FunctionCall", "Arguments: " + arguments,innerCtx.getStart().getLine());
 
         return functionCall;    }
 
@@ -475,7 +473,7 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
         } else {
             expression = new Literal("default expression");
         }
-        SymbolTable.addSymbolToCurrentScope("ArrowFunction", "Function", "Parameters: " + parameterList.toString());
+        SymbolTable.addSymbolToCurrentScope("ArrowFunction", "Function", "Parameters: " + parameterList.toString(),innerCtx.getStart().getLine());
 
         SymbolTable.endCurrentScope();
         //System.out.println("Exiting ArrowFunction Scope");
@@ -556,9 +554,9 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
     public AST visitPropertyAssignment(TypeScripteParser.PropertyAssignmentContext ctx) {
         String key = ctx.IDENTIFIER().getText();
         Expression value = (Expression) visit(ctx.expression());
-        SymbolTable.addSymbolToCurrentScope(key, "String", value.toString());
-        Symbol symbol = new Symbol(key, "String", value.toString(), SymbolTable.currentScope.getName());
-        SymbolTable.getSymbols().add(symbol);
+        if (!insideArrayLiteral) {
+            SymbolTable.addSymbolToCurrentScope(key, "", value.toString(), ctx.getStart().getLine());
+        }
         return new PropertyAssignment(key, value);
     }
 

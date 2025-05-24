@@ -1,5 +1,5 @@
-var s="MSHANALLAH";
-var s="";
+ int s="MSHANALLAH";
+
  for(var i=0;i< 3;i++) {
    if(i==2){
     consol.log("hello world");

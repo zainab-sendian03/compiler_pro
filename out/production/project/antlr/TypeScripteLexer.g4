@@ -6,15 +6,18 @@ WS: [ \t\r\n]+ -> skip;
 LINE_COMMENT: ( '//' ~[\r\n]* | '<!--' .*? '-->' ) -> skip;
 BLOCK_COMMENT: '/*' .*? '*/' -> skip;
 
+
 // Keywords
 IMPORT: 'import';
 FROM: 'from';
 EXPORT: 'export';
 CLASS: 'class';
 COMPONENT: 'Component';
+MYSTRING: 'String';
 IF: 'if';
 ELSE: 'else';
 FOR: 'for';
+INT: 'int';
 VAR: 'var';
 SELECTOR: 'selector';
 TEMPLATE: 'template';
