@@ -13,8 +13,8 @@ import java.util.Stack;
 import java.util.stream.Collectors;
 
 public class BaseVisitor extends TypeScripteParserBaseVisitor {
-//    SymbolTable symbolTable = new SymbolTable();
-private boolean insideArrayLiteral = false;
+    //    SymbolTable symbolTable = new SymbolTable();
+    private boolean insideArrayLiteral = false;
 
     private final Stack<String> scopeStack = new Stack<>();
     @Override
@@ -227,24 +227,61 @@ private boolean insideArrayLiteral = false;
 
         return componentBody;    }
 
+
     @Override
     public AST visitSelectorFld(TypeScripteParser.SelectorFldContext ctx) {
         TypeScripteParser.SelectorFieldContext innerCtx = ctx.selectorField();
-        String selctor = innerCtx.STRING().getText();
-        SymbolTable.addSymbolToCurrentScope("selctor", "String", selctor,innerCtx.getStart().getLine());
-        Symbol symbol = new Symbol("selctor", "String", selctor, SymbolTable.currentScope.getName(),innerCtx.getStart().getLine());
+
+        String value = null;
+        String type = null;
+
+        if (innerCtx.primitiveType().literal().TRUE() != null) {
+            value = innerCtx.primitiveType().literal().TRUE().getText();
+            type = "true";
+        }else if (innerCtx.primitiveType().literal().FALSE() != null) {
+            value = innerCtx.primitiveType().literal().TRUE().getText();
+            type = "false";
+        } else if (innerCtx.primitiveType().NUMBER() != null) {
+            value = innerCtx.primitiveType().NUMBER().getText();
+            type = "int";
+        } else if (innerCtx.primitiveType().arrayLiteral() != null) {
+            value = innerCtx.primitiveType().arrayLiteral().getText();
+            type = "Array";
+        } else if (innerCtx.primitiveType().objectLiteral() != null) {
+            value = innerCtx.primitiveType().objectLiteral().getText();
+            type = "Object";
+        } else if (innerCtx.primitiveType().IDENTIFIER() != null) {
+            value = innerCtx.primitiveType().IDENTIFIER().getText();
+            type = "any";
+        }else if (innerCtx.primitiveType().literal().STRING() != null) {
+            value = innerCtx.primitiveType().literal().STRING().getText();
+            type = "String";
+        }else {
+            value ="unknown";
+            type="unknown";
+        }
+
+        Symbol symbol = new Symbol("selector", type, value, SymbolTable.currentScope.getName(), innerCtx.getStart().getLine());
         SymbolTable.getSymbols().add(symbol);
-        return new SelectorField(selctor);
+        SymbolTable.addSymbolToCurrentScope("selector", type, value, innerCtx.getStart().getLine());
+
+        return new SelectorField(value);
     }
+
 
     @Override
     public AST visitStandaloneFld(TypeScripteParser.StandaloneFldContext ctx) {
         TypeScripteParser.StandaloneFieldContext innerCtx = ctx.standaloneField();
-        String standalone = innerCtx.TRUE() != null ? innerCtx.TRUE().getText() : innerCtx.FALSE().getText();
-        SymbolTable.addSymbolToCurrentScope("standalone", "boolean", standalone,innerCtx.getStart().getLine());
-        Symbol symbol = new Symbol("standalone", "boolean", standalone, SymbolTable.currentScope.getName(),innerCtx.getStart().getLine());
+        String value = null;
+
+        if (innerCtx.primitiveType().BOOLEAN() != null) {
+            value = innerCtx.primitiveType().BOOLEAN().getText();
+        }  else {
+            value = "unknown";
+        }        SymbolTable.addSymbolToCurrentScope("standalone", "boolean", value,innerCtx.getStart().getLine());
+        Symbol symbol = new Symbol("standalone", "boolean", value   , SymbolTable.currentScope.getName(),innerCtx.getStart().getLine());
         SymbolTable.getSymbols().add(symbol);
-        return new StandalongField(standalone);
+        return new StandalongField(value);
     }
 
     @Override
@@ -261,26 +298,37 @@ private boolean insideArrayLiteral = false;
 
     @Override
     public AST visitTemplateFld(TypeScripteParser.TemplateFldContext ctx) {
+        // أول شيء: الحصول على الـ TemplateFieldContext الداخلية
         TypeScripteParser.TemplateFieldContext innerCtx = ctx.templateField();
 
-        if (innerCtx == null) {
-            System.out.println("TemplateFieldContext is null");
+        // التأكد إذا الcontext غير فارغ وإذا الـ primitiveType يحتوي TEMPLATE_LITERAL
+        if (innerCtx == null || innerCtx.primitiveType().TEMPLATE_LITERAL() == null) {
+            System.out.println("TemplateFieldContext is null or not a template literal");
             return null;
         }
-        String templateString = innerCtx.BACKTICK(0).getText();
-        List<Node> elements = innerCtx.element().stream()
-                .map(elementCtx -> {
-                    if (elementCtx == null) {
-                        System.out.println("Null element in template");
-                        return null;
-                    }
-                    return (Node) visit(elementCtx);
-                })
-                .collect(Collectors.toList());
-        SymbolTable.addSymbolToCurrentScope("Template", "String", "",innerCtx.getStart().getLine());
-        Symbol symbol = new Symbol("Template", "String", "", SymbolTable.currentScope.getName(), innerCtx.getStart().getLine());
+
+        // استخراج النص الخام (مع backticks)
+        String raw = innerCtx.primitiveType().TEMPLATE_LITERAL().getText();
+
+        // إزالة أول وآخر حرف (backticks) للحصول على النص الفعلي
+        String templateString = raw.substring(1, raw.length() - 1);
+
+        // إضافة الـ Symbol للـ SymbolTable (نفس النطاق الحالي)
+        Symbol symbol = new Symbol(
+                "Template",      // الاسم
+                "String",        // النوع
+                templateString,  // القيمة (النص بدون backticks)
+                SymbolTable.currentScope.getName(),  // اسم النطاق الحالي
+                innerCtx.getStart().getLine()        // رقم السطر
+        );
         SymbolTable.getSymbols().add(symbol);
-        return new TemplateField(templateString, elements);    }
+        SymbolTable.addSymbolToCurrentScope("Template", "String", templateString, innerCtx.getStart().getLine());
+
+        // إنشاء وإرجاع كائن AST خاص بالـ TemplateField (قد تحتاج لتعديل حسب تعريف الكلاس)
+        return new TemplateField(templateString, new ArrayList<>());
+    }
+
+
 
     @Override
     public AST visitOtherFlds(TypeScripteParser.OtherFldsContext ctx) {
@@ -410,7 +458,7 @@ private boolean insideArrayLiteral = false;
     public AST visitArrayExpr(TypeScripteParser.ArrayExprContext ctx) {
         TypeScripteParser.ArrayLiteralContext innerCtx = ctx.arrayLiteral();
 
-        insideArrayLiteral = true; // ✅ نحن داخل مصفوفة الآن
+        insideArrayLiteral = true;
         ArrayLiteral arrayLiteral = new ArrayLiteral();
         for (int i = 0; i < innerCtx.expression().size(); i++) {
             if (innerCtx.expression(i) != null) {
@@ -418,7 +466,7 @@ private boolean insideArrayLiteral = false;
                 arrayLiteral.addElement(element);
             }
         }
-        insideArrayLiteral = false; // ❌ خرجنا من المصفوفة
+        insideArrayLiteral = false;
         return arrayLiteral;
     }
 

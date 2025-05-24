@@ -26,8 +26,7 @@ public class Main {
         BaseVisitor visitor = new BaseVisitor();
         Program program = (Program) visitor.visit(tree);
         SemanticAnalyzer analyzer = new SemanticAnalyzer();
-        analyzer.checkDuplicateProperties(SymbolTable.getScopes());
-        analyzer.getDuplicateErrors().printErrors();
+        analyzer.analyzeAll(SymbolTable.getScopes());
         System.out.println();
 //        System.out.println("AST:");
 //        System.out.println(program);

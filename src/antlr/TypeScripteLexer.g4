@@ -5,7 +5,7 @@ WS: [ \t\r\n]+ -> skip;
 // Comments
 LINE_COMMENT: ( '//' ~[\r\n]* | '<!--' .*? '-->' ) -> skip;
 BLOCK_COMMENT: '/*' .*? '*/' -> skip;
-
+TEMPLATE_LITERAL : '`' (~[`])* '`' ;
 
 // Keywords
 IMPORT: 'import';

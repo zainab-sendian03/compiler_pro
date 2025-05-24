@@ -42,20 +42,20 @@ field
 
 
 selectorField
-  : SELECTOR COLON STRING
+  : SELECTOR COLON primitiveType
   ;
 
 templateField
-  : TEMPLATE COLON BACKTICK element* BACKTICK
+  : TEMPLATE COLON primitiveType
   ;
 
 
 importsField
-  : IMPORTS COLON arrayLiteral*
+  : IMPORTS COLON primitiveType*
   ;
 
 standaloneField
-  : STANDALONE COLON TRUE | FALSE
+  : STANDALONE COLON primitiveType
   ;
 
 otherFields
@@ -97,7 +97,12 @@ type
 
 
 primitiveType
-  : NUMBER | MYSTRING | BOOLEAN | VOID | NULL | IDENTIFIER;
+  : NUMBER | MYSTRING | BOOLEAN | VOID | NULL | IDENTIFIER | TEMPLATE_LITERAL
+  | arrayLiteral
+  | objectLiteral
+  | literal
+  ;
+
 
 expression
   : literal                  #LiteralExpr
