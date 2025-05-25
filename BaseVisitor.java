@@ -194,22 +194,24 @@ public class BaseVisito extends TypeScripteParserBaseVisitor {
     }
 
     @Override
-    public AST visitImportStatement(TypeScripteParser.ImportStatementContext ctx) {
-        String module;
+    public AST visitImportStmt(TypeScripteParser.ImportStmtContext ctx) {
+        TypeScripteParser.ImportStatementContext innerCtx = ctx.importStatement();
 
-        if (ctx.STRING() != null) {
-            module = ctx.STRING().getText().replace("\"", "").replace("'", "");
+        String module ;
+
+        if (innerCtx.STRING() != null) {
+            module  = innerCtx.STRING().getText().replace("\"", "").replace("'", "");
         } else if (ctx.getText().contains("Component")) {
             module = "Component";
         } else {
-            throw new IllegalArgumentException("Invalid import statement: " + ctx.getText());
+            throw new IllegalArgumentException("Invalid import statement: " + innerCtx.getText());
         }
 
         ImportStatement importStatement = new ImportStatement(module);
 
-        for (int i = 0; i < ctx.children.size(); i++) {
-            String text = ctx.getChild(i).getText();
-            if (text.equals("import") || text.equals("from") || text.equals("{") || text.equals("}") || text.equals(",")|| text.equals(";")) {
+        for (int i = 0; i < innerCtx.children.size(); i++) {
+            String text = innerCtx.getChild(i).getText();
+            if (text.equals("import")  text.equals("from")  text.equals("{")  text.equals("}")  text.equals(",")|| text.equals(";")) {
                 continue;
             }
             if (!text.isEmpty()) {
@@ -218,8 +220,6 @@ public class BaseVisito extends TypeScripteParserBaseVisitor {
         }
         return importStatement;
     }
-
-
     @Override
     public AST visitComponentDeclaration(TypeScripteParser.ComponentDeclarationContext ctx) {
         //System.out.println("Entering Component Scope");
