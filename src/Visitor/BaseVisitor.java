@@ -43,16 +43,16 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
 
         if (innerCtx.STRING() != null) {
             module  = innerCtx.STRING().getText().replace("\"", "").replace("'", "");
-        } else if (ctx.getText().contains("Component")) {
+        } else if (innerCtx.getText().contains("Component")) {
             module = "Component";
         } else {
-            throw new IllegalArgumentException("Invalid import statement: " + ctx.getText());
+            throw new IllegalArgumentException("Invalid import statement: " + innerCtx.getText());
         }
 
         ImportStatement importStatement = new ImportStatement(module);
 
-        for (int i = 0; i < ctx.children.size(); i++) {
-            String text = ctx.getChild(i).getText();
+        for (int i = 0; i < innerCtx.children.size(); i++) {
+            String text = innerCtx.getChild(i).getText();
             if (text.equals("import") || text.equals("from") || text.equals("{") || text.equals("}") || text.equals(",")|| text.equals(";")) {
                 continue;
             }
