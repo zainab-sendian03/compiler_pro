@@ -7,6 +7,7 @@ public class SemanticError {
     private final String scopeName;
     private final int lineNumber;
 
+
     public SemanticError(String message, String symbolName, String scopeName, int lineNumber) {
         this.message = message;
         this.symbolName = symbolName;
@@ -29,6 +30,8 @@ public class SemanticError {
     public int getLineNumber() {
         return lineNumber;
     }
+
+
 
     @Override
     public String toString() {

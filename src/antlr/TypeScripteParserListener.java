@@ -224,6 +224,16 @@ public interface TypeScripteParserListener extends ParseTreeListener {
 	 */
 	void exitTemplateField(TypeScripteParser.TemplateFieldContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link TypeScripteParser#backTemplate}.
+	 * @param ctx the parse tree
+	 */
+	void enterBackTemplate(TypeScripteParser.BackTemplateContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link TypeScripteParser#backTemplate}.
+	 * @param ctx the parse tree
+	 */
+	void exitBackTemplate(TypeScripteParser.BackTemplateContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link TypeScripteParser#importsField}.
 	 * @param ctx the parse tree
 	 */

@@ -46,13 +46,13 @@ private boolean insideArrayLiteral = false;
         } else if (ctx.getText().contains("Component")) {
             module = "Component";
         } else {
-            throw new IllegalArgumentException("Invalid import statement: " + ctx.getText());
+            throw new IllegalArgumentException("Invalid import statement: " + innerCtx.getText());
         }
 
         ImportStatement importStatement = new ImportStatement(module);
 
-        for (int i = 0; i < ctx.children.size(); i++) {
-            String text = ctx.getChild(i).getText();
+        for (int i = 0; i < innerCtx.children.size(); i++) {
+            String text = innerCtx.getChild(i).getText();
             if (text.equals("import") || text.equals("from") || text.equals("{") || text.equals("}") || text.equals(",")|| text.equals(";")) {
                 continue;
             }
@@ -107,24 +107,23 @@ private boolean insideArrayLiteral = false;
 
         return new VariableDeclaration(name, type, expression);
     }
-
     @Override
-    public AST visitObjectLiteralStmt(TypeScripteParser.ObjectLiteralStmtContext ctx) {
-        TypeScripteParser.ObjectLiteralContext innerCtx = ctx.objectLiteral();
-
+    public Object visitObjectExpr(TypeScripteParser.ObjectExprContext ctx) {
         ObjectLiteral objectLiteral = new ObjectLiteral();
-        for (int i = 0; i < innerCtx.propertyAssignment().size(); i++) {
-            PropertyAssignment property = (PropertyAssignment) visit(innerCtx.propertyAssignment(i));
-            objectLiteral.addProperty(property);
+
+        if (ctx.objectLiteral().propertyAssignment() != null) {
+            for (int i = 0; i < ctx.objectLiteral().propertyAssignment().size(); i++) {
+                PropertyAssignment property = (PropertyAssignment) visit(ctx.objectLiteral().propertyAssignment(i));
+                objectLiteral.addProperty(property);
+            }
         }
         return objectLiteral;
     }
 
     @Override
-    public AST visitExprStmt(TypeScripteParser.ExprStmtContext ctx) {
+    public Object visitExprStmt(TypeScripteParser.ExprStmtContext ctx) {
         TypeScripteParser.ExpressionStatementContext innerCtx = ctx.expressionStatement();
-        Expression expression = (Expression) visit(innerCtx.expression());
-        return new ExpressionStatement(expression);
+        return visit(innerCtx.expression());
     }
 
     @Override
@@ -227,34 +226,113 @@ private boolean insideArrayLiteral = false;
 
         return componentBody;    }
 
+
     @Override
     public AST visitSelectorFld(TypeScripteParser.SelectorFldContext ctx) {
         TypeScripteParser.SelectorFieldContext innerCtx = ctx.selectorField();
-        String selctor = innerCtx.STRING().getText();
-        SymbolTable.addSymbolToCurrentScope("selctor", "String", selctor,innerCtx.getStart().getLine());
-        Symbol symbol = new Symbol("selctor", "String", selctor, SymbolTable.currentScope.getName(),innerCtx.getStart().getLine());
+
+        String value = null;
+        String type = null;
+
+       if (innerCtx.primitiveType() != null) {
+            if (innerCtx.primitiveType().literal() != null) {
+                if (innerCtx.primitiveType().literal().TRUE() != null) {
+                    value = "true";
+                    type = "true";
+                } else if (innerCtx.primitiveType().literal().FALSE() != null) {
+                    value = "false";
+                    type = "false";
+                } else if (innerCtx.primitiveType().literal().NUMBER() != null) {
+                    value = innerCtx.primitiveType().literal().NUMBER().getText();
+                    type= "int";
+                } else if (innerCtx.primitiveType().literal().STRING() != null) {
+                    value = innerCtx.primitiveType().literal().STRING().getText();
+                    type = "String";
+                } else {
+                    value = innerCtx.primitiveType().literal().getText();
+                    type =innerCtx.primitiveType().literal().getText();;
+                }
+            } else {
+                value = innerCtx.primitiveType().getText();
+                type=innerCtx.primitiveType().getText();
+            }
+        }
+
+        if (value == null) {
+            value = "";
+        }
+
+        Symbol symbol = new Symbol("selector", type, value, SymbolTable.currentScope.getName(), innerCtx.getStart().getLine());
         SymbolTable.getSymbols().add(symbol);
-        return new SelectorField(selctor);
+        SymbolTable.addSymbolToCurrentScope("selector", type, value, innerCtx.getStart().getLine());
+
+        return new SelectorField(value);
     }
+
 
     @Override
     public AST visitStandaloneFld(TypeScripteParser.StandaloneFldContext ctx) {
         TypeScripteParser.StandaloneFieldContext innerCtx = ctx.standaloneField();
-        String standalone = innerCtx.TRUE() != null ? innerCtx.TRUE().getText() : innerCtx.FALSE().getText();
-        SymbolTable.addSymbolToCurrentScope("standalone", "boolean", standalone,innerCtx.getStart().getLine());
-        Symbol symbol = new Symbol("standalone", "boolean", standalone, SymbolTable.currentScope.getName(),innerCtx.getStart().getLine());
+        String value = null;
+        String type = null;
+
+        if (innerCtx.primitiveType() != null) {
+            if (innerCtx.primitiveType().literal() != null) {
+                if (innerCtx.primitiveType().literal().TRUE() != null) {
+                    value = innerCtx.primitiveType().literal().TRUE().getText();
+                    type = "boolean";
+                } else if (innerCtx.primitiveType().literal().FALSE() != null) {
+                    value = innerCtx.primitiveType().literal().FALSE().getText();
+                    type = "boolean";
+                } else if (innerCtx.primitiveType().literal().NUMBER() != null) {
+                    value = innerCtx.primitiveType().literal().NUMBER().getText();
+                    type= "int";
+                } else if (innerCtx.primitiveType().literal().STRING() != null) {
+                    value = innerCtx.primitiveType().literal().STRING().getText();
+                    type = "String";
+                } else {
+                    value = innerCtx.primitiveType().literal().getText();
+                    type =innerCtx.primitiveType().literal().getText();;
+                }
+            } else {
+                value = innerCtx.primitiveType().getText();
+                type=innerCtx.primitiveType().getText();
+            }
+        }
+
+        if (value == null) {
+            value = "";
+        }       SymbolTable.addSymbolToCurrentScope("standalone", type, value,innerCtx.getStart().getLine());
+        Symbol symbol = new Symbol("standalone", type, value   , SymbolTable.currentScope.getName(),innerCtx.getStart().getLine());
         SymbolTable.getSymbols().add(symbol);
-        return new StandalongField(standalone);
+            return new StandalongField(value);
     }
 
     @Override
     public AST visitImportsFld(TypeScripteParser.ImportsFldContext ctx) {
+        TypeScripteParser.ImportsFieldContext innerCtx = ctx.importsField();
+
         ImportsField importsField = new ImportsField();
-        String id = ctx.getText();
-        importsField.addImport(id);
-        SymbolTable.addSymbolToCurrentScope(id, "imports", id,ctx.getStart().getLine());
-        Symbol symbol = new Symbol(id, "imports", id, SymbolTable.currentScope.getName(),ctx.getStart().getLine());
-        SymbolTable.getSymbols().add(symbol);
+        for (TypeScripteParser.PrimitiveTypeContext primCtx : innerCtx.primitiveType()) {
+            String importValue = primCtx.getText();
+
+            String type;
+            if (importValue.equals("true") || importValue.equals("false")) {
+                type = "boolean";
+            } else if (importValue.startsWith("\"") && importValue.endsWith("\"") ) {
+                type = "String";
+            } else if (importValue.startsWith("[") && importValue.endsWith("]")) {
+                type = "Array";
+            } else {
+                type = primCtx.getText();
+
+            }
+            importsField.addImport(importValue);
+
+            SymbolTable.addSymbolToCurrentScope("imports",type , importValue, ctx.getStart().getLine());
+            Symbol symbol = new Symbol("imports",type , importValue, SymbolTable.currentScope.getName(), ctx.getStart().getLine());
+            SymbolTable.getSymbols().add(symbol);
+        }
 
         return importsField;
     }
@@ -263,24 +341,32 @@ private boolean insideArrayLiteral = false;
     public AST visitTemplateFld(TypeScripteParser.TemplateFldContext ctx) {
         TypeScripteParser.TemplateFieldContext innerCtx = ctx.templateField();
 
-        if (innerCtx == null) {
-            System.out.println("TemplateFieldContext is null");
-            return null;
+        TemplateField templateField = new TemplateField();
+
+        String value = innerCtx.primitiveType().getText();
+        templateField.setTemplateString(value);
+
+        String type;
+        if (value.equals("true") || value.equals("false")) {
+            type = "boolean";
+        } else if (value.startsWith("\"") && value.endsWith("\"") || value.startsWith("`") && value.endsWith("`")) {
+            type = "String";
+        } else if (value.startsWith("[") && value.endsWith("]")) {
+            type = "Array";
+        } else {
+            type = innerCtx.primitiveType().getText();
+
         }
-        String templateString = innerCtx.BACKTICK(0).getText();
-        List<Node> elements = innerCtx.element().stream()
-                .map(elementCtx -> {
-                    if (elementCtx == null) {
-                        System.out.println("Null element in template");
-                        return null;
-                    }
-                    return (Node) visit(elementCtx);
-                })
-                .collect(Collectors.toList());
-        SymbolTable.addSymbolToCurrentScope("Template", "String", "",innerCtx.getStart().getLine());
-        Symbol symbol = new Symbol("Template", "String", "", SymbolTable.currentScope.getName(), innerCtx.getStart().getLine());
+
+        SymbolTable.addSymbolToCurrentScope("template",type,value, ctx.getStart().getLine());
+
+        Symbol symbol = new Symbol("template",  type, value, SymbolTable.currentScope.getName(), ctx.getStart().getLine());
         SymbolTable.getSymbols().add(symbol);
-        return new TemplateField(templateString, elements);    }
+
+        return templateField;
+    }
+
+
 
     @Override
     public AST visitOtherFlds(TypeScripteParser.OtherFldsContext ctx) {
@@ -296,7 +382,6 @@ private boolean insideArrayLiteral = false;
 
     @Override
     public AST visitPropertyDeclaration(TypeScripteParser.PropertyDeclarationContext ctx) {
-
         String name = ctx.IDENTIFIER().getText();
         Type type = ctx.type() != null ? new Type(ctx.type().getText()) : null;
         Expression value = ctx.expression() != null ? (Expression) visit(ctx.expression()) : null;
@@ -392,7 +477,7 @@ private boolean insideArrayLiteral = false;
 
     @Override
     public AST visitPrimitiveType(TypeScripteParser.PrimitiveTypeContext ctx) {
-        if (ctx.NUMBER() != null) {
+        if (ctx.literal().NUMBER() != null) {
             return new PrimitiveType("number");
         } else if (ctx.MYSTRING() != null) {
             return new PrimitiveType("string");
@@ -410,7 +495,7 @@ private boolean insideArrayLiteral = false;
     public AST visitArrayExpr(TypeScripteParser.ArrayExprContext ctx) {
         TypeScripteParser.ArrayLiteralContext innerCtx = ctx.arrayLiteral();
 
-        insideArrayLiteral = true; // ✅ نحن داخل مصفوفة الآن
+        insideArrayLiteral = true;
         ArrayLiteral arrayLiteral = new ArrayLiteral();
         for (int i = 0; i < innerCtx.expression().size(); i++) {
             if (innerCtx.expression(i) != null) {
@@ -418,7 +503,7 @@ private boolean insideArrayLiteral = false;
                 arrayLiteral.addElement(element);
             }
         }
-        insideArrayLiteral = false; // ❌ خرجنا من المصفوفة
+        insideArrayLiteral = false;
         return arrayLiteral;
     }
 
@@ -556,18 +641,12 @@ private boolean insideArrayLiteral = false;
         Expression value = (Expression) visit(ctx.expression());
         if (!insideArrayLiteral) {
             SymbolTable.addSymbolToCurrentScope(key, "", value.toString(), ctx.getStart().getLine());
+
         }
         return new PropertyAssignment(key, value);
     }
 
-    @Override
-    public AST visitExpressionStatement(TypeScripteParser.ExpressionStatementContext ctx) {
-        if (ctx == null || ctx.expression() == null) {
-            System.out.println("Visiting an empty or null expression");
-            return null;
-        }
-        return (AST) visit(ctx.expression());
-    }
+
 
 
     @Override

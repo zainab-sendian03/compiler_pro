@@ -138,6 +138,12 @@ public interface TypeScripteParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitTemplateField(TypeScripteParser.TemplateFieldContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link TypeScripteParser#backTemplate}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBackTemplate(TypeScripteParser.BackTemplateContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link TypeScripteParser#importsField}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

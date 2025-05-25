@@ -245,6 +245,18 @@ public class TypeScripteParserBaseListener implements TypeScripteParserListener 
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterBackTemplate(TypeScripteParser.BackTemplateContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitBackTemplate(TypeScripteParser.BackTemplateContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterImportsField(TypeScripteParser.ImportsFieldContext ctx) { }
 	/**
 	 * {@inheritDoc}

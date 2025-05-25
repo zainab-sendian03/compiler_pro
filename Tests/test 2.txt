@@ -3,9 +3,8 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-root',
+  selector:  "app",
   standalone: true,
-    standalone: true,
   imports: [CommonModule],
   template: `
       <div style="display: flex">
