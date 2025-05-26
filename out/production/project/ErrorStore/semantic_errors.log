@@ -1,0 +1,5 @@
+=== Duplicate Property Definition Errors ===
+Error in scope 'Component Scope' on symbol 'selector' at line 6: Duplicate property 'selector' in scope 'Component Scope'
+
+=== Mismatch Type of Property ===
+Error in scope 'Component Scope' on symbol 'standalone' at line 8: Mismatch type for 'standalone' in scope 'Component Scope': expected 'boolean' but got '12'
