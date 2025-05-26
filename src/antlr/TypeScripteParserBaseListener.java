@@ -1,4 +1,4 @@
-// Generated from C:/Users/HP/compiler_pro/src/antlr/TypeScripteParser.g4 by ANTLR 4.13.2
+// Generated from C:/Users/HP ALL IN ONE/IdeaProjects/code/src/antlr/TypeScripteParser.g4 by ANTLR 4.13.2
 package antlr;
 
 import org.antlr.v4.runtime.ParserRuleContext;

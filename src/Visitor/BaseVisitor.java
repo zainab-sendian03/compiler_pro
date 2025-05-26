@@ -1,6 +1,5 @@
 package Visitor;
 
-import Semantic_Check.SemanticAnalyzer;
 import SymbolTable.SymbolTable;
 import antlr.TypeScripteParser;
 import SymbolTable.Symbol;
@@ -9,14 +8,13 @@ import ast.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
-import java.util.stream.Collectors;
+
 
 public class BaseVisitor extends TypeScripteParserBaseVisitor {
 //    SymbolTable symbolTable = new SymbolTable();
 private boolean insideArrayLiteral = false;
 
-    private final Stack<String> scopeStack = new Stack<>();
+  //  private final Stack<String> scopeStack = new Stack<>();
     @Override
     public AST visitProgram(TypeScripteParser.ProgramContext ctx) {
         System.out.println();
@@ -250,7 +248,7 @@ private boolean insideArrayLiteral = false;
                     type = "String";
                 } else {
                     value = innerCtx.primitiveType().literal().getText();
-                    type =innerCtx.primitiveType().literal().getText();;
+                    type =innerCtx.primitiveType().literal().getText();
                 }
             } else {
                 value = innerCtx.primitiveType().getText();
@@ -292,7 +290,7 @@ private boolean insideArrayLiteral = false;
                     type = "String";
                 } else {
                     value = innerCtx.primitiveType().literal().getText();
-                    type =innerCtx.primitiveType().literal().getText();;
+                    type =innerCtx.primitiveType().literal().getText();
                 }
             } else {
                 value = innerCtx.primitiveType().getText();
@@ -545,14 +543,14 @@ private boolean insideArrayLiteral = false;
 
         //System.out.println("Entering ArrowFunction Scope");
         SymbolTable.createScope("ArrowFunction Scope");
-        ParameterList parameterList = null;
+        ParameterList parameterList ;
         if (innerCtx.parameterList() != null) {
             parameterList = (ParameterList) visit(innerCtx.parameterList());
         } else {
             parameterList = new ParameterList();
         }
 
-        Expression expression = null;
+        Expression expression ;
         if (innerCtx.propertyAccess() != null) {
             expression = (Expression) visit(innerCtx.propertyAccess());
         } else {

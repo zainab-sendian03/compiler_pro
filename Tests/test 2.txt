@@ -4,7 +4,8 @@ import { CommonModule } from '@angular/common';
 
 @Component({
   selector:  "app",
-  standalone: true,
+    selector:  "app",
+  standalone: 12,
   imports: [CommonModule],
   template: `
       <div style="display: flex">
