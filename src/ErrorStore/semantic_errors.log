@@ -10,4 +10,3 @@ Error in scope 'Component Scope' on symbol 'template' at line 10: Mismatch type 
 === Invalid Event Call Errors ===
 
 === Mismatched Tag Errors ===
-Error in scope 'Global' on symbol 'div' at line 11: Unclosed tag <div> detected with no matching closing tag.
