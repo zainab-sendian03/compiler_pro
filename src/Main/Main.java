@@ -40,7 +40,7 @@ public class Main {
             logger.addHandler(fileHandler);
 
             SemanticAnalyzer analyzer = new SemanticAnalyzer();
-            analyzer.analyzeAll(SymbolTable.getScopes());
+            analyzer.analyzeAll(SymbolTable.getScopes(),SymbolTable.getSymbols());
             fileHandler.close();
 
         } catch (IOException e) {
@@ -50,7 +50,7 @@ public class Main {
 //        System.out.println("AST:");
 //    System.out.println(program);
 //            System.out.println("------------------------- Symbol Table -------------------------");
-//            SymbolTable.print();
+//           SymbolTable.print();
 // SymbolTable.printScopes();
 
 

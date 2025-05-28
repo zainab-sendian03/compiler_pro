@@ -8,11 +8,13 @@ import ast.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 
 public class BaseVisitor extends TypeScripteParserBaseVisitor {
 //    SymbolTable symbolTable = new SymbolTable();
 private boolean insideArrayLiteral = false;
+    private final Stack<String> scopeStack = new Stack<>();
 
   //  private final Stack<String> scopeStack = new Stack<>();
     @Override
@@ -487,6 +489,8 @@ private boolean insideArrayLiteral = false;
             return new PrimitiveType("null");
         } else if (ctx.IDENTIFIER() != null) {
             return new PrimitiveType(ctx.IDENTIFIER().getText());
+        }else if (ctx.backTemplate() != null) {
+            return new PrimitiveType(ctx.backTemplate().getText());
         }
         return null;    }
     @Override
@@ -648,49 +652,194 @@ private boolean insideArrayLiteral = false;
 
 
     @Override
-    public Object visitCompleteElement(TypeScripteParser.CompleteElementContext ctx) {
-        return super.visitCompleteElement(ctx);
+    public Node visitCompleteElement(TypeScripteParser.CompleteElementContext ctx) {
+        TypeScripteParser.CompleteTagContext innerCtx = ctx.completeTag();
+        if (innerCtx == null) {
+            System.out.println("CompleteElementContext is null");
+            return null;
+        }
+        CompleteTag completeTag = new CompleteTag(null, new ArrayList<>(), null);
+
+        if (innerCtx.openTag() != null) {
+            completeTag.setOpenTag((OpenTag) visit(innerCtx.openTag()));
+
+        }
+        String currentTagName = completeTag.getOpenTag() != null
+                ? completeTag.getOpenTag().getTagName()
+                : "Unknown";
+        scopeStack.push(currentTagName);
+        for (int i = 0; i < innerCtx.children.size(); i++) {
+            if (innerCtx.getChild(i) != null) {
+
+                if (innerCtx.getChild(i) instanceof TypeScripteParser.ElementContext) {
+                    completeTag.getChildren().add((Node) visit(innerCtx.getChild(i)));
+                } else if (innerCtx.getChild(i) instanceof TypeScripteParser.AngularExpressionContext) {
+                    completeTag.getChildren().add((Node) visit(innerCtx.getChild(i)));
+                }
+            }
+        }
+        if (innerCtx.closedTag() != null) {
+            completeTag.setClosedTag((ClosedTag) visit(innerCtx.closedTag()));
+        }
+        scopeStack.pop();
+        return completeTag;
+
+    }
+
+
+
+    @Override
+    public Node visitSelfClosingElement(TypeScripteParser.SelfClosingElementContext ctx) {
+        TypeScripteParser.SelfClosingTagContext innerCtx = ctx.selfClosingTag();
+        if (innerCtx == null) {
+            System.out.println("SelfClosingTagContext is null");
+            return null;
+        }
+
+        SelfClosingTag selfTag = new SelfClosingTag(null, new ArrayList<>());
+        String tagName = innerCtx.TAG_NAME().getText();
+        selfTag.setTagName(tagName);
+        scopeStack.push(tagName);
+        for (int i = 0; i < innerCtx.content().size(); i++) {
+            if (innerCtx.content(i) != null) {
+
+                selfTag.getAttributes().add((ContentNode) visit(innerCtx.content(i)));
+            }
+        }
+        String parentScope = scopeStack.size() > 1 ? scopeStack.get(scopeStack.size() - 2) : "Global";
+        Symbol s = new Symbol(tagName, "Tag", null, parentScope,innerCtx.getStart().getLine());
+        s.setKind("selfClosing");
+        SymbolTable.getSymbols().add(s);
+
+        scopeStack.pop();
+        return selfTag;
+    }
+
+
+    @Override
+    public OpenTag visitOpenTag(TypeScripteParser.OpenTagContext ctx) {
+        OpenTag oTag = new OpenTag(null, new ArrayList<>());
+
+        String tagName = ctx.TAG_NAME().getText();
+        scopeStack.push(tagName);
+        oTag.setTagName(tagName);
+        for (int i = 0; i < ctx.content().size(); i++) {
+            if (ctx.content(i) != null) {
+                oTag.getAttributes().add((ContentNode) visit(ctx.content(i)));
+            }
+        }
+        String parentScope = scopeStack.size() > 1 ? scopeStack.get(scopeStack.size() - 2) : "Global";
+        Symbol ss = new Symbol(tagName, "Tag", null, parentScope,ctx.getStart().getLine());
+        ss.setKind("open");
+        SymbolTable.getSymbols().add(ss);
+
+        scopeStack.pop();
+        return oTag;
     }
 
     @Override
-    public Object visitSelfClosingElement(TypeScripteParser.SelfClosingElementContext ctx) {
-        return super.visitSelfClosingElement(ctx);
+    public ClosedTag visitClosedTag(TypeScripteParser.ClosedTagContext ctx) {
+        ClosedTag cTag = new ClosedTag(null);
+        String tagName = ctx.TAG_NAME().getText();
+        cTag.setTagName(tagName);
+        String parentScope = scopeStack.isEmpty() ? "Global" : scopeStack.peek();
+        Symbol s = new Symbol(tagName, "Tag", null, parentScope, ctx.getStart().getLine());
+        s.setKind("close");
+        SymbolTable.getSymbols().add(s);
+        return cTag;
     }
 
 
     @Override
-    public Object visitOpenTag(TypeScripteParser.OpenTagContext ctx) {
-        return super.visitOpenTag(ctx);
+    public Node visitAngularExpression(TypeScripteParser.AngularExpressionContext ctx) {
+        AngularExpression e = new AngularExpression(null);
+        String expression = ctx.ANGULAR_EXPRESSION().getText();
+        e.setExpression(expression);
+        return e;
+    }
+
+
+    @Override
+    public ContentNode visitNormalAttr(TypeScripteParser.NormalAttrContext ctx) {
+        TypeScripteParser.NormalAttributeContext innerCtx = ctx.normalAttribute();
+        if (innerCtx == null) {
+            System.out.println("NormalAttributeContext is null");
+            return null;
+        }
+        NormalAttribute bAtt = new NormalAttribute(null, null);
+        String name = innerCtx.IDENTIFIER().getText();
+        String value = innerCtx.STRING().getText();
+        value = value.substring(1, value.length() - 1);
+        bAtt.setName(name);
+        bAtt.setValue(value);
+        String currentScope = scopeStack.isEmpty() ? "Global" : scopeStack.peek();
+        Symbol ssss = new Symbol(name, "NormalAttribute", value, currentScope,innerCtx.getStart().getLine());
+        SymbolTable.getSymbols().add(ssss);
+
+        return bAtt;
     }
 
     @Override
-    public Object visitClosedTag(TypeScripteParser.ClosedTagContext ctx) {
-        return super.visitClosedTag(ctx);
+    public ContentNode visitBindingAttr(TypeScripteParser.BindingAttrContext ctx) {
+
+        TypeScripteParser.BindingAttributeContext innerCtx = ctx.bindingAttribute();
+        if (innerCtx == null) {
+            System.out.println("BindingAttributeContext is null");
+            return null;
+        }
+        BindingAttribute dAtt = new BindingAttribute(null, null);
+
+        String name = innerCtx.IDENTIFIER().getText();
+        String value = innerCtx.STRING().getText();
+        value = value.substring(1, value.length() - 1);
+        dAtt.setName(name);
+        dAtt.setValue(value);
+        String currentScope = scopeStack.isEmpty() ? "Global" : scopeStack.peek();
+        Symbol sssss = new Symbol(name, "BindingAttribute", value, currentScope,innerCtx.getStart().getLine());
+        SymbolTable.getSymbols().add(sssss);
+        return dAtt;
     }
 
     @Override
-    public Object visitAngularExpression(TypeScripteParser.AngularExpressionContext ctx) {
-        return super.visitAngularExpression(ctx);
+    public ContentNode visitDirectiveAttr(TypeScripteParser.DirectiveAttrContext ctx) {
+        TypeScripteParser.DirevtiveAttributeContext innerCtx = ctx.direvtiveAttribute();
+        if (innerCtx == null) {
+            System.out.println("DirectiveAttributeContext is null");
+            return null;
+        }
+        DirectiveAttribute dAtt = new DirectiveAttribute(null, null);
+
+        String name = innerCtx.IDENTIFIER().getText();
+        String value = innerCtx.STRING().getText();
+        value = value.substring(1, value.length() - 1);
+        dAtt.setName(name);
+        dAtt.setValue(value);
+        String currentScope = scopeStack.isEmpty() ? "Global" : scopeStack.peek();
+        Symbol sssss = new Symbol(name, "DirectiveAttribute", value, currentScope,innerCtx.getStart().getLine());
+        SymbolTable.getSymbols().add(sssss);
+        return dAtt;
     }
 
-    @Override
-    public Object visitNormalAttr(TypeScripteParser.NormalAttrContext ctx) {
-        return super.visitNormalAttr(ctx);
-    }
 
     @Override
-    public Object visitBindingAttr(TypeScripteParser.BindingAttrContext ctx) {
-        return super.visitBindingAttr(ctx);
-    }
+    public ContentNode visitEventAttr(TypeScripteParser.EventAttrContext ctx) {
 
-    @Override
-    public Object visitDirectiveAttr(TypeScripteParser.DirectiveAttrContext ctx) {
-        return super.visitDirectiveAttr(ctx);
-    }
+        TypeScripteParser.EventAttributeContext innerCtx = ctx.eventAttribute();
+        if (innerCtx == null) {
+            System.out.println("EventAttributeContext is null");
+            return null;
+        }
 
-    @Override
-    public Object visitEventAttr(TypeScripteParser.EventAttrContext ctx) {
-        return super.visitEventAttr(ctx);
+        EventAttribute eAtt = new EventAttribute(null, null);
+        String name = innerCtx.IDENTIFIER().getText();
+        String value = innerCtx.STRING().getText();
+        value = value.substring(1, value.length() - 1);
+        eAtt.setName(name);
+        eAtt.setValue(value);
+        String currentScope = scopeStack.isEmpty() ? "Global" : scopeStack.peek();
+        Symbol ssssss = new Symbol(name, "EventAttribute", value, currentScope,innerCtx.getStart().getLine());
+        SymbolTable.getSymbols().add(ssssss);
+        return eAtt;
     }
 
 
