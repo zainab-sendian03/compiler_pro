@@ -1,7 +1,7 @@
     package ast;
 
 
-    public class OtherField extends AST {
+    public class OtherField extends Field {
          String name;
         Expression value;
 

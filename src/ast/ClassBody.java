@@ -2,15 +2,16 @@ package ast;
 
 import java.util.ArrayList;
 
-public class ClassBody extends AST {
-    public ArrayList<AST> members;
+public class ClassBody extends Node implements Addable<Node>{
+    public ArrayList<Node> members;
 
     public ClassBody() {
         this.members = new ArrayList<>();
     }
 
-    public void addMember(AST member) {
-        this.members.add(member);
+    @Override
+    public void add(Node child) {
+        members.add(child);
     }
 
     @Override

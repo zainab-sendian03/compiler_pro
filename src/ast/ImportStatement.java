@@ -2,7 +2,7 @@ package ast;
 
 import java.util.ArrayList;
 
-public class ImportStatement extends Statement{
+public class ImportStatement extends Statement implements Addable<String>{
     ArrayList<String> identifiers;
     String module;
 
@@ -11,8 +11,9 @@ public class ImportStatement extends Statement{
         this.identifiers = new ArrayList<>();
     }
 
-    public void addIdentifiers(String identifier) {
-        this.identifiers.add(identifier);
+    @Override
+    public void add(String item) {
+        identifiers.add(item);
     }
 
     @Override

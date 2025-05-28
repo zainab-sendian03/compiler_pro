@@ -1,7 +1,7 @@
 package ast;
 
 // القاعدة: closedTag
-public class ClosedTag {
+public class ClosedTag extends Node {
     private String tagName;
 
     public ClosedTag(String tagName) {

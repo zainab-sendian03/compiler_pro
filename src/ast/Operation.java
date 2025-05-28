@@ -1,6 +1,6 @@
 package ast;
 
-public class Operation extends Expression {
+public class Operation extends Node implements Expression {
     String operator;
     Expression left;
     Expression right;
@@ -16,6 +16,11 @@ public class Operation extends Expression {
         this.operator = operator;
         this.left = left;
         this.right = null;
+    }
+
+    @Override
+    public void add(Expression child) {
+
     }
 
     @Override

@@ -1,4 +1,5 @@
     package ast;
 
-    public abstract class Field extends AST{
+    public abstract class Field extends Node{
+
     }

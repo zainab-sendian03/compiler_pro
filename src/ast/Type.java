@@ -1,11 +1,8 @@
 package ast;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-public class Type extends AST {
+public class Type extends Node {
     private String typeName;
     private List<Type> unionTypes;
 

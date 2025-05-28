@@ -14,7 +14,6 @@ import { CommonModule } from '@angular/common';
 <p>{{ item.name }}</p>
 <img [src]="item.image" alt="{{ item.name }}" style="width: 200px; height: 200px;"/>
 </div>
-</div>
 
 <div *ngIf="selectedItem !== null">
 <h2>{{ items[selectedItem].name }}</h2>

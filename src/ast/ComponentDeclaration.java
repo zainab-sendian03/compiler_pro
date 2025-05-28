@@ -1,6 +1,6 @@
 package ast;
 
-public class ComponentDeclaration extends AST {
+public class ComponentDeclaration extends Node {
     ComponentBody componentBody;
 
     public ComponentBody getComponentBody() {

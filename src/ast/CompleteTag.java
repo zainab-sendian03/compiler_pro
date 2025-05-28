@@ -2,7 +2,7 @@ package ast;
 
 import java.util.List;
 
-public class CompleteTag extends Node {
+public class CompleteTag extends Node implements Addable<Node> {
     int i=0;
     private OpenTag openTag;
     private List<Node> elements;
@@ -38,10 +38,10 @@ public class CompleteTag extends Node {
         return closedTag;
     }
 
-    public void addChild(Node child){
+    @Override
+    public void add(Node child){
         elements.add(child);
     }
-
     @Override
     public String toString() {
 
@@ -50,7 +50,7 @@ public class CompleteTag extends Node {
         builder.append("openTag:{ ").append(openTag).append("}\n");
         builder.append("elements: [\n");
         for (Node child : elements) {
-            builder.append("").append(child).append(",\n");
+            builder.append(child).append(",\n");
         }
         builder.append("],\n");
         builder.append("closedTag: ").append(closedTag).append("\n}");

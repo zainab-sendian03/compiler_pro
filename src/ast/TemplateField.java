@@ -3,7 +3,7 @@ package ast;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TemplateField extends Field {
+public class TemplateField extends Field  {
     private  String template;
     private final List<Node> elements;
 

@@ -1,6 +1,6 @@
 package ast;
 
-public class VariableDeclaration extends AST {
+public class VariableDeclaration extends Node {
     String name;
     Type type;
     Expression value;

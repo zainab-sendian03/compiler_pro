@@ -1,6 +1,6 @@
 package ast;
 
-public class PropertyDeclaration extends AST {
+public class PropertyDeclaration extends Node {
 
     String name;
     Type type;

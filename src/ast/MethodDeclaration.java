@@ -1,6 +1,6 @@
 package ast;
 
-public class MethodDeclaration extends AST {
+public class MethodDeclaration extends Node {
     String name;
     ParameterList parameters;
     Type type;

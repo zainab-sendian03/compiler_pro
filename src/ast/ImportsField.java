@@ -2,15 +2,17 @@ package ast;
 
 import java.util.ArrayList;
 
-public class ImportsField extends Field {
+public class ImportsField extends Field implements Addable<String>{
     ArrayList<String> imports;
 
     public ImportsField() {
         this.imports = new ArrayList<>();
     }
 
-    public void addImport(String importName) {
-        this.imports.add(importName);
+
+    @Override
+    public void add(String item) {
+        imports.add(item);
     }
 
     public ArrayList<String> getImports() {

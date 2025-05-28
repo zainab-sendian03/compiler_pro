@@ -1,6 +1,6 @@
 package ast;
 
-public class DirectiveAttribute extends ContentNode {
+public class DirectiveAttribute extends Node {
     private String name;
     private String value;
 

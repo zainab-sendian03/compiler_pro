@@ -4,6 +4,7 @@ public class Symbol {
     private String name;   // اسم المتغير
     private String type;   // نوع المتغير (مثل int، String)
     private String value;  // القيمة
+    private String kind;
     private String scope;  // نطاق المتغير
     private final int lineNumber;
     public Symbol(String name, String type, String value, String scope, int lineNumber) {
@@ -12,6 +13,15 @@ public class Symbol {
         this.value = value;
         this.scope = scope;
         this.lineNumber=lineNumber;
+        this.kind = null;
+    }
+
+    public String getKind() {
+        return kind;
+    }
+
+    public void setKind(String kind) {
+        this.kind = kind;
     }
 
     public int getLineNumber() {
@@ -56,6 +66,7 @@ public class Symbol {
         return "Symbol{" +
                 "name='" + name + '\'' +
                 ", type='" + type + '\'' +
+                ", kind='" + kind + '\'' +
                 ", value='" + value + '\'' +
                 ", scope='" + scope + '\'' +
                 '}';

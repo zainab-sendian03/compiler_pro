@@ -1,6 +1,6 @@
 package ast;
 
-public class Parameter extends AST {
+public class Parameter extends Node {
     String name;
     Type type;
 

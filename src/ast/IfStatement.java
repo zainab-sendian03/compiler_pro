@@ -1,6 +1,6 @@
 package ast;
 
-public class IfStatement extends AST {
+public class IfStatement extends Node {
     Expression condition;
     Statement ifBody;
     Statement elseBody;

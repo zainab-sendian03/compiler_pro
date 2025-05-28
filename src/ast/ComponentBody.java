@@ -3,16 +3,13 @@ package ast;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ComponentBody extends Field {
+public class ComponentBody extends Node implements Addable<Field>{
      List<Field> fields;
 
     public ComponentBody() {
         this.fields = new ArrayList<>();
     }
 
-    public void addField(Field field) {
-        this.fields.add(field);
-    }
 
     public List<Field> getFields() {
         return fields;
@@ -21,5 +18,10 @@ public class ComponentBody extends Field {
     @Override
     public String toString() {
         return "ComponentBody{" +"\n" + fields + "\n"+'}';
+    }
+
+    @Override
+    public void add(Field item) {
+        fields.add(item);
     }
 }

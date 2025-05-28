@@ -1,6 +1,6 @@
 package ast;
 
-public class ExpressionStatement extends Statement{
+public class ExpressionStatement extends Node{
     Expression expression;
 
     public ExpressionStatement(Expression expression) {

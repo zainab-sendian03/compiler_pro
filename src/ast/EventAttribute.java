@@ -1,6 +1,6 @@
 package ast;
 
-public class EventAttribute extends ContentNode {
+public class EventAttribute extends Node {
     private String name;
     private String value;
 

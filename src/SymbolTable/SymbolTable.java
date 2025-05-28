@@ -17,15 +17,16 @@ public class SymbolTable {
     }
 
     public static void print() {
-        System.out.println("Name\t\tType\t\tValue\t\tScope\t\t line");
+        System.out.println("Name\t\tType\t\tValue\t\tScope\t\t kind\t\t line");
         System.out.println("*=====================================================*");
         for (Symbol s : symbols) {
-            System.out.printf("%s\t\t%s\t\t%s\t\t%s\t\t%d%n",
+            System.out.printf("%s\t\t%s\t\t%s\t\t%s\t\t%s\t\t%d%n",
                     s.getName(),
                     s.getType(),
                     s.getValue(),
                     s.getScope(),
-            s.getLineNumber());
+                    s.getKind(),
+                    s.getLineNumber());
             System.out.println("____________________________________________________________________________________");
 
         }

@@ -2,8 +2,8 @@ package ast;
 
 import java.util.ArrayList;
 
-public class ParameterList extends AST{
-    private ArrayList<Parameter> parameters;
+public class ParameterList extends Node  {
+    private final ArrayList<Parameter> parameters;
 
     public ParameterList() {
         this.parameters = new ArrayList<>();

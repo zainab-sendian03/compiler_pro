@@ -1,6 +1,6 @@
 package ast;
 
-public class PropertyAssignment extends AST{
+public class PropertyAssignment extends Node {
     String name;
     Expression value;
 

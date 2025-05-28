@@ -2,7 +2,7 @@ package ast;
 
 import java.util.ArrayList;
 
-public class ObjectLiteral extends Expression {
+public class ObjectLiteral  extends Node implements Expression {
     ArrayList<PropertyAssignment> properties;
 
     public ObjectLiteral() {
@@ -11,6 +11,11 @@ public class ObjectLiteral extends Expression {
 
     public void addProperty(PropertyAssignment property) {
         this.properties.add(property);
+    }
+
+    @Override
+    public void add(Expression child) {
+
     }
 
     @Override

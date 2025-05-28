@@ -3,7 +3,7 @@ package ast;
 import java.util.ArrayList;
 
 
-public class FunctionCall extends Expression {
+public class FunctionCall extends Node  implements Expression,Addable<FunctionCall> {
     String functionName;
     ArrayList<Expression> arguments;
     ArrayList<FunctionCall> chainedCalls;
@@ -14,12 +14,18 @@ public class FunctionCall extends Expression {
         this.chainedCalls = new ArrayList<>();
     }
 
-    public void addArgument(Expression argument) {
-        this.arguments.add(argument);
-    }
-
     public void addChainedCall(FunctionCall call) {
         this.chainedCalls.add(call);
+    }
+
+    @Override
+    public void add(Expression child) {
+        arguments.add(child);
+    }
+
+    @Override
+    public void add(FunctionCall item) {
+        chainedCalls.add(item);
     }
 
     @Override

@@ -2,11 +2,11 @@ package ast;
 
 import java.util.List;
 
-public class OpenTag {
+public class OpenTag extends Node {
     private String tagName;
-    private List<ContentNode> attributes;
+    private List<Node> attributes;
 
-    public OpenTag(String tagName, List<ContentNode> attributes) {
+    public OpenTag(String tagName, List<Node> attributes) {
         this.tagName = tagName;
         this.attributes = attributes;
     }
@@ -15,7 +15,7 @@ public class OpenTag {
         this.tagName = tagName;
     }
 
-    public void setAttributes(List<ContentNode> attributes) {
+    public void setAttributes(List<Node> attributes) {
         this.attributes = attributes;
     }
 
@@ -23,17 +23,17 @@ public class OpenTag {
         return tagName;
     }
 
-    public List<ContentNode> getAttributes() {
+    public List<Node> getAttributes() {
         return attributes;
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("TagName:" + tagName +",").append("\n");
+        builder.append("TagName:").append(tagName).append(",").append("\n");
         builder.append("Attributes: [\n");
-        for (ContentNode child : attributes) {
-            builder.append("").append(child.toString()).append(",\n");
+        for (Node child : attributes) {
+            builder.append(child.toString()).append(",\n");
         }
         builder.append("]"+"\n");
         return builder.toString();

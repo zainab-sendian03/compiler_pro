@@ -1,6 +1,6 @@
 package ast;
 
-public class NormalAttribute extends ContentNode {
+public class NormalAttribute extends Node {
     private String name;
     private String value;
 

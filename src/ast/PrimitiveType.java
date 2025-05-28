@@ -1,10 +1,9 @@
 package ast;
 
-public class PrimitiveType extends Type {
+public class PrimitiveType extends Node  {
      String primitiveName;
 
     public PrimitiveType(String primitiveName) {
-        super(primitiveName);
         this.primitiveName = primitiveName;
     }
 

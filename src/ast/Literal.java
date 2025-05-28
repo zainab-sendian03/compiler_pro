@@ -1,6 +1,6 @@
 package ast;
 
-public class Literal extends Expression {
+public class Literal extends Node  implements Expression {
     String stringValue;
     Integer intValue;
     Boolean boolValue;
@@ -19,6 +19,11 @@ public class Literal extends Expression {
 
     public Literal(Boolean boolValue) {
         this.boolValue = boolValue;
+    }
+
+    @Override
+    public void add(Expression child) {
+
     }
 
     @Override

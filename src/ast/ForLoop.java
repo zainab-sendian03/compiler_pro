@@ -2,11 +2,11 @@ package ast;
 
 import java.util.ArrayList;
 
-public class ForLoop extends AST {
+public class ForLoop extends Node implements Addable<Node>{
     VariableDeclaration init;
     Expression condition;
     Expression operation;
-    ArrayList<AST> body;
+    ArrayList<Node> body;
 
     public ForLoop(VariableDeclaration init, Expression condition, Expression operation) {
         this.init = init;
@@ -15,8 +15,10 @@ public class ForLoop extends AST {
         this.body = new ArrayList<>();
     }
 
-    public void addBodyStatement(AST statement) {
-        this.body.add(statement);
+
+    @Override
+    public void add(Node child) {
+        body.add(child);
     }
 
     @Override
