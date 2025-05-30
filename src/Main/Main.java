@@ -9,6 +9,8 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import SymbolTable.SymbolTable;
+import SymbolTable.AttSymbolTable;
+import SymbolTable.TagSymbolTable;
 
 
 import java.io.IOException;
@@ -26,7 +28,8 @@ public class Main {
         CommonTokenStream token = new CommonTokenStream(lexer);
         TypeScripteParser parser = new TypeScripteParser(token);
         ParseTree tree = parser.program();
-        BaseVisitor visitor = new BaseVisitor();
+        SemanticAnalyzer analyzer = new SemanticAnalyzer();
+        BaseVisitor visitor = new BaseVisitor(analyzer);
         Program program = (Program) visitor.visit(tree);
         try {
             FileHandler fileHandler = new FileHandler("src/ErrorStore/semantic_errors.log", false);
@@ -39,18 +42,21 @@ public class Main {
             logger.setUseParentHandlers(false);
             logger.addHandler(fileHandler);
 
-            SemanticAnalyzer analyzer = new SemanticAnalyzer();
-            analyzer.analyzeAll(SymbolTable.getScopes(), SymbolTable.getSymbols());
+
+            analyzer.analyzeAll(SymbolTable.getScopes(), SymbolTable.getSymbols(),AttSymbolTable.getSymbols());
             fileHandler.close();
 
         } catch (IOException e) {
             System.err.println("Failed to set up logger: " + e.getMessage());
         }
+       // System.out.println(program);
+        //            System.out.println("------------------------- Symbol Table -------------------------");
+        AttSymbolTable.print();
 
 //        System.out.println("AST:");
-//    System.out.println(program);
-//            System.out.println("------------------------- Symbol Table -------------------------");
-            SymbolTable.print();
+
+
+            //SymbolTable.print();
 // SymbolTable.printScopes();
 
 

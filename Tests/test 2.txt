@@ -8,20 +8,21 @@ import { CommonModule } from '@angular/common';
   standalone: 12,
   imports: [CommonModule],
   template: `
-      <div style="display: flex">
-<div style="width: 30%;">
-<div *ngFor="let item of items; let i = index" (click)="selectItem(i)">
-<p>{{ item.name }}</p>
-<img [src]="item.image" alt="{{ item.name }}" style="width: 200px; height: 200px;"/>
-</div>
-</div>
+<div style="display: flex">
+ <div style="width: 30%;">
+  <div *ngFor="let item of itemds; let i = index" (click)="selectIteem(i)">
+   <p>{{ item.name }}</h1>
+   <img [src]="item.image" alt="{{ item.name }}" style="width: 200px; height: 200px;"/>
+  </div>
+  </div>
 
-<div *ngIf="selectedItem !== null">
-<h2>{{ items[selectedItem].name }}</h2>
-<img [src]="items[selectedItem].image" alt="{{ items[selectedItem].name }}" style="width: 230px; height: 230px;"/>
-<p>{{ items[selectedItem].details }}</p>
+
+ <div *ngIf="selecrtedItem !== null">
+  <h2>{{ items[selectedItem].name }}</p>
+  <img [src]="items[selectedItem].image" alt="{{ items[selectedItem].name }}" style="width: 230px; height: 230px;"/>
+  <p>{{ items[selectedItem].details }}</p>
  </div>
- </div>
+
   `,
 })
 export class AppComponent {

@@ -2,6 +2,8 @@ package Semantic_Check;
 
 import SymbolTable.Scope;
 import SymbolTable.Symbol;
+import SymbolTable.AttSymbol;
+import SymbolTable.TagSymbolTable;
 import SymbolTable.SymbolTable;
 import static Main.Main.logger;
 
@@ -55,10 +57,10 @@ public class SemanticAnalyzer {
         }
 
     }
-    public void checkInvalidDirectiveExpressions(List<Symbol> symbols) {
+    public void checkInvalidDirectiveExpressions(List<AttSymbol> symbols) {
 
 
-        for (Symbol directive : symbols) {
+        for (AttSymbol directive : symbols) {
             if (directive.getType().equals("DirectiveAttribute") &&
                     (directive.getName().equals("ngIf") || directive.getName().equals("ngFor"))) {
 
@@ -86,9 +88,9 @@ public class SemanticAnalyzer {
                 }
                 if (variableToCheck != null) {
                     boolean found = false;
-                    for (Symbol symbol : symbols) {
+                    for (AttSymbol symbol : symbols) {
                         if (symbol.getName().equals(variableToCheck)
-                                && symbol.getScope().equals("Class Scope")) {
+                                ) {
                             found = true;
                             break;
                         }
@@ -100,7 +102,7 @@ public class SemanticAnalyzer {
                         SemanticError error = new SemanticError(
                                 message,
                                 directive.getName(),
-                                directive.getScope(),
+                                " ",
                                 directive.getLineNumber()
                         );
                         directiveTable.addError(error);
@@ -109,10 +111,10 @@ public class SemanticAnalyzer {
             }
         }
     }
-    public void checkInvalidEventCall(List<Symbol> symbols) {
+    public void checkInvalidEventCall(List<AttSymbol> symbols) {
 
 
-        for (Symbol directive : symbols) {
+        for (AttSymbol directive : symbols) {
             if (directive.getType().equals("EventAttribute")) {
                 String value = directive.getValue(); // مثل "selectItem(i)"
                 String functionName = null;
@@ -128,10 +130,10 @@ public class SemanticAnalyzer {
                 if (functionName != null) {
                     boolean found = false;
 
-                    for (Symbol symbol : symbols) {
+                    for (AttSymbol symbol : symbols) {
                         if (symbol.getType().equals("Function")
                                 && symbol.getName().equals(functionName)
-                                && symbol.getScope().equals("Function Scope")) {
+                                ) {
                             found = true;
                             break;
                         }
@@ -141,7 +143,7 @@ public class SemanticAnalyzer {
                         SemanticError error = new SemanticError(
                                 "Calling undefined function: '" + functionName + "' from event '" + directive.getName() + "'",
                                 directive.getName(),
-                                directive.getScope(),
+                                " ",
                                 directive.getLineNumber()
                         );
                         eventTable.addError(error);
@@ -150,63 +152,29 @@ public class SemanticAnalyzer {
             }
         }
     }
-    public void checkTagMatching(List<Symbol> symbols) {
-        Stack<Symbol> tagStack = new Stack<>();
-
-        for (Symbol sym : symbols) {
-            if (!"Tag".equals(sym.getType())) continue;
-
-            switch (sym.getKind()) {
-                case "open":
-                    tagStack.push(sym);
-                    break;
-
-                case "close":
-                    if (tagStack.isEmpty()) {
-                        SemanticError error = new SemanticError(
-                                "Unexpected closing tag </" + sym.getName() + "> found with no matching opening tag.",
-                                sym.getName(),
-                                sym.getScope(),
-                                sym.getLineNumber());
-                        tagsTable.addError(error);
-                    } else {
-                        Symbol top = tagStack.pop();
-                        if (!top.getName().equals(sym.getName())) {
-                            SemanticError error = new SemanticError(
-                                    "Mismatched tag: expected closing </" + top.getName() + "> but found </" + sym.getName() + ">.",
-                                    sym.getName(),
-                                    sym.getScope(),
-                                    sym.getLineNumber());
-                            tagsTable.addError(error);
-                        }
-                    }
-                    break;
-
-                case "selfClosing":
-                    // Self-closing tag — no action needed
-                    break;
-            }
-        }
-
-        while (!tagStack.isEmpty()) {
-            Symbol unclosed = tagStack.pop();
+    public void checkTagMatching(String closedTagName, int line, TagSymbolTable tagSymbolTable, String scope) {
+        Stack<String> stack = tagSymbolTable.getTagStack();
+        if (!stack.isEmpty() && stack.peek().equals(closedTagName)) {
+            stack.pop();
+        } else {
             SemanticError error = new SemanticError(
-                    "Unclosed tag <" + unclosed.getName() + "> detected with no matching closing tag.",
-                    unclosed.getName(),
-                    unclosed.getScope(),
-                    unclosed.getLineNumber());
+                    "Mismatched closing tag: </" + closedTagName + ">",
+                    closedTagName,
+                    scope,
+                    line
+            );
             tagsTable.addError(error);
+            if (!stack.isEmpty()) {
+                stack.pop();
+            }
+
         }
     }
-
-
-
-    public void analyzeAll(List<Scope> scopes,List<Symbol> symbols) {
+    public void analyzeAll(List<Scope> scopes,List<Symbol> symbols,List<AttSymbol> attSymbol) {
         checkDuplicateProperties(scopes);
         checkMismatchType();
-        checkInvalidDirectiveExpressions( symbols);
-        checkInvalidEventCall( symbols);
-        checkTagMatching( symbols);
+        checkInvalidDirectiveExpressions( attSymbol);
+        checkInvalidEventCall( attSymbol);
         printErrorsGrouped();
     }
     public void printErrorsGrouped() {

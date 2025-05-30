@@ -8,6 +8,8 @@ Error in scope 'Component Scope' on symbol 'template' at line 10: Mismatch type 
 ===  Invalid Directive Expression Errors ===
 
 === Invalid Event Call Errors ===
+Error in scope ' ' on symbol 'click' at line 13: Calling undefined function: 'selectIteem' from event 'click'
 
 === Mismatched Tag Errors ===
-Error in scope 'Global' on symbol 'div' at line 11: Unclosed tag <div> detected with no matching closing tag.
+Error in scope 'p' on symbol 'h1' at line 14: Mismatched closing tag: </h1>
+Error in scope 'h2' on symbol 'p' at line 21: Mismatched closing tag: </p>
