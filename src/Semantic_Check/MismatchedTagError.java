@@ -8,6 +8,7 @@ public class MismatchedTagError {
     public void addError(SemanticError error) {
         errors.add(error);
     }
+
     public ArrayList<SemanticError> getErrors() {
         return errors;
     }

@@ -21,12 +21,14 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         String src = "Tests/test 2.txt";
+        //String srcFisrt = "Tests/sourcefile.txt";
         CharStream cs = fromFileName(src);
         TypeScripteLexer lexer = new TypeScripteLexer(cs);
         CommonTokenStream token = new CommonTokenStream(lexer);
         TypeScripteParser parser = new TypeScripteParser(token);
         ParseTree tree = parser.program();
-        BaseVisitor visitor = new BaseVisitor();
+        SemanticAnalyzer analyzer = new SemanticAnalyzer();
+        BaseVisitor visitor = new BaseVisitor(analyzer);
         Program program = (Program) visitor.visit(tree);
         try {
             FileHandler fileHandler = new FileHandler("src/ErrorStore/semantic_errors.log", false);
@@ -36,22 +38,28 @@ public class Main {
                     return record.getMessage() + "\n";
                 }
             });
-            //logger.setUseParentHandlers(false);
+            logger.setUseParentHandlers(false);
             logger.addHandler(fileHandler);
-
-            SemanticAnalyzer analyzer = new SemanticAnalyzer();
-            analyzer.analyzeAll(SymbolTable.getSymbols());
+            analyzer.analyzeAll(AttSymbolTable.getSymbols());
             fileHandler.close();
 
         } catch (IOException e) {
             System.err.println("Failed to set up logger: " + e.getMessage());
         }
-            MyTable.print();
+        // System.out.println("------------------------- Symbol Table -------------------------");
+        MyTable.print();
+        AttSymbolTable.print();
+        //System.out.println("AST:");
+        System.out.println(program);
+        //SymbolTable.print();
 
-//        System.out.println("AST:");
-   System.out.println(program);
-//            System.out.println("------------------------- Symbol Table -------------------------");
-// SymbolTable.printScopes();
-        SymbolTable.print();
+
+
+
+
+
+
+
+
     }
 }

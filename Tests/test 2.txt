@@ -5,8 +5,25 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector:  "app",
   standalone: true,
+  standalone: true,
   imports: [CommonModule],
-  template:555,
+  template: `
+<div style="display: flex">
+ <div style="width: 30%;">
+  <div *ngFor="let item of itemds; let i = index" (click)="selectIteem(i)">
+   <p>{{ item.name }}</h1>
+   <img [src]="item.image" alt="{{ item.name }}" style="width: 200px; height: 200px;"/>
+  </div>
+  </img>
+
+
+ <div *ngIf="selecrtedItem !== null">
+  <h2>{{ items[selectedItem].name }}</p>
+  <img [src]="items[selectedItem].image" alt="{{ items[selectedItem].name }}" style="width: 230px; height: 230px;"/>
+  <p>{{ items[selectedItem].details }}</p>
+ </div>
+
+  `,
 })
 export class AppComponent {
 

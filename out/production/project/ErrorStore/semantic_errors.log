@@ -1,11 +1,15 @@
-
-=== Duplicate Property Definition ===
+=== Duplicate Property Definition Errors ===
+Error in scope 'Component Scope' on symbol 'selector' at line 6: Duplicate property 'selector' in scope 'Component Scope'
 
 === Mismatch Type of Property ===
-Error in scope 'Component Scope' on symbol 'template' at line 9: Mismatch type for 'template' in scope 'Component Scope': expected 'String' but got 'template:555'
+Error in scope 'Component Scope' on symbol 'standalone' at line 8: Mismatch type for 'standalone' in scope 'Component Scope': expected 'boolean' but got '12'
+Error in scope 'Component Scope' on symbol 'template' at line 10: Mismatch type for 'template' in scope 'Component Scope': expected 'String' but got 'undefined'
 
 ===  Invalid Directive Expression Errors ===
 
 === Invalid Event Call Errors ===
+Error in scope ' ' on symbol 'click' at line 13: Calling undefined function: 'selectIteem' from event 'click'
 
 === Mismatched Tag Errors ===
+Error in scope 'p' on symbol 'h1' at line 14: Mismatched closing tag: </h1>
+Error in scope 'h2' on symbol 'p' at line 21: Mismatched closing tag: </p>

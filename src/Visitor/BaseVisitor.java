@@ -1,5 +1,6 @@
 package Visitor;
 
+import Semantic_Check.SemanticAnalyzer;
 import SymbolTable.SymbolTable;
 import antlr.TypeScripteParser;
 import SymbolTable.*;
@@ -12,13 +13,18 @@ import java.util.Stack;
 
 
 public class BaseVisitor extends TypeScripteParserBaseVisitor {
-//    SymbolTable symbolTable = new SymbolTable();
 private boolean insideArrayLiteral = false;
    static MyTable localTable = new MyTable();
+    private TagSymbolTable tagSymbolTable = new TagSymbolTable();
+    private AttSymbolTable attSymbolTable = new AttSymbolTable();
+    private SemanticAnalyzer analyzer;
 
-    private final Stack<String> scopeStack = new Stack<>();
 
-  //  private final Stack<String> scopeStack = new Stack<>();
+    public BaseVisitor(SemanticAnalyzer analyzer) {
+        this.analyzer = analyzer;
+    }
+
+    //  private final Stack<String> scopeStack = new Stack<>();
     @Override
     public Node visitProgram(TypeScripteParser.ProgramContext ctx) {
         System.out.println();
@@ -347,6 +353,7 @@ private boolean insideArrayLiteral = false;
 
         Node primitiveNode = (Node) visit(innerCtx.primitiveType());
         TemplateField templateField = new TemplateField();
+
         String value;
         String type;
 
@@ -380,7 +387,6 @@ private boolean insideArrayLiteral = false;
         return templateField;
     }
 
-
     @Override
     public Node visitOtherFlds(TypeScripteParser.OtherFldsContext ctx) {
         TypeScripteParser.OtherFieldsContext innerCtx = ctx.otherFields();
@@ -399,9 +405,12 @@ private boolean insideArrayLiteral = false;
         Expression value = ctx.expression() != null ? (Expression) visit(ctx.expression()) : null;
 
         assert value != null;
-        SymbolTable.addSymbolToCurrentScope(name,"", value.toString(),ctx.getStart().getLine());
-        Symbol symbol = new Symbol(name, "", value.toString(), SymbolTable.currentScope.getName(),ctx.getStart().getLine());
-        SymbolTable.getSymbols().add(symbol);
+        //SymbolTable.addSymbolToCurrentScope(name,"", value.toString(),ctx.getStart().getLine());
+        //Symbol symbol = new Symbol(name, "", value.toString(), SymbolTable.currentScope.getName(),ctx.getStart().getLine());
+        //SymbolTable.getSymbols().add(symbol);
+        AttSymbol p = new AttSymbol(name, "", value.toString(),ctx.getStart().getLine());
+        attSymbolTable.getSymbols().add(p);
+
 
         return new PropertyDeclaration(name, type, value);
     }
@@ -418,10 +427,12 @@ private boolean insideArrayLiteral = false;
         MethodBody methodBody = ctx.methodBody() != null
                 ? (MethodBody) visit(ctx.methodBody())
                 : new MethodBody();
-        SymbolTable.addSymbolToCurrentScope(name, "Function", type.getTypeName(),ctx.getStart().getLine());
-        Symbol symbol = new Symbol(name, "Function", type.getTypeName(), SymbolTable.currentScope.getName(),ctx.getStart().getLine());
-        SymbolTable.getSymbols().add(symbol);
-        SymbolTable.endCurrentScope();
+        //SymbolTable.addSymbolToCurrentScope(name, "Function", type.getTypeName(),ctx.getStart().getLine());
+        AttSymbol m = new AttSymbol(name, "Function", type.getTypeName(),ctx.getStart().getLine());
+        attSymbolTable.getSymbols().add(m);
+        //Symbol symbol = new Symbol(name, "Function", type.getTypeName(), SymbolTable.currentScope.getName(),ctx.getStart().getLine());
+        //SymbolTable.getSymbols().add(symbol);
+        //SymbolTable.endCurrentScope();
         //System.out.println("Exiting Program Scope");
         return new MethodDeclaration(name, parameterList, type, methodBody);    }
 
@@ -448,8 +459,6 @@ private boolean insideArrayLiteral = false;
         return new Parameter(name, type);    }
 
     @Override
-
-
     public Node visitMethodBody(TypeScripteParser.MethodBodyContext ctx) {
         MethodBody methodBody = new MethodBody();
         for (int i = 0; i < ctx.statement().size(); i++) {
@@ -487,7 +496,6 @@ private boolean insideArrayLiteral = false;
         }
 
         return null;    }
-
 
     @Override
     public Node visitPrimitiveType(TypeScripteParser.PrimitiveTypeContext ctx) {
@@ -679,10 +687,6 @@ private boolean insideArrayLiteral = false;
             completeTag.setOpenTag((OpenTag) visit(innerCtx.openTag()));
 
         }
-        String currentTagName = completeTag.getOpenTag() != null
-                ? completeTag.getOpenTag().getTagName()
-                : "Unknown";
-        scopeStack.push(currentTagName);
         for (int i = 0; i < innerCtx.children.size(); i++) {
             if (innerCtx.getChild(i) != null) {
 
@@ -696,57 +700,39 @@ private boolean insideArrayLiteral = false;
         if (innerCtx.closedTag() != null) {
             completeTag.setClosedTag((ClosedTag) visit(innerCtx.closedTag()));
         }
-        scopeStack.pop();
         return completeTag;
 
     }
 
-    @Override
-    public Node visitSelfClosingElement(TypeScripteParser.SelfClosingElementContext ctx) {
-        TypeScripteParser.SelfClosingTagContext innerCtx = ctx.selfClosingTag();
-        if (innerCtx == null) {
-            System.out.println("SelfClosingTagContext is null");
-            return null;
+@Override
+public Node visitSelfClosingElement(TypeScripteParser.SelfClosingElementContext ctx) {
+    TypeScripteParser.SelfClosingTagContext innerCtx = ctx.selfClosingTag();
+    if (innerCtx == null) return null;
+    SelfClosingTag selfTag = new SelfClosingTag(null, new ArrayList<>());
+    String tagName = innerCtx.TAG_NAME().getText();
+    selfTag.setTagName(tagName);
+    for (int i = 0; i < innerCtx.content().size(); i++) {
+        if (innerCtx.content(i) != null) {
+
+            selfTag.getAttributes().add((Node) visit(innerCtx.content(i)));
         }
-
-        SelfClosingTag selfTag = new SelfClosingTag(null, new ArrayList<>());
-        String tagName = innerCtx.TAG_NAME().getText();
-        selfTag.setTagName(tagName);
-        scopeStack.push(tagName);
-        for (int i = 0; i < innerCtx.content().size(); i++) {
-            if (innerCtx.content(i) != null) {
-
-                selfTag.getAttributes().add((Node) visit(innerCtx.content(i)));
-            }
-        }
-        String parentScope = scopeStack.size() > 1 ? scopeStack.get(scopeStack.size() - 2) : "Global";
-        Symbol s = new Symbol(tagName, "Tag", null, parentScope,innerCtx.getStart().getLine());
-        s.setKind("selfClosing");
-        SymbolTable.getSymbols().add(s);
-
-        scopeStack.pop();
-        return selfTag;
     }
 
+    return selfTag;
+}
 
     @Override
     public Node visitOpenTag(TypeScripteParser.OpenTagContext ctx) {
         OpenTag oTag = new OpenTag(null, new ArrayList<>());
-
         String tagName = ctx.TAG_NAME().getText();
-        scopeStack.push(tagName);
         oTag.setTagName(tagName);
+        tagSymbolTable.pushTag(tagName);
         for (int i = 0; i < ctx.content().size(); i++) {
-            if (ctx.content(i) != null) {
-                oTag.getAttributes().add((Node) visit(ctx.content(i)));
-            }
-        }
-        String parentScope = scopeStack.size() > 1 ? scopeStack.get(scopeStack.size() - 2) : "Global";
-        Symbol ss = new Symbol(tagName, "Tag", null, parentScope,ctx.getStart().getLine());
-        ss.setKind("open");
-        SymbolTable.getSymbols().add(ss);
+           if (ctx.content(i) != null) {
+               oTag.getAttributes().add((Node) visit(ctx.content(i)));
+           }
+       }
 
-        scopeStack.pop();
         return oTag;
     }
 
@@ -755,10 +741,9 @@ private boolean insideArrayLiteral = false;
         ClosedTag cTag = new ClosedTag(null);
         String tagName = ctx.TAG_NAME().getText();
         cTag.setTagName(tagName);
-        String parentScope = scopeStack.isEmpty() ? "Global" : scopeStack.peek();
-        Symbol s = new Symbol(tagName, "Tag", null, parentScope, ctx.getStart().getLine());
-        s.setKind("close");
-        SymbolTable.getSymbols().add(s);
+        int line = ctx.getStart().getLine();
+        String scope = tagSymbolTable.getCurrentScope();
+        analyzer.checkTagMatching(tagName, line, tagSymbolTable, scope);
         return cTag;
     }
 
@@ -785,10 +770,6 @@ private boolean insideArrayLiteral = false;
         value = value.substring(1, value.length() - 1);
         bAtt.setName(name);
         bAtt.setValue(value);
-        String currentScope = scopeStack.isEmpty() ? "Global" : scopeStack.peek();
-        Symbol ssss = new Symbol(name, "NormalAttribute", value, currentScope,innerCtx.getStart().getLine());
-        SymbolTable.getSymbols().add(ssss);
-
         return bAtt;
     }
 
@@ -807,9 +788,6 @@ private boolean insideArrayLiteral = false;
         value = value.substring(1, value.length() - 1);
         dAtt.setName(name);
         dAtt.setValue(value);
-        String currentScope = scopeStack.isEmpty() ? "Global" : scopeStack.peek();
-        Symbol sssss = new Symbol(name, "BindingAttribute", value, currentScope,innerCtx.getStart().getLine());
-        SymbolTable.getSymbols().add(sssss);
         return dAtt;
     }
 
@@ -827,9 +805,9 @@ private boolean insideArrayLiteral = false;
         value = value.substring(1, value.length() - 1);
         dAtt.setName(name);
         dAtt.setValue(value);
-        String currentScope = scopeStack.isEmpty() ? "Global" : scopeStack.peek();
-        Symbol sssss = new Symbol(name, "DirectiveAttribute", value, currentScope,innerCtx.getStart().getLine());
-        SymbolTable.getSymbols().add(sssss);
+        AttSymbol s3 = new AttSymbol(name, "DirectiveAttribute", value,innerCtx.getStart().getLine());
+        attSymbolTable.getSymbols().add(s3);
+
         return dAtt;
     }
 
@@ -849,12 +827,8 @@ private boolean insideArrayLiteral = false;
         value = value.substring(1, value.length() - 1);
         eAtt.setName(name);
         eAtt.setValue(value);
-        String currentScope = scopeStack.isEmpty() ? "Global" : scopeStack.peek();
-        Symbol ssssss = new Symbol(name, "EventAttribute", value, currentScope,innerCtx.getStart().getLine());
-        SymbolTable.getSymbols().add(ssssss);
+        AttSymbol s4 = new AttSymbol(name, "EventAttribute", value,innerCtx.getStart().getLine());
+        attSymbolTable.getSymbols().add(s4);
         return eAtt;
     }
-
-
-
 }
