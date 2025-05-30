@@ -1,8 +1,8 @@
 package Semantic_Check;
 
-import SymbolTable.Scope;
+import SymbolTable.*;
 import SymbolTable.Symbol;
-import SymbolTable.SymbolTable;
+
 import static Main.Main.logger;
 
 import java.util.*;
@@ -10,8 +10,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SemanticAnalyzer {
-    DuplicatePropertyDefinitionTable duplicateTable = new DuplicatePropertyDefinitionTable();
-    MismatchTypeOfPropertyTable mismatchTypeOfPropertyTable = new MismatchTypeOfPropertyTable();
+    DuplicatePropertyDefinition duplicate = new DuplicatePropertyDefinition();
+    MismatchTypeOfProperty mismatchTypeOfPropertyTable = new MismatchTypeOfProperty();
     InvalidDirectiveExpression directiveTable =new InvalidDirectiveExpression();
     InvalidEventCall eventTable =new InvalidEventCall();
     MismatchedTagError tagsTable = new MismatchedTagError();
@@ -22,7 +22,8 @@ public class SemanticAnalyzer {
         predefinedTypes.put("template", "String");
         predefinedTypes.put("imports", "Array");
     }
-    public void checkDuplicateProperties(List<Scope> scopes) {
+    public void checkDuplicateProperties() {
+        Deque<Scope> scopes = MyTable.getScopeStack();
         for (Scope scope : scopes) {
             List<Symbol> symbols = scope.getSymbols();
             for (int i = 0; i < symbols.size(); i++) {
@@ -32,14 +33,20 @@ public class SemanticAnalyzer {
                                 "Duplicate property '" + symbols.get(i).getName() + "' in scope '" + scope.getName() + "'", symbols.get(i).getName(),
                                 scope.getName(),symbols.get(i).getLineNumber()
                         );
-                        duplicateTable. addError(error);
+
+                        duplicate.addError(error);
                     }
                 }
             }
         }
     }
-    public void checkMismatchType(){
-        for (Symbol symbol : SymbolTable.getSymbols()) {
+    public void checkMismatchType() {
+        Scope currentScope = MyTable.getCurrentScope();
+        if (currentScope == null) {
+            System.err.println("Warning: Current scope is null when checking mismatch types.");
+            return;
+        }
+        for (Symbol symbol : currentScope.getSymbols()) {
             String type = symbol.getType();
             String expectedType = predefinedTypes.get(symbol.getName());
             if (expectedType != null && !type.equals(expectedType)) {
@@ -53,11 +60,9 @@ public class SemanticAnalyzer {
                 mismatchTypeOfPropertyTable.addError(error);
             }
         }
-
     }
+
     public void checkInvalidDirectiveExpressions(List<Symbol> symbols) {
-
-
         for (Symbol directive : symbols) {
             if (directive.getType().equals("DirectiveAttribute") &&
                     (directive.getName().equals("ngIf") || directive.getName().equals("ngFor"))) {
@@ -201,21 +206,20 @@ public class SemanticAnalyzer {
 
 
 
-    public void analyzeAll(List<Scope> scopes,List<Symbol> symbols) {
-        checkDuplicateProperties(scopes);
+    public  void analyzeAll(List<Symbol> symbols) {
+        checkDuplicateProperties();
         checkMismatchType();
         checkInvalidDirectiveExpressions( symbols);
         checkInvalidEventCall( symbols);
         checkTagMatching( symbols);
         printErrorsGrouped();
+
     }
     public void printErrorsGrouped() {
-
-        logger.warning("=== Duplicate Property Definition Errors ===");
-        for (SemanticError error : duplicateTable.getErrors()) {
+        logger.warning("\n=== Duplicate Property Definition ===");
+        for (SemanticError error : duplicate.getErrors()) {
             logger.warning(error.toString());
         }
-
         logger.warning("\n=== Mismatch Type of Property ===");
         for (SemanticError error : mismatchTypeOfPropertyTable.getErrors()) {
             logger.warning(error.toString());

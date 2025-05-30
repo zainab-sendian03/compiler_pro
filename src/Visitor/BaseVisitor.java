@@ -2,7 +2,7 @@ package Visitor;
 
 import SymbolTable.SymbolTable;
 import antlr.TypeScripteParser;
-import SymbolTable.Symbol;
+import SymbolTable.*;
 import antlr.TypeScripteParserBaseVisitor;
 import ast.*;
 
@@ -14,6 +14,8 @@ import java.util.Stack;
 public class BaseVisitor extends TypeScripteParserBaseVisitor {
 //    SymbolTable symbolTable = new SymbolTable();
 private boolean insideArrayLiteral = false;
+   static MyTable localTable = new MyTable();
+
     private final Stack<String> scopeStack = new Stack<>();
 
   //  private final Stack<String> scopeStack = new Stack<>();
@@ -68,11 +70,11 @@ private boolean insideArrayLiteral = false;
         TypeScripteParser.ComponentDeclarationContext innerCtx = ctx.componentDeclaration();
 
         //System.out.println("Entering Component Scope");
-        SymbolTable.createScope("Component Scope");
+        MyTable.createScope("Component Scope");
         ComponentBody componentBody = (ComponentBody) visit(innerCtx.componentBody());
         ComponentDeclaration componentDeclaration = new ComponentDeclaration();
         componentDeclaration.setComponentBody(componentBody);
-        SymbolTable.endCurrentScope();
+        MyTable.endCurrentScope();
         //System.out.println("Exiting Program Scope");
         return componentDeclaration;    }
 
@@ -120,11 +122,6 @@ private boolean insideArrayLiteral = false;
         return objectLiteral;
     }
 
-    @Override
-    public Object visitExprStmt(TypeScripteParser.ExprStmtContext ctx) {
-        TypeScripteParser.ExpressionStatementContext innerCtx = ctx.expressionStatement();
-        return visit(innerCtx.expression());
-    }
 
     @Override
     public Node visitClassStmt(TypeScripteParser.ClassStmtContext ctx) {
@@ -261,11 +258,8 @@ private boolean insideArrayLiteral = false;
         if (value == null) {
             value = "";
         }
-
-        Symbol symbol = new Symbol("selector", type, value, SymbolTable.currentScope.getName(), innerCtx.getStart().getLine());
-        SymbolTable.getSymbols().add(symbol);
-        SymbolTable.addSymbolToCurrentScope("selector", type, value, innerCtx.getStart().getLine());
-
+        localTable.addSymbolToCurrentScope("selector", value,type,innerCtx.getStart().getLine());
+        localTable.add("selector", MyTable.getCurrentScope().getName(),value,type,innerCtx.getStart().getLine());
         return new SelectorField(value);
     }
 
@@ -302,9 +296,9 @@ private boolean insideArrayLiteral = false;
 
         if (value == null) {
             value = "";
-        }       SymbolTable.addSymbolToCurrentScope("standalone", type, value,innerCtx.getStart().getLine());
-        Symbol symbol = new Symbol("standalone", type, value   , SymbolTable.currentScope.getName(),innerCtx.getStart().getLine());
-        SymbolTable.getSymbols().add(symbol);
+        }
+        localTable.addSymbolToCurrentScope("standalone", value, type,innerCtx.getStart().getLine());
+        localTable.add("standalone",value, type   , SymbolTable.currentScope.getName(),innerCtx.getStart().getLine());
             return new StandalongField(value);
     }
 
@@ -329,15 +323,23 @@ private boolean insideArrayLiteral = false;
             }
             importsField.add(importValue);
 
-            SymbolTable.addSymbolToCurrentScope("imports",type , importValue, ctx.getStart().getLine());
-            Symbol symbol = new Symbol("imports",type , importValue, SymbolTable.currentScope.getName(), ctx.getStart().getLine());
-            SymbolTable.getSymbols().add(symbol);
+            localTable.addSymbolToCurrentScope("imports",importValue , type, ctx.getStart().getLine());
+            localTable.add("imports",importValue , type, SymbolTable.currentScope.getName(), ctx.getStart().getLine());
         }
 
         return importsField;
     }
 
+    @Override
+    public Node visitBackTemplate(TypeScripteParser.BackTemplateContext ctx) {
+        Node elementNode =(Node) visit(ctx.element());
 
+        TemplateField templateField = new TemplateField();
+        templateField.setTemplateString(ctx.getText());
+        templateField.getElements().add(elementNode);
+
+        return templateField;
+    }
 
     @Override
     public Node visitTemplateFld(TypeScripteParser.TemplateFldContext ctx) {
@@ -345,7 +347,6 @@ private boolean insideArrayLiteral = false;
 
         Node primitiveNode = (Node) visit(innerCtx.primitiveType());
         TemplateField templateField = new TemplateField();
-
         String value;
         String type;
 
@@ -360,24 +361,25 @@ private boolean insideArrayLiteral = false;
             } else if (value.startsWith("[") && value.endsWith("]")) {
                 type = "Array";
             } else {
-                type = innerCtx.getText();
+                type = innerCtx.primitiveType().getText();
             }
 
         } else if (primitiveNode instanceof TemplateField) {
             templateField = (TemplateField) primitiveNode;
             value = templateField.getTemplateString();
             type = "String";
+
         } else {
-            value = "undefined";
-            type = "undefined";
+            value = innerCtx.getText();
+            type = innerCtx.getText();
         }
 
-        SymbolTable.addSymbolToCurrentScope("template", type, value, ctx.getStart().getLine());
-        Symbol symbol = new Symbol("template", type, value, SymbolTable.currentScope.getName(), ctx.getStart().getLine());
-        SymbolTable.getSymbols().add(symbol);
+        localTable.addSymbolToCurrentScope("template", value, type, ctx.getStart().getLine());
+        localTable.add("template", value, type, SymbolTable.currentScope.getName(), ctx.getStart().getLine());
 
         return templateField;
     }
+
 
     @Override
     public Node visitOtherFlds(TypeScripteParser.OtherFldsContext ctx) {
@@ -385,9 +387,8 @@ private boolean insideArrayLiteral = false;
 
         String fieldName = innerCtx.getText();
         Expression expression = (Expression) visit(innerCtx.expression());
-        SymbolTable.addSymbolToCurrentScope(fieldName, fieldName, expression.toString(),innerCtx.getStart().getLine());
-        Symbol symbol = new Symbol(fieldName, fieldName, expression.toString(), SymbolTable.currentScope.getName(),innerCtx.getStart().getLine());
-        SymbolTable.getSymbols().add(symbol);
+        localTable.addSymbolToCurrentScope(fieldName, fieldName, expression.toString(),innerCtx.getStart().getLine());
+        localTable.add(fieldName, fieldName, expression.toString(), SymbolTable.currentScope.getName(),innerCtx.getStart().getLine());
         return new OtherField(fieldName, expression);
     }
 
@@ -401,7 +402,6 @@ private boolean insideArrayLiteral = false;
         SymbolTable.addSymbolToCurrentScope(name,"", value.toString(),ctx.getStart().getLine());
         Symbol symbol = new Symbol(name, "", value.toString(), SymbolTable.currentScope.getName(),ctx.getStart().getLine());
         SymbolTable.getSymbols().add(symbol);
-
 
         return new PropertyDeclaration(name, type, value);
     }
@@ -448,6 +448,8 @@ private boolean insideArrayLiteral = false;
         return new Parameter(name, type);    }
 
     @Override
+
+
     public Node visitMethodBody(TypeScripteParser.MethodBodyContext ctx) {
         MethodBody methodBody = new MethodBody();
         for (int i = 0; i < ctx.statement().size(); i++) {
@@ -486,12 +488,13 @@ private boolean insideArrayLiteral = false;
 
         return null;    }
 
+
     @Override
     public Node visitPrimitiveType(TypeScripteParser.PrimitiveTypeContext ctx) {
         if (ctx.literal() != null && ctx.literal().NUMBER() != null) {
             return new PrimitiveType("number");
         } else if (ctx.MYSTRING() != null) {
-            return new PrimitiveType("string");
+            return new PrimitiveType("String");
         } else if (ctx.BOOLEAN() != null) {
             return new PrimitiveType("boolean");
         } else if (ctx.VOID() != null) {
@@ -499,12 +502,14 @@ private boolean insideArrayLiteral = false;
         } else if (ctx.NULL() != null) {
             return new PrimitiveType("null");
         } else if (ctx.IDENTIFIER() != null) {
-            return new PrimitiveType(ctx.IDENTIFIER().getText());
+            return (Node) visit(ctx.IDENTIFIER());
         }else if (ctx.backTemplate() != null) {
             return (Node) visit(ctx.backTemplate());
         }
 
-        return null;    }
+        return null;
+    }
+
     @Override
     public Node visitArrayExpr(TypeScripteParser.ArrayExprContext ctx) {
         TypeScripteParser.ArrayLiteralContext innerCtx = ctx.arrayLiteral();
@@ -695,8 +700,6 @@ private boolean insideArrayLiteral = false;
         return completeTag;
 
     }
-
-
 
     @Override
     public Node visitSelfClosingElement(TypeScripteParser.SelfClosingElementContext ctx) {

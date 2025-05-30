@@ -32,7 +32,7 @@ public class TemplateField extends Field  {
     @Override
     public String toString() {
         return "TemplateField{" +
-                "template='" + template + '\'' +
+                "template='" +
                 ", elements=" + elements +
                 '}';
     }
