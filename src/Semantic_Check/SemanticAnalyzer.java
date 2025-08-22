@@ -104,12 +104,12 @@ public class SemanticAnalyzer {
                     }
                     if (!found) {
                         String message = "Directive '" + directive.getName() +
-                                "' uses undefined variable/expression: '" + variableToCheck + "'.";
+                                "' uses undefined variable: '" + variableToCheck + "'.";
 
                         SemanticError error = new SemanticError(
                                 message,
                                 directive.getName(),
-                                " ",
+                                "div",
                                 directive.getLineNumber()
                         );
                         directiveTable.addError(error);
@@ -150,7 +150,7 @@ public class SemanticAnalyzer {
                         SemanticError error = new SemanticError(
                                 "Calling undefined function: '" + functionName + "' from event '" + directive.getName() + "'",
                                 directive.getName(),
-                                " ",
+                                "div ",
                                 directive.getLineNumber()
                         );
                         eventTable.addError(error);

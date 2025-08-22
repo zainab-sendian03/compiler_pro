@@ -5,6 +5,7 @@ public class AttSymbol {
     private String type;   // نوع المتغير (مثل int، String)
     private String value;
     private  int lineNumber;
+    private String scope;
 
 
     public AttSymbol(String name, String type, String value,int lineNumber ) {
@@ -28,5 +29,13 @@ public class AttSymbol {
 
     public int getLineNumber() {
         return lineNumber;
+    }
+
+    public String getScope() {
+        return scope;
+    }
+
+    public void setScope(String scope) {
+        this.scope = scope;
     }
 }

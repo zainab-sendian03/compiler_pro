@@ -20,8 +20,9 @@ public class Main {
     public static Logger logger = Logger.getLogger("MyLog");
 
     public static void main(String[] args) throws IOException {
-        String src = "Tests/test 2.txt";
         //String srcFisrt = "Tests/sourcefile.txt";
+        //String src = "Tests/test 2.txt";
+        String src = "Tests/newTest.txt";
         CharStream cs = fromFileName(src);
         TypeScripteLexer lexer = new TypeScripteLexer(cs);
         CommonTokenStream token = new CommonTokenStream(lexer);
@@ -47,8 +48,8 @@ public class Main {
             System.err.println("Failed to set up logger: " + e.getMessage());
         }
         // System.out.println("------------------------- Symbol Table -------------------------");
-        MyTable.print();
-        AttSymbolTable.print();
+       // MyTable.print();
+        //AttSymbolTable.print();
         //System.out.println("AST:");
         System.out.println(program);
         //SymbolTable.print();

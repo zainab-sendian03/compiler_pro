@@ -1,15 +1,17 @@
-=== Duplicate Property Definition Errors ===
-Error in scope 'Component Scope' on symbol 'selector' at line 6: Duplicate property 'selector' in scope 'Component Scope'
+
+=== Duplicate Property Definition ===
+Error in scope 'Component Scope' on symbol 'standalone' at line 7: Duplicate property 'standalone' in scope 'Component Scope'
 
 === Mismatch Type of Property ===
-Error in scope 'Component Scope' on symbol 'standalone' at line 8: Mismatch type for 'standalone' in scope 'Component Scope': expected 'boolean' but got '12'
-Error in scope 'Component Scope' on symbol 'template' at line 10: Mismatch type for 'template' in scope 'Component Scope': expected 'String' but got 'undefined'
 
 ===  Invalid Directive Expression Errors ===
+Error in scope 'div' on symbol 'ngFor' at line 13: Direct?"ive 'ngFor' uses undefined variable: 'itemds'.
+Error in scope 'div' on symbol 'ngIf' at line 20: Directive 'ngIf' uses undefined variable: 'selecrtedItem'.
 
 === Invalid Event Call Errors ===
-Error in scope ' ' on symbol 'click' at line 13: Calling undefined function: 'selectIteem' from event 'click'
+Error in scope 'div ' on symbol 'click' at line 13: Calling undefined function: 'selectIteem' from event 'click'
 
 === Mismatched Tag Errors ===
 Error in scope 'p' on symbol 'h1' at line 14: Mismatched closing tag: </h1>
+Error in scope 'div' on symbol 'img' at line 17: Mismatched closing tag: </img>
 Error in scope 'h2' on symbol 'p' at line 21: Mismatched closing tag: </p>
