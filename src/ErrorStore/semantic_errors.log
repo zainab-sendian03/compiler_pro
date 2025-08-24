@@ -1,9 +1,7 @@
 
 === Duplicate Property Definition ===
-Error in scope 'Component Scope' on symbol 'standalone' at line 7: Duplicate property 'standalone' in scope 'Component Scope'
 
 === Mismatch Type of Property ===
-Error in scope 'Component Scope' on symbol 'template' at line 10: Mismatch type for 'template' in scope 'Component Scope': expected 'String' but got 'template:555'
 
 ===  Invalid Directive Expression Errors ===
 

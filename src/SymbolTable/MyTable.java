@@ -5,7 +5,7 @@ import java.util.*;
 public class MyTable {
     private static final List<Property> Property = new ArrayList<>();
     private static final Deque<Scope> scopes = new ArrayDeque<>();
-    public static Scope currentScope = null; // النطاق الحالي
+    public static Scope currentScope = null;
 
     public static Deque<Scope> getScopeStack() {
             return scopes;

@@ -18,10 +18,6 @@ public class Operation extends Node implements Expression {
         this.right = null;
     }
 
-    @Override
-    public void add(Expression child) {
-
-    }
 
     @Override
     public String toString() {

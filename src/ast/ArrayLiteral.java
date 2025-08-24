@@ -3,19 +3,15 @@ package ast;
 import java.util.ArrayList;
 
 public class ArrayLiteral extends Node implements Expression {
-    ArrayList<Expression> elements;
+    public ArrayList<Expression> elements = new ArrayList<>();
 
-    public ArrayLiteral() {
-        this.elements = new ArrayList<>();
+    public void addElement(Expression expr) {
+        elements.add(expr);
     }
 
-    @Override
-    public void add(Expression  child){
-            elements.add(child);
-
-    }
     @Override
     public String toString() {
         return elements.toString();
     }
 }
+

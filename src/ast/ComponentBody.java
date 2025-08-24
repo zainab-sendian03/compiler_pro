@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ComponentBody extends Node implements Addable<Field>{
-     List<Field> fields;
+    List<Field> fields;
 
     public ComponentBody() {
         this.fields = new ArrayList<>();

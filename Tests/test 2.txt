@@ -1,55 +1,120 @@
-import { bootstrapApplication } from '@angular/platform-browser';
-import { Component } from '@angular/core';
+  import { bootstrapApplication } from '@angular/platform-browser';
+import { Component, Injectable } from '@angular/core';
+import { RouterModule, Router, ActivatedRoute, provideRouter } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { BehaviorSubject } from 'rxjs';
 import { CommonModule } from '@angular/common';
 
+export interface Product {
+  name: string;
+  image: string;
+  details: string;
+}
+@Injectable({ providedIn: 'root' })
+class ProductService {
+  private productsSubject = new BehaviorSubject< Product[]>([
+    { name: 'Product 1', image: 'assets/images/image2.jpg', details: ' Product Details 1' },
+    { name: 'Product 2', image: 'assets/images/image3.jpg', details: ' Product Details 2' }
+  ]);
+  products$ = this.productsSubject.asObservable();
+
+
+  addProduct(product: Product) {
+    const products = this.productsSubject.value;
+    this.productsSubject.next([...products, product]);
+  }
+ updateProduct(index: number, product: Product) {
+    const products = this.productsSubject.value;
+    products[index] = product;
+    this.productsSubject.next([...products]);
+  }
+    deleteProduct(index: number) {
+      const products = this.productsSubject.value;
+      products.splice(index, 1);
+      this.productsSubject.next([...products]);
+    }
+
+    getProduct(index: number): Product | null {
+      return this.productsSubject.value[index] || null;
+    }
+}
 @Component({
-  selector:  "app",
+  selector: 'app-product-list',
   standalone: true,
-  standalone: true,
-  imports: [CommonModule],
-  template: `
-<div style="display: flex">
- <div style="width: 30%;">
-  <div *ngFor="let item of itemds; let i = index" (click)="selectIteem(i)">
-   <p>{{ item.name }}</h1>
-   <img [src]="item.image" alt="{{ item.name }}" style="width: 200px; height: 200px;"/>
-  </div>
-  </img>
-
-
- <div *ngIf="selecrtedItem !== null">
-  <h2>{{ items[selectedItem].name }}</p>
-  <img [src]="items[selectedItem].image" alt="{{ items[selectedItem].name }}" style="width: 230px; height: 230px;"/>
-  <p>{{ items[selectedItem].details }}</p>
- </div>
-
-  `,
+  imports: [RouterModule, CommonModule],
+  template: '',
 })
-export class AppComponent {
-
-  items = [
-    { name: 'Product 1', image: 'assets/images/image1.jpg', details: 'Beautiful' },
-    { name: 'Product 2', image: 'assets/images/image2.jpg', details: 'Sweet' },
-    { name: 'Product 3', image: 'assets/images/image3.jpg', details: 'Nice' }
-  ];
-
+class ProductListComponent {
+  items: Product[] = [];
   selectedItem: number | null = null;
 
-  selectItem(index: number): void {
-    this.selectedItem = index;
-  }
+ constructor(private productService: ProductService, private router: Router) {
+  this.productService.products$.subscribe(products => {
+    this.items = products;
+    if (this.selectedItem !== null && this.selectedItem >= products.length) {
+      this.selectedItem = null;
+    }
+  });
 }
 
-// تفعيل التطبيق باستخدام bootstrapApplication
 
-bootstrapApplication(AppComponent)
-  .catch((err: any) => console.error(err));
+  selectItem(index: number) {
+    this.selectedItem = index;
+  }
 
+  deleteItem() {
+    if (this.selectedItem !== null) {
+      this.productService.deleteProduct(this.selectedItem);
+      this.selectedItem = null;
+    }
+  }
 
+  editItem() {
+    if (this.selectedItem !== null) {
+      this.router.navigate(['/edit', this.selectedItem]);
+    }
+  }
 
+  addItem() {
+    this.router.navigate(['/add']);
+  }
+}
+@Component({
+  selector: 'app-add-product',
+  standalone: true,
+  imports: [FormsModule, RouterModule],
+  template: '',
+})
+class AddProductComponent {
+  product: Product = { name: '', image: 'https://i.pinimg.com/736x/b0/33/4d/b0334d3c2d1ed6f5d8006f250c35b135.jpg', details: '' };
 
+  constructor(private productService: ProductService, private router: Router) {}
 
+  save() {
+    if (this.product.name && this.product.image && this.product.details) {
+      this.productService.addProduct({ ...this.product });
+      this.router.navigate(['/']);
+    }
+  }
 
-
-
-
+  cancel() {
+    this.router.navigate(['/']);
+  }
+}
+@Component({
+  selector: 'app-edit-product',
+  standalone: true,
+  imports: [FormsModule, RouterModule],
+  template: '',
+})
+class AppComponent {}
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideRouter([
+      { path: '', component: ProductListComponent },
+      { path: 'add', component: AddProductComponent },
+      { path: 'edit/:id', component: EditProductComponent },
+      { path: '**', redirectTo: '' }
+    ])
+  ]
+}).catch(err => console.error(err));

@@ -21,10 +21,6 @@ public class Literal extends Node  implements Expression {
         this.boolValue = boolValue;
     }
 
-    @Override
-    public void add(Expression child) {
-
-    }
 
     @Override
     public String toString() {

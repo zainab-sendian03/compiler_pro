@@ -2,30 +2,21 @@ package ast;
 
 import java.util.ArrayList;
 
-
-public class FunctionCall extends Node  implements Expression,Addable<FunctionCall> {
-    String functionName;
-    ArrayList<Expression> arguments;
-    ArrayList<FunctionCall> chainedCalls;
+public class FunctionCall extends Node implements Expression {
+    public String functionName;
+    public ArrayList<Expression> arguments = new ArrayList<>();
+    public ArrayList<FunctionCall> chainedCalls = new ArrayList<>();
 
     public FunctionCall(String functionName) {
         this.functionName = functionName;
-        this.arguments = new ArrayList<>();
-        this.chainedCalls = new ArrayList<>();
+    }
+
+    public void addArgument(Expression expr) {
+        arguments.add(expr);
     }
 
     public void addChainedCall(FunctionCall call) {
-        this.chainedCalls.add(call);
-    }
-
-    @Override
-    public void add(Expression child) {
-        arguments.add(child);
-    }
-
-    @Override
-    public void add(FunctionCall item) {
-        chainedCalls.add(item);
+        chainedCalls.add(call);
     }
 
     @Override
@@ -33,10 +24,16 @@ public class FunctionCall extends Node  implements Expression,Addable<FunctionCa
         StringBuilder sb = new StringBuilder();
         sb.append(functionName).append("(");
         for (int i = 0; i < arguments.size(); i++) {
-            sb.append(arguments.get(i).toString());
+            sb.append(arguments.get(i));
             if (i < arguments.size() - 1) sb.append(", ");
         }
         sb.append(")");
+        if (!chainedCalls.isEmpty()) {
+            sb.append(".").append(chainedCalls);
+        }
+
         return sb.toString();
     }
+
+
 }

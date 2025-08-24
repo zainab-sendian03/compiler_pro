@@ -2,24 +2,15 @@ package ast;
 
 import java.util.ArrayList;
 
-public class ObjectLiteral  extends Node implements Expression {
-    ArrayList<PropertyAssignment> properties;
+public class ObjectLiteral extends Node implements Expression {
+    public ArrayList<PropertyAssignment> properties = new ArrayList<>();
 
-    public ObjectLiteral() {
-        this.properties = new ArrayList<>();
-    }
-
-    public void addProperty(PropertyAssignment property) {
-        this.properties.add(property);
-    }
-
-    @Override
-    public void add(Expression child) {
-
+    public void addProperty(PropertyAssignment pa) {
+        properties.add(pa);
     }
 
     @Override
     public String toString() {
-        return properties.toString()+ "\n";
+        return properties.toString();
     }
 }

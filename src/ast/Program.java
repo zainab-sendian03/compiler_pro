@@ -2,26 +2,19 @@ package ast;
 
 import java.util.ArrayList;
 
-public class Program extends Node implements Addable<Node>{
+public class Program extends Node {
+    public ArrayList<Node> statements = new ArrayList<>();
 
-    ArrayList<Node> children;
-
-    public Program() {
-        this.children = new ArrayList<>();
-    }
-
-
-    @Override
-    public void add(Node item) {
-        children.add(item);
+    public void addStatement(Node stmt) {
+        statements.add(stmt);
     }
 
     @Override
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (Node ast : this.children) {
-            stringBuilder.append(ast).append("\n");
+        StringBuilder sb = new StringBuilder();
+        for (Node stmt : statements) {
+            sb.append(stmt).append("\n");
         }
-        return stringBuilder.toString();
+        return sb.toString();
     }
 }

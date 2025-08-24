@@ -47,9 +47,9 @@ public class Main {
             System.err.println("Failed to set up logger: " + e.getMessage());
         }
         // System.out.println("------------------------- Symbol Table -------------------------");
-        MyTable.print();
-        AttSymbolTable.print();
-        //System.out.println("AST:");
+        //MyTable.print();
+      //  AttSymbolTable.print();
+        System.out.println("AST:");
         System.out.println(program);
         //SymbolTable.print();
 
