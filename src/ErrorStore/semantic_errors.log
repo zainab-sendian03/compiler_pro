@@ -9,7 +9,7 @@ Error in scope 'div' on symbol 'ngFor' at line 13: Directive 'ngFor' uses undefi
 Error in scope 'div' on symbol 'ngIf' at line 20: Directive 'ngIf' uses undefined variable: 'selecrtedItem'.
 
 === Invalid Event Call Errors ===
-Error in scope 'div ' on symbol 'click' at line 13: Calling undefined function: 'selectIteem' from event 'click'
+Error in scope 'div' on symbol 'click' at line 13: Calling undefined function: 'selectIteem' from event 'click'
 
 === Mismatched Tag Errors ===
 Error in scope 'p' on symbol 'h1' at line 14: Mismatched closing tag: </h1>

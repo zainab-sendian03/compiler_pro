@@ -23,9 +23,5 @@ public class ClosedTag extends Node {
         return "TagName:"  + tagName  ;
     }
 
-//    @Override
-//    public String toString() {
-//        return "</" + tagName + ">";
-//    }
 }
 

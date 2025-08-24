@@ -1,10 +1,7 @@
 package Semantic_Check;
 
-import SymbolTable.Scope;
-import SymbolTable.Symbol;
-import SymbolTable.AttSymbol;
-import SymbolTable.TagSymbolTable;
-import SymbolTable.MyTable;
+import SymbolTable.*;
+
 import static Main.Main.logger;
 
 import java.util.*;
@@ -64,7 +61,24 @@ public class SemanticAnalyzer {
         }
 
     }
-    public void checkInvalidDirectiveExpressions(List<AttSymbol> symbols) {
+    public void checkTagMatching(String closedTagName, int line, TagSymbolTable tagSymbolTable, String scope) {
+        Stack<String> stack = tagSymbolTable.getTagStack();
+        if (!stack.isEmpty() && stack.peek().equals(closedTagName)) {
+            stack.pop();
+        } else {
+            SemanticError error = new SemanticError(
+                    "Mismatched closing tag: </" + closedTagName + ">",
+                    closedTagName,
+                    scope,
+                    line
+            );
+            tagsTable.addError(error);
+            if (!stack.isEmpty()) {
+                stack.pop();
+            }
+        }
+    }
+    /*public void checkInvalidDirectiveExpressions(List<AttSymbol> symbols) {
 
 
         for (AttSymbol directive : symbols) {
@@ -117,9 +131,8 @@ public class SemanticAnalyzer {
                 }
             }
         }
-    }
-    public void checkInvalidEventCall(List<AttSymbol> symbols) {
-
+    }*/
+    /*public void checkInvalidEventCall(List<AttSymbol> symbols) {
 
         for (AttSymbol directive : symbols) {
             if (directive.getType().equals("EventAttribute")) {
@@ -158,29 +171,101 @@ public class SemanticAnalyzer {
                 }
             }
         }
+    }*/
+    public void checkEventCallImmediate(AttSymbol directive) {
+        if (!"EventAttribute".equals(directive.getType())) return;
+
+        String value = directive.getValue(); // مثلاً "selectItem(i)"
+        Pattern pattern = Pattern.compile("^\\s*([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(");
+        Matcher matcher = pattern.matcher(value);
+
+        String functionName = null;
+        if (matcher.find()) {
+            functionName = matcher.group(1); // مثل: selectItem
+        }
+
+        if (functionName != null) {
+            boolean found = false;
+
+            for (AttSymbol symbol : AttSymbolTable.getSymbols()) {
+                if ("Function".equals(symbol.getType()) && symbol.getName().equals(functionName)) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                SemanticError error = new SemanticError(
+                        "Calling undefined function: '" + functionName + "' from event '" + directive.getName() + "'",
+                        directive.getName(),
+                        "div",
+                        directive.getLineNumber()
+                );
+                eventTable.addError(error);
+            }
+        }
     }
-    public void checkTagMatching(String closedTagName, int line, TagSymbolTable tagSymbolTable, String scope) {
-        Stack<String> stack = tagSymbolTable.getTagStack();
-        if (!stack.isEmpty() && stack.peek().equals(closedTagName)) {
-            stack.pop();
-        } else {
-            SemanticError error = new SemanticError(
-                    "Mismatched closing tag: </" + closedTagName + ">",
-                    closedTagName,
-                    scope,
-                    line
-            );
-            tagsTable.addError(error);
-            if (!stack.isEmpty()) {
-                stack.pop();
+    public void checkInvalidDirectiveExpression(AttSymbol directive) {
+        if (directive.getType().equals("DirectiveAttribute") &&
+                (directive.getName().equals("ngIf") || directive.getName().equals("ngFor"))) {
+
+            String expression = directive.getValue();
+            String variableToCheck = null;
+
+            if (directive.getName().equals("ngIf")) {
+                // إزالة علامات التنصيص لو موجودة
+                if ((expression.startsWith("\"") && expression.endsWith("\"")) ||
+                        (expression.startsWith("'") && expression.endsWith("'"))) {
+                    expression = expression.substring(1, expression.length() - 1);
+                }
+
+                // التقاط أول identifier
+                Pattern pattern = Pattern.compile("\\b[a-zA-Z_][a-zA-Z0-9_]*\\b");
+                Matcher matcher = pattern.matcher(expression);
+                if (matcher.find()) {
+                    variableToCheck = matcher.group();
+                }
+
+            } else if (directive.getName().equals("ngFor")) {
+                // نبحث عن الجزء بعد كلمة of
+                Pattern pattern = Pattern.compile("of\\s+([\\w\\.]+)");
+                Matcher matcher = pattern.matcher(expression);
+                if (matcher.find()) {
+                    variableToCheck = matcher.group(1);
+                }
+            }
+
+            // التحقق من وجود المتغير بالـ symbol table
+            if (variableToCheck != null) {
+                boolean found = false;
+
+
+                for (AttSymbol symbol : AttSymbolTable.getSymbols()) {
+                    if (symbol.getName().equals(variableToCheck)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    String message = "Directive '" + directive.getName() +
+                            "' uses undefined variable: '" + variableToCheck + "'.";
+
+                    SemanticError error = new SemanticError(
+                            message,
+                            directive.getName(),
+                            "div", // ممكن لاحقاً تاخدها من الـ AST node نفسه بدل ما تكون ثابتة
+                            directive.getLineNumber()
+                    );
+                    directiveTable.addError(error);
+                }
             }
         }
     }
     public void analyzeAll(List<AttSymbol> attSymbol) {
         checkDuplicateProperties();
         checkMismatchType();
-        checkInvalidDirectiveExpressions( attSymbol);
-        checkInvalidEventCall( attSymbol);
+        //checkInvalidDirectiveExpressions( attSymbol);
+        //checkInvalidEventCall(attSymbol);
         printErrorsGrouped();
 
     }

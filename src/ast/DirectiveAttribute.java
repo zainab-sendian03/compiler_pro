@@ -1,6 +1,6 @@
 package ast;
 
-public class DirectiveAttribute extends Node {
+public class DirectiveAttribute extends Content {
     private String name;
     private String value;
 
@@ -27,6 +27,6 @@ public class DirectiveAttribute extends Node {
 
     @Override
     public String toString() {
-        return "DirectiveAttribute : AttributeName:" + "*" + name  + ", AttributeValue:" + value + "";
+        return "DirectiveAttribute : AttributeName:" + "*" + name  + ", AttributeValue:" + value + " ";
     }
 }

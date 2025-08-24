@@ -4,6 +4,7 @@ import Semantic_Check.SemanticAnalyzer;
 import Visitor.BaseVisitor;
 import antlr.TypeScripteLexer;
 import antlr.TypeScripteParser;
+import ast.HtmlRoot;
 import ast.Program;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -20,17 +21,25 @@ public class Main {
     public static Logger logger = Logger.getLogger("MyLog");
 
     public static void main(String[] args) throws IOException {
-        //String srcFisrt = "Tests/sourcefile.txt";
-        //String src = "Tests/test 2.txt";
-        String src = "Tests/newTest.txt";
-        CharStream cs = fromFileName(src);
+        String htmlCode = "Tests/htmlCode.txt";
+        String errorsCode = "Tests/errorsCode.txt";
+        String completeCode = "Tests/completeCode.txt";
+        String sourcefile = "Tests/sourcefile.txt";
+        //CharStream cs = fromFileName(sourcefile);
+        //html
+        CharStream cs = fromFileName(errorsCode);
         TypeScripteLexer lexer = new TypeScripteLexer(cs);
         CommonTokenStream token = new CommonTokenStream(lexer);
         TypeScripteParser parser = new TypeScripteParser(token);
         ParseTree tree = parser.program();
+        //html
+        //ParseTree htmlTree = parser.htmlRoot();
         SemanticAnalyzer analyzer = new SemanticAnalyzer();
         BaseVisitor visitor = new BaseVisitor(analyzer);
         Program program = (Program) visitor.visit(tree);
+        //html
+        //HtmlRoot htmlRoot = (HtmlRoot) visitor.visit(htmlTree);
+
         try {
             FileHandler fileHandler = new FileHandler("src/ErrorStore/semantic_errors.log", false);
             fileHandler.setFormatter(new Formatter() {
@@ -41,7 +50,11 @@ public class Main {
             });
             logger.setUseParentHandlers(false);
             logger.addHandler(fileHandler);
+
+            //this will delete after edit baseVisitor
             analyzer.analyzeAll(AttSymbolTable.getSymbols());
+            //new we will use it Instead of analyzeAll
+            //analyzer.printErrorsGrouped();
             fileHandler.close();
 
         } catch (IOException e) {
@@ -50,9 +63,18 @@ public class Main {
         // System.out.println("------------------------- Symbol Table -------------------------");
        // MyTable.print();
         //AttSymbolTable.print();
-        //System.out.println("AST:");
+
+
+        System.out.println("AST:");
         System.out.println(program);
-        //SymbolTable.print();
+        SymbolTable.print();
+
+        //html
+        //System.out.println("HTML AST:");
+        //System.out.println(htmlRoot);
+        //System.out.println(htmlTree.toStringTree(parser));
+
+
 
 
 

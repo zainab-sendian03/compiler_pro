@@ -9,21 +9,27 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
 
   template: `
-      <div style="display: flex">
-        <div style="width: 30%;">
+ <button (click)="addItem()">إضافة منتج جديد</button>
 
-          <div *ngFor="let item of items; let i = index" (click)="selectItem(i)">
-            <p>{{ item.name }}</p>
-            <img [src]="item.image" alt="{{ item.name }}" style="width: 200px; height: 200px;"/>
-          </div>
-        </div>
-
-        <div *ngIf="selectedItem !== null">
-          <h2>{{ items[selectedItem].name }}</h2>
-          <img [src]="items[selectedItem].image" alt="{{ items[selectedItem].name }}" style="width: 230px; height: 230px;"/>
-          <p>{{ items[selectedItem].details }}</p>
+    <div style="display: flex">
+      <!-- القائمة -->
+      <div style="width: 30%;">
+        <div *ngFor="let item of items; let i = index" (click)="selectItem(i)">
+          <p>{{ item.name }}</p>
+          <img [src]="item.image" width="100"/>
         </div>
       </div>
+
+      <!-- التفاصيل -->
+      <div style="margin-left: 20px;" *ngIf="selectedItem !== null">
+        <h3>{{ items[selectedItem!].name }}</h3>
+        <img [src]="items[selectedItem!].image" width="150"/>
+        <p>{{ items[selectedItem!].details }}</p>
+
+        <button (click)="editItem()">تعديل</button>
+        <button (click)="deleteItem()">حذف</button>
+      </div>
+    </div>
   `,
 })
 export class AppComponent {

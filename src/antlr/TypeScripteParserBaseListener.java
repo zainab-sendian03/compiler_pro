@@ -1,4 +1,4 @@
-// Generated from C:/Users/HP ALL IN ONE/IdeaProjects/code/src/antlr/TypeScripteParser.g4 by ANTLR 4.13.2
+// Generated from C:/Users/USER/Desktop/4th-2/Compiler2/New folder/compiler_pro/src/antlr/TypeScripteParser.g4 by ANTLR 4.13.2
 package antlr;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -689,6 +689,18 @@ public class TypeScripteParserBaseListener implements TypeScripteParserListener 
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterHtmlRoot(TypeScripteParser.HtmlRootContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitHtmlRoot(TypeScripteParser.HtmlRootContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterCompleteElement(TypeScripteParser.CompleteElementContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -773,6 +785,18 @@ public class TypeScripteParserBaseListener implements TypeScripteParserListener 
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterText(TypeScripteParser.TextContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitText(TypeScripteParser.TextContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterNormalAttr(TypeScripteParser.NormalAttrContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -821,6 +845,18 @@ public class TypeScripteParserBaseListener implements TypeScripteParserListener 
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterTwoWayBindingAttr(TypeScripteParser.TwoWayBindingAttrContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTwoWayBindingAttr(TypeScripteParser.TwoWayBindingAttrContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterNormalAttribute(TypeScripteParser.NormalAttributeContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -864,6 +900,18 @@ public class TypeScripteParserBaseListener implements TypeScripteParserListener 
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitEventAttribute(TypeScripteParser.EventAttributeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterTwoWayBindingAttribute(TypeScripteParser.TwoWayBindingAttributeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTwoWayBindingAttribute(TypeScripteParser.TwoWayBindingAttributeContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

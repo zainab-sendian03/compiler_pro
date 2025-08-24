@@ -49,8 +49,9 @@ templateField
   : TEMPLATE COLON primitiveType
   ;
 
+
 backTemplate
-    : BACKTICK element BACKTICK
+    : BACKTICK element* BACKTICK
     ;
 
 importsField
@@ -184,7 +185,9 @@ variableDeclaration
   | IDENTIFIER EQUALS expression                                #VarReassignment
   ;
 
-
+htmlRoot
+    : element* EOF
+    ;
 // القواعد لتحليل العناصر (الوسوم)
 element
   : completeTag     #CompleteElement
@@ -194,7 +197,7 @@ element
 
 // القواعد لتحليل الوسوم الكاملة (التي تحتوي على فتح وإغلاق)
 completeTag
-    : openTag (element|angularExpression)* closedTag
+    : openTag (element | angularExpression|text )* closedTag
     ;
 
 // القواعد لتحليل الوسوم الذاتية الإغلاق
@@ -213,6 +216,7 @@ closedTag
 angularExpression
     : ANGULAR_EXPRESSION
     ;
+text:TEXT | IDENTIFIER ;
 
 // القواعد لتحليل السمات
 content
@@ -220,6 +224,7 @@ content
   | bindingAttribute    #BindingAttr
   | direvtiveAttribute  #DirectiveAttr
   | eventAttribute      #EventAttr
+  | twoWayBindingAttribute #TwoWayBindingAttr
   ;
 
 
@@ -238,3 +243,8 @@ direvtiveAttribute
 eventAttribute
     : LPAREN IDENTIFIER RPAREN EQUALS STRING
     ;
+
+twoWayBindingAttribute
+    : LBRACKET LPAREN IDENTIFIER RPAREN RBRACKET EQUALS STRING
+    ;
+

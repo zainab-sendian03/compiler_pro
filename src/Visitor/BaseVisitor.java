@@ -9,15 +9,14 @@ import ast.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 
 
 public class BaseVisitor extends TypeScripteParserBaseVisitor {
 private boolean insideArrayLiteral = false;
    static MyTable localTable = new MyTable();
-    private TagSymbolTable tagSymbolTable = new TagSymbolTable();
-    private AttSymbolTable attSymbolTable = new AttSymbolTable();
-    private SemanticAnalyzer analyzer;
+    private final TagSymbolTable tagSymbolTable = new TagSymbolTable();
+    private final AttSymbolTable attSymbolTable = new AttSymbolTable();
+    private final SemanticAnalyzer analyzer;
 
 
     public BaseVisitor(SemanticAnalyzer analyzer) {
@@ -338,12 +337,13 @@ private boolean insideArrayLiteral = false;
 
     @Override
     public Node visitBackTemplate(TypeScripteParser.BackTemplateContext ctx) {
-        Node elementNode =(Node) visit(ctx.element());
-
         TemplateField templateField = new TemplateField();
         templateField.setTemplateString(ctx.getText());
-        templateField.getElements().add(elementNode);
-
+        for (int i = 0; i < ctx.element().size(); i++) {
+            if (ctx.element(i) != null) {
+                templateField.getElements().add((Node) visit(ctx.element(i)));
+            }
+        }
         return templateField;
     }
 
@@ -405,9 +405,6 @@ private boolean insideArrayLiteral = false;
         Expression value = ctx.expression() != null ? (Expression) visit(ctx.expression()) : null;
 
         assert value != null;
-        //SymbolTable.addSymbolToCurrentScope(name,"", value.toString(),ctx.getStart().getLine());
-        //Symbol symbol = new Symbol(name, "", value.toString(), SymbolTable.currentScope.getName(),ctx.getStart().getLine());
-        //SymbolTable.getSymbols().add(symbol);
         AttSymbol p = new AttSymbol(name, "", value.toString(),ctx.getStart().getLine());
         attSymbolTable.getSymbols().add(p);
 
@@ -673,9 +670,21 @@ private boolean insideArrayLiteral = false;
         return new PropertyAssignment(key, value);
     }
 
+    @Override
+    public Node visitHtmlRoot(TypeScripteParser.HtmlRootContext ctx) {
+        SymbolTable.createScope("HTML Scope");
+        HtmlRoot root=new HtmlRoot( new ArrayList<>());
+        for (int i = 0; i < ctx.element().size(); i++) {
+            if (ctx.element(i) != null) {
+                root.getChildren().add((Node) visit(ctx.element(i)));
+            }
+        }
+        SymbolTable.endCurrentScope();
+        return root;
+    }
 
     @Override
-    public Node visitCompleteElement(TypeScripteParser.CompleteElementContext ctx) {
+    public Element visitCompleteElement(TypeScripteParser.CompleteElementContext ctx) {
         TypeScripteParser.CompleteTagContext innerCtx = ctx.completeTag();
         if (innerCtx == null) {
             System.out.println("CompleteElementContext is null");
@@ -695,7 +704,11 @@ private boolean insideArrayLiteral = false;
                 } else if (innerCtx.getChild(i) instanceof TypeScripteParser.AngularExpressionContext) {
                     completeTag.getChildren().add((Node) visit(innerCtx.getChild(i)));
                 }
-            }
+              else if (innerCtx.getChild(i) instanceof TypeScripteParser.TextContext) {
+                completeTag.getChildren().add((Node) visit(innerCtx.getChild(i)));
+                }
+
+           }
         }
         if (innerCtx.closedTag() != null) {
             completeTag.setClosedTag((ClosedTag) visit(innerCtx.closedTag()));
@@ -756,6 +769,22 @@ public Node visitSelfClosingElement(TypeScripteParser.SelfClosingElementContext 
         return e;
     }
 
+    @Override
+    public Node visitText(TypeScripteParser.TextContext ctx) {
+        Text t = new Text(null,null);
+        if (ctx.TEXT() != null) {
+            String text=ctx.TEXT().getText();
+            System.out.print("text"+ctx.TEXT().getText());
+            t.setText(text);
+            t.setIdentifier(null);
+        } else {
+            String text=ctx.IDENTIFIER().getText();
+            System.out.print("text"+ctx.IDENTIFIER().getText());
+            t.setText(null);
+            t.setIdentifier(text);
+        }
+        return t;
+    }
 
     @Override
     public Node visitNormalAttr(TypeScripteParser.NormalAttrContext ctx) {
@@ -806,7 +835,8 @@ public Node visitSelfClosingElement(TypeScripteParser.SelfClosingElementContext 
         dAtt.setName(name);
         dAtt.setValue(value);
         AttSymbol s3 = new AttSymbol(name, "DirectiveAttribute", value,innerCtx.getStart().getLine());
-        attSymbolTable.getSymbols().add(s3);
+        //attSymbolTable.getSymbols().add(s3);
+        analyzer.checkInvalidDirectiveExpression(s3);
 
         return dAtt;
     }
@@ -828,7 +858,29 @@ public Node visitSelfClosingElement(TypeScripteParser.SelfClosingElementContext 
         eAtt.setName(name);
         eAtt.setValue(value);
         AttSymbol s4 = new AttSymbol(name, "EventAttribute", value,innerCtx.getStart().getLine());
-        attSymbolTable.getSymbols().add(s4);
+        //attSymbolTable.getSymbols().add(s4);
+        analyzer.checkEventCallImmediate(s4 );
         return eAtt;
     }
+    @Override
+    public Node visitTwoWayBindingAttr(TypeScripteParser.TwoWayBindingAttrContext ctx) {
+
+        TypeScripteParser.TwoWayBindingAttributeContext innerCtx = ctx.twoWayBindingAttribute();
+        if (innerCtx == null) {
+            System.out.println("TwoWayBindingAttributeContext is null");
+            return null;
+        }
+
+        TwoWayBindingAttribute tAtt = new TwoWayBindingAttribute(null, null);
+        String name = innerCtx.IDENTIFIER().getText();
+        String value = innerCtx.STRING().getText();
+        value = value.substring(1, value.length() - 1);
+        tAtt.setName(name);
+        tAtt.setValue(value);
+        AttSymbol s5 = new AttSymbol(name, "TwoWayBindingAttribute", value,innerCtx.getStart().getLine());
+        attSymbolTable.getSymbols().add(s5);
+        return tAtt;
+    }
+
+
 }

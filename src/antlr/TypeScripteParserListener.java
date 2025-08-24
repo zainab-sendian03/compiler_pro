@@ -1,4 +1,4 @@
-// Generated from C:/Users/HP ALL IN ONE/IdeaProjects/code/src/antlr/TypeScripteParser.g4 by ANTLR 4.13.2
+// Generated from C:/Users/USER/Desktop/4th-2/Compiler2/New folder/compiler_pro/src/antlr/TypeScripteParser.g4 by ANTLR 4.13.2
 package antlr;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -616,6 +616,16 @@ public interface TypeScripteParserListener extends ParseTreeListener {
 	 */
 	void exitVarReassignment(TypeScripteParser.VarReassignmentContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link TypeScripteParser#htmlRoot}.
+	 * @param ctx the parse tree
+	 */
+	void enterHtmlRoot(TypeScripteParser.HtmlRootContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link TypeScripteParser#htmlRoot}.
+	 * @param ctx the parse tree
+	 */
+	void exitHtmlRoot(TypeScripteParser.HtmlRootContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code CompleteElement}
 	 * labeled alternative in {@link TypeScripteParser#element}.
 	 * @param ctx the parse tree
@@ -690,6 +700,16 @@ public interface TypeScripteParserListener extends ParseTreeListener {
 	 */
 	void exitAngularExpression(TypeScripteParser.AngularExpressionContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link TypeScripteParser#text}.
+	 * @param ctx the parse tree
+	 */
+	void enterText(TypeScripteParser.TextContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link TypeScripteParser#text}.
+	 * @param ctx the parse tree
+	 */
+	void exitText(TypeScripteParser.TextContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code NormalAttr}
 	 * labeled alternative in {@link TypeScripteParser#content}.
 	 * @param ctx the parse tree
@@ -738,6 +758,18 @@ public interface TypeScripteParserListener extends ParseTreeListener {
 	 */
 	void exitEventAttr(TypeScripteParser.EventAttrContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code TwoWayBindingAttr}
+	 * labeled alternative in {@link TypeScripteParser#content}.
+	 * @param ctx the parse tree
+	 */
+	void enterTwoWayBindingAttr(TypeScripteParser.TwoWayBindingAttrContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code TwoWayBindingAttr}
+	 * labeled alternative in {@link TypeScripteParser#content}.
+	 * @param ctx the parse tree
+	 */
+	void exitTwoWayBindingAttr(TypeScripteParser.TwoWayBindingAttrContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link TypeScripteParser#normalAttribute}.
 	 * @param ctx the parse tree
 	 */
@@ -777,4 +809,14 @@ public interface TypeScripteParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitEventAttribute(TypeScripteParser.EventAttributeContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link TypeScripteParser#twoWayBindingAttribute}.
+	 * @param ctx the parse tree
+	 */
+	void enterTwoWayBindingAttribute(TypeScripteParser.TwoWayBindingAttributeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link TypeScripteParser#twoWayBindingAttribute}.
+	 * @param ctx the parse tree
+	 */
+	void exitTwoWayBindingAttribute(TypeScripteParser.TwoWayBindingAttributeContext ctx);
 }

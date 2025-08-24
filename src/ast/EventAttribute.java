@@ -1,6 +1,6 @@
 package ast;
 
-public class EventAttribute extends Node {
+public class EventAttribute extends Content {
     private String name;
     private String value;
 
@@ -27,6 +27,6 @@ public class EventAttribute extends Node {
 
     @Override
     public String toString() {
-        return "EventAttribute : AttributeName:" + "(" + name + ")" + ", AttributeValue:" + value + "";
+        return "EventAttribute : AttributeName:" + "(" + name + ")" + ", AttributeValue:" + value + " ";
     }
 }

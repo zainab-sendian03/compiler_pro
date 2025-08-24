@@ -2,7 +2,7 @@ package ast;
 
 import java.util.List;
 
-public class SelfClosingTag extends Node implements Addable<Node>{
+public class SelfClosingTag extends Element implements Addable<Node>{
     private String tagName;
     private List<Node> attributes;
 
@@ -49,16 +49,7 @@ public class SelfClosingTag extends Node implements Addable<Node>{
 
 
 
-//    @Override
-//    public String toString() {
-//        StringBuilder builder = new StringBuilder();
-//        builder.append("<"+ tagName +" ");
-//        for (ContentNode child : attributes) {
-//            builder.append(child.toString());
-//        }
-//        builder.append("/>"+"\n");
-//        return builder.toString();
-//    }
+
 
 
 

@@ -59,6 +59,10 @@ STRING: '"' (~["\\] | '\\' .)* '"' | '\'' (~['\\] | '\\' .)* '\'';
 NUMBER: [0-9]+('.'[0-9]+)?;
 IDENTIFIER: [a-zA-Z_][a-zA-Z0-9_]*;
 ANGULAR_EXPRESSION : '{{'  .*? '}}'  ;
+TEXT: [\p{L}_][\p{L}\p{N}_]*;
+
+
+
 
 // Modes for HTML parsing
 mode TAG;

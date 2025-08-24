@@ -1,7 +1,7 @@
 package ast;
 
 // القاعدة: bindingAttribute
-public class BindingAttribute extends Node {
+public class BindingAttribute extends Content {
     private String name;
     private String value;
 

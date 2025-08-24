@@ -1,6 +1,6 @@
 package ast;
 
-public class NormalAttribute extends Node {
+public class NormalAttribute extends Content {
     private String name;
     private String value;
 
@@ -28,6 +28,6 @@ public class NormalAttribute extends Node {
     @Override
     public String toString() {
 
-        return "NormalAttribute : AttributeName:" + name + ", AttributeValue:" + value + "";
+        return "NormalAttribute : AttributeName:" + name + ", AttributeValue:" + value + " ";
     }
 }
