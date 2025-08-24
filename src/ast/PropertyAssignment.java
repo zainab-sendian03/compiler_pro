@@ -1,16 +1,16 @@
 package ast;
 
 public class PropertyAssignment extends Node {
-    String name;
-    Expression value;
+    public Expression key;
+    public Expression value;
 
-    public PropertyAssignment(String name, Expression value) {
-        this.name = name;
+    public PropertyAssignment(Expression key, Expression value) {
+        this.key = key;
         this.value = value;
     }
 
     @Override
     public String toString() {
-        return name + ": " + value;
+        return key + ":" + value;
     }
 }

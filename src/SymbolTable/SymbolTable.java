@@ -3,10 +3,11 @@ package SymbolTable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 public class SymbolTable {
     private static ArrayList<Symbol> symbols = new ArrayList<>();
-    private static final List<Scope> scopes = new ArrayList<>();
+    private static final Stack<Scope> scopes = new Stack<Scope>();
 
     public void setSymbols(ArrayList<Symbol> symbols) {
         SymbolTable.symbols = symbols;

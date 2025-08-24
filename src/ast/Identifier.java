@@ -11,9 +11,7 @@ public class Identifier extends Node implements Expression {
         return name;
     }
 
-    @Override
-    public void add(Expression child) {
-    }
+
 
     @Override
     public String toString() {

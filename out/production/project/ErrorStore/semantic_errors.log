@@ -1,34 +1,17 @@
 
 === Duplicate Property Definition ===
-Error in scope 'Component Scope' on symbol 'standalone' at line 7: Duplicate property 'standalone' in scope 'Component Scope'
 
 === Mismatch Type of Property ===
 
 ===  Invalid Directive Expression Errors ===
-Error in scope 'div' on symbol 'ngFor' at line 13: Directive 'ngFor' uses undefined variable: 'itemds'.
-Error in scope 'div' on symbol 'ngIf' at line 20: Directive 'ngIf' uses undefined variable: 'selecrtedItem'.
+Error in scope 'div' on symbol 'ngFor' at line 55: Directive 'ngFor' uses undefined variable: 'ite'.
+Error in scope 'div' on symbol 'ngIf' at line 62: Directive 'ngIf' uses undefined variable: 'selectedIte'.
 
 === Invalid Event Call Errors ===
-Error in scope 'div' on symbol 'click' at line 13: Calling undefined function: 'selectIteem' from event 'click'
+Error in scope 'div ' on symbol 'click' at line 55: Calling undefined function: 'selectIte' from event 'click'
+Error in scope 'div ' on symbol 'click' at line 67: Calling undefined function: 'editIte' from event 'click'
+Error in scope 'div ' on symbol 'click' at line 68: Calling undefined function: 'deleItem' from event 'click'
 
 === Mismatched Tag Errors ===
-Error in scope 'p' on symbol 'h1' at line 14: Mismatched closing tag: </h1>
-Error in scope 'div' on symbol 'img' at line 17: Mismatched closing tag: </img>
-Error in scope 'h2' on symbol 'p' at line 21: Mismatched closing tag: </p>
-
-=== Duplicate Property Definition ===
-Error in scope 'Component Scope' on symbol 'standalone' at line 7: Duplicate property 'standalone' in scope 'Component Scope'
-
-=== Mismatch Type of Property ===
-
-===  Invalid Directive Expression Errors ===
-Error in scope 'div' on symbol 'ngFor' at line 13: Directive 'ngFor' uses undefined variable: 'itemds'.
-Error in scope 'div' on symbol 'ngIf' at line 20: Directive 'ngIf' uses undefined variable: 'selecrtedItem'.
-
-=== Invalid Event Call Errors ===
-Error in scope 'div' on symbol 'click' at line 13: Calling undefined function: 'selectIteem' from event 'click'
-
-=== Mismatched Tag Errors ===
-Error in scope 'p' on symbol 'h1' at line 14: Mismatched closing tag: </h1>
-Error in scope 'div' on symbol 'img' at line 17: Mismatched closing tag: </img>
-Error in scope 'h2' on symbol 'p' at line 21: Mismatched closing tag: </p>
+Error in scope 'h3' on symbol 'h6' at line 63: Mismatched closing tag: </h6>
+Error in scope 'button' on symbol 'butt' at line 120: Mismatched closing tag: </butt>

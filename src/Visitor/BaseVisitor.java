@@ -2,13 +2,16 @@ package Visitor;
 
 import Semantic_Check.SemanticAnalyzer;
 import SymbolTable.SymbolTable;
-import antlr.TypeScripteParser;
 import SymbolTable.*;
+
 import antlr.TypeScripteParserBaseVisitor;
 import ast.*;
-
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNode;
+import antlr.TypeScripteParser;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 
 public class BaseVisitor extends TypeScripteParserBaseVisitor {
@@ -33,7 +36,7 @@ private boolean insideArrayLiteral = false;
         Program program = new Program();
         for (int i = 0; i < ctx.statement().size(); i++) {
             if (ctx.statement(i) != null) {
-                program.add((Node) visit(ctx.statement(i)));
+                program.addStatement((Node) visit(ctx.statement(i)));
             }
         }
         SymbolTable.endCurrentScope();
@@ -46,26 +49,20 @@ private boolean insideArrayLiteral = false;
     public Node visitImportStmt(TypeScripteParser.ImportStmtContext ctx) {
         TypeScripteParser.ImportStatementContext innerCtx = ctx.importStatement();
 
-        String module ;
-
-        if (innerCtx.STRING() != null) {
-            module  = innerCtx.STRING().getText().replace("\"", "").replace("'", "");
-        } else if (ctx.getText().contains("Component")) {
-            module = "Component";
-        } else {
-            throw new IllegalArgumentException("Invalid import statement: " + innerCtx.getText());
-        }
+        // module is always STRING
+        String module = innerCtx.STRING().getText().replace("\"", "").replace("'", "");
 
         ImportStatement importStatement = new ImportStatement(module);
 
-        for (int i = 0; i < innerCtx.children.size(); i++) {
-            String text = innerCtx.getChild(i).getText();
-            if (text.equals("import") || text.equals("from") || text.equals("{") || text.equals("}") || text.equals(",")|| text.equals(";")) {
-                continue;
-            }
-            if (!text.isEmpty()) {
-                importStatement.add(text);
-            }
+        // Collect identifiers, components, injectables
+        for (TerminalNode id : innerCtx.IDENTIFIER()) {
+            importStatement.addIdentifier(id.getText());
+        }
+        for (TerminalNode comp : innerCtx.COMPONENT()) {
+            importStatement.addIdentifier(comp.getText());
+        }
+        for (TerminalNode inj : innerCtx.INJECTABLE()) {
+            importStatement.addIdentifier(inj.getText());
         }
         return importStatement;
     }
@@ -74,14 +71,17 @@ private boolean insideArrayLiteral = false;
     public Node visitComponentStmt(TypeScripteParser.ComponentStmtContext ctx) {
         TypeScripteParser.ComponentDeclarationContext innerCtx = ctx.componentDeclaration();
 
-        //System.out.println("Entering Component Scope");
-        MyTable.createScope("Component Scope");
+        // فتح Scope للـ Component
+        SymbolTable.createScope("Component Scope");
         ComponentBody componentBody = (ComponentBody) visit(innerCtx.componentBody());
         ComponentDeclaration componentDeclaration = new ComponentDeclaration();
         componentDeclaration.setComponentBody(componentBody);
-        MyTable.endCurrentScope();
+        SymbolTable.endCurrentScope();
         //System.out.println("Exiting Program Scope");
-        return componentDeclaration;    }
+        return componentDeclaration;
+    }
+
+
 
     @Override
     public Node visitVariableStmt(TypeScripteParser.VariableStmtContext ctx) {
@@ -112,10 +112,10 @@ private boolean insideArrayLiteral = false;
         Symbol symbol = new Symbol(name, typeName, rawValue, SymbolTable.currentScope.getName(),innerCtx.getStart().getLine());
         SymbolTable.getSymbols().add(symbol);
 
-        return new VariableDeclaration(name, type, expression);
+        return new VariableDeclaration(name, expression);
     }
     @Override
-    public Object visitObjectExpr(TypeScripteParser.ObjectExprContext ctx) {
+    public Node visitObjectExpr(TypeScripteParser.ObjectExprContext ctx) {
         ObjectLiteral objectLiteral = new ObjectLiteral();
 
         if (ctx.objectLiteral().propertyAssignment() != null) {
@@ -153,7 +153,7 @@ private boolean insideArrayLiteral = false;
         return classDeclaration;    }
 
     @Override
-    public Object visitClassBody(TypeScripteParser.ClassBodyContext ctx) {
+    public Node visitClassBody(TypeScripteParser.ClassBodyContext ctx) {
         ClassBody classBody = new ClassBody();
         for (int i = 0; i < ctx.children.size(); i++) {
             if (ctx.children.get(i) != null) {
@@ -199,24 +199,44 @@ private boolean insideArrayLiteral = false;
     @Override
     public Node visitIfStmt(TypeScripteParser.IfStmtContext ctx) {
         TypeScripteParser.IfStatementContext innerCtx = ctx.ifStatement();
-        Expression condition = (Expression) visit(innerCtx.expression());
-        //System.out.println("Entering If Scope");
-        SymbolTable.createScope("If Scope");
-        SymbolTable.addSymbolToCurrentScope("Condition", "Boolean", condition.toString(),innerCtx.getStart().getLine());
 
-        Statement ifBodyAST = (Statement) visit(innerCtx.statement(0));
+        // التعامل مع الشرط: جمع كل expressions إذا في أكثر من واحد
+        Expression condition;
+        if (innerCtx.expression().size() == 1) {
+            condition = (Expression) visit(innerCtx.expression(0));
+        } else {
+            ArrayList<Expression> expressions = new ArrayList<>();
+            for (TypeScripteParser.ExpressionContext exprCtx : innerCtx.expression()) {
+                expressions.add((Expression) visit(exprCtx));
+            }
+            // ممكن تستخدم BinaryExpression أو AndExpression حسب تصميم AST
+            condition = new MultiExpression(expressions);
+        }
+
+        // إنشاء AST
+        IfStatement ifStmt = new IfStatement(condition);
+
+        // التعامل مع if body
+        SymbolTable.createScope("If Scope");
+        for (TypeScripteParser.StatementContext stmtCtx : innerCtx.statement()) {
+            Statement stmt = (Statement) visit(stmtCtx);
+            ifStmt.addToIfBody(stmt);
+        }
         SymbolTable.endCurrentScope();
-        //System.out.println("Exiting ForLoop Scope");
-        Statement elseBodyAST = null;
+
+        // التعامل مع else body إذا موجود
         if (innerCtx.ELSE() != null) {
-            //System.out.println("Entering Else Scope");
             SymbolTable.createScope("Else Scope");
-            elseBodyAST = (Statement) visit(innerCtx.statement(1));
+            // هنا نحتاج فقط statement الموجودة بعد ELSE
+            Statement elseStmt = (Statement) visit(innerCtx.statement(innerCtx.statement().size() - 1));
+            ifStmt.addToElseBody(elseStmt);
             SymbolTable.endCurrentScope();
             //System.out.println("Exiting ForLoop Scope");
         }
-        return new IfStatement(condition, ifBodyAST, elseBodyAST);
+
+        return ifStmt;
     }
+
 
     @Override
     public Node visitComponentBody(TypeScripteParser.ComponentBodyContext ctx) {
@@ -226,7 +246,9 @@ private boolean insideArrayLiteral = false;
             componentBody.add(field);
         }
 
-        return componentBody;    }
+        return componentBody;
+    }
+
 
 
     @Override
@@ -264,7 +286,7 @@ private boolean insideArrayLiteral = false;
             value = "";
         }
         localTable.addSymbolToCurrentScope("selector", value,type,innerCtx.getStart().getLine());
-        localTable.add("selector", MyTable.getCurrentScope().getName(),value,type,innerCtx.getStart().getLine());
+        localTable.add("selector", SymbolTable.currentScope.getName(),value,type,innerCtx.getStart().getLine());
         return new SelectorField(value);
     }
 
@@ -339,13 +361,17 @@ private boolean insideArrayLiteral = false;
     public Node visitBackTemplate(TypeScripteParser.BackTemplateContext ctx) {
         TemplateField templateField = new TemplateField();
         templateField.setTemplateString(ctx.getText());
-        for (int i = 0; i < ctx.element().size(); i++) {
-            if (ctx.element(i) != null) {
-                templateField.getElements().add((Node) visit(ctx.element(i)));
+
+        for (TypeScripteParser.ElementContext elemCtx : ctx.element()) {
+            Node elementNode = (Node) visit(elemCtx);
+            if (elementNode != null) {
+                templateField.getElements().add(elementNode);
             }
         }
+
         return templateField;
     }
+
 
     @Override
     public Node visitTemplateFld(TypeScripteParser.TemplateFldContext ctx) {
@@ -402,12 +428,18 @@ private boolean insideArrayLiteral = false;
     public Node visitPropertyDeclaration(TypeScripteParser.PropertyDeclarationContext ctx) {
         String name = ctx.IDENTIFIER().getText();
         Type type = ctx.type() != null ? new Type(ctx.type().getText()) : null;
-        Expression value = ctx.expression() != null ? (Expression) visit(ctx.expression()) : null;
+        Expression value = null;
+        value = ctx.expression() != null ? (Expression) visit(ctx.expression()) : null;
 
-        assert value != null;
-        AttSymbol p = new AttSymbol(name, "", value.toString(),ctx.getStart().getLine());
-        attSymbolTable.getSymbols().add(p);
 
+        if (ctx.expression() != null) {
+            value = (Expression) visit(ctx.expression());
+
+        }
+
+        String valueStr = (value != null) ? value.toString() : "";
+        AttSymbol p = new AttSymbol(name, "", valueStr, ctx.getStart().getLine());
+        AttSymbolTable.getSymbols().add(p);
 
         return new PropertyDeclaration(name, type, value);
     }
@@ -418,20 +450,21 @@ private boolean insideArrayLiteral = false;
         SymbolTable.createScope("Function Scope");
         String name = ctx.IDENTIFIER().getText();
         ParameterList parameterList = ctx.parameterList() != null ? (ParameterList) visit(ctx.parameterList()) : null;
-        Type type = ctx.type() != null
-                ? new Type(ctx.type().getText())
-                : new Type("void");
-        MethodBody methodBody = ctx.methodBody() != null
-                ? (MethodBody) visit(ctx.methodBody())
-                : new MethodBody();
-        //SymbolTable.addSymbolToCurrentScope(name, "Function", type.getTypeName(),ctx.getStart().getLine());
-        AttSymbol m = new AttSymbol(name, "Function", type.getTypeName(),ctx.getStart().getLine());
-        attSymbolTable.getSymbols().add(m);
-        //Symbol symbol = new Symbol(name, "Function", type.getTypeName(), SymbolTable.currentScope.getName(),ctx.getStart().getLine());
-        //SymbolTable.getSymbols().add(symbol);
-        //SymbolTable.endCurrentScope();
-        //System.out.println("Exiting Program Scope");
-        return new MethodDeclaration(name, parameterList, type, methodBody);    }
+
+        Type type = ctx.type() != null ? new Type(ctx.type().getText()) : new Type("void");
+
+        MethodBody methodBodyNode = ctx.methodBody() != null ? (MethodBody) visit(ctx.methodBody()) : new MethodBody();
+
+        MethodDeclaration methodDeclaration = new MethodDeclaration(name, parameterList, methodBodyNode.getStatements());
+
+        AttSymbol m = new AttSymbol(name, "Function", type.getTypeName(), ctx.getStart().getLine());
+        AttSymbolTable.getSymbols().add(m);
+
+        SymbolTable.endCurrentScope();
+
+        return methodDeclaration;
+    }
+
 
     @Override
     public Node visitParameterList(TypeScripteParser.ParameterListContext ctx)   {
@@ -439,7 +472,7 @@ private boolean insideArrayLiteral = false;
         for (int i = 0; i < ctx.parameter().size(); i++) {
             if (ctx.parameter(i) != null) {
                 Parameter parameter = (Parameter) visit(ctx.parameter(i));
-                parameterList.addParameter(parameter);
+                parameterList.add(parameter);
             }
         }
         return parameterList;    }
@@ -461,7 +494,12 @@ private boolean insideArrayLiteral = false;
         for (int i = 0; i < ctx.statement().size(); i++) {
             if (ctx.statement(i) != null) {
                 Node statement = (Node) visit(ctx.statement(i));
-                methodBody.add(statement);
+                if (statement != null) {
+                    methodBody.add(statement);
+                } else {
+                    System.out.println("Warning: statement is null at index " + i);
+                }
+
             }
         }
         return methodBody;    }
@@ -474,7 +512,7 @@ private boolean insideArrayLiteral = false;
 
         if (ctx.PIPE() != null) {
             Type leftType = (Type) visit(ctx.primitiveType());
-            Type rightType = (Type) visit(ctx.type());
+            Type rightType = (Type) visit((ParseTree) ctx.type());
 
             List<Type> unionTypes = new ArrayList<>();
             if (leftType != null && leftType.getUnionTypes() != null) {
@@ -524,7 +562,7 @@ private boolean insideArrayLiteral = false;
         for (int i = 0; i < innerCtx.expression().size(); i++) {
             if (innerCtx.expression(i) != null) {
                 Expression element = (Expression) visit(innerCtx.expression(i));
-                arrayLiteral.add(element);
+                arrayLiteral.addElement(element);
             }
         }
         insideArrayLiteral = false;
@@ -541,27 +579,38 @@ private boolean insideArrayLiteral = false;
 
         if (innerCtx.expression() != null) {
             for (int i = 0; i < innerCtx.expression().size(); i++) {
-                Expression argument = (Expression) visit(innerCtx.expression(i));
-                functionCall.add(argument);
-                arguments.add(argument.toString());
-
-            }
-        }
-        for (int i = 0; i < innerCtx.DOT().size(); i++) {
-            String chainedFunctionName = innerCtx.getChild(4 + i * 4).getText();
-            FunctionCall chainedCall = new FunctionCall(chainedFunctionName);
-
-            if (innerCtx.expression(i) != null) {
-                for (int j = 0; j < innerCtx.expression().size(); j++) {
-                    Expression chainedArgument = (Expression) visit(innerCtx.expression(j));
-                    chainedCall.add(chainedArgument);
+                Node node = (Node) visit(innerCtx.expression(i));
+                if (node instanceof Expression) {
+                    Expression argument = (Expression) node;
+                    functionCall.addArgument(argument);
+                    arguments.add(argument.toString());
+                } else {
+                    // في حال الـ visit رجع null أو مش Expression
+                    arguments.add("null");
                 }
             }
-            functionCall.addChainedCall(chainedCall);
         }
-        SymbolTable.addSymbolToCurrentScope(functionName, "FunctionCall", "Arguments: " + arguments,innerCtx.getStart().getLine());
 
-        return functionCall;    }
+        // التعامل مع chained calls
+        for (int i = 0; i < innerCtx.getChildCount(); i++) {
+            ParseTree child = innerCtx.getChild(i);
+            if (child.getText().equals(".") && i + 1 < innerCtx.getChildCount()) {
+                String chainedFunctionName = innerCtx.getChild(i + 1).getText();
+                FunctionCall chainedCall = new FunctionCall(chainedFunctionName);
+                functionCall.addChainedCall(chainedCall);
+            }
+        }
+
+        SymbolTable.addSymbolToCurrentScope(
+                functionName,
+                "FunctionCall",
+                "Arguments: " + arguments,
+                innerCtx.getStart().getLine()
+        );
+
+        return functionCall;
+    }
+
 
     @Override
     public Node visitArrowFunctionExpr(TypeScripteParser.ArrowFunctionExprContext ctx) {
@@ -569,54 +618,93 @@ private boolean insideArrayLiteral = false;
 
         //System.out.println("Entering ArrowFunction Scope");
         SymbolTable.createScope("ArrowFunction Scope");
-        ParameterList parameterList ;
+
+        // التعامل مع الـ parameters
+        ParameterList parameterList;
         if (innerCtx.parameterList() != null) {
             parameterList = (ParameterList) visit(innerCtx.parameterList());
+        } else if (innerCtx.IDENTIFIER() != null) {
+            parameterList = new ParameterList();
+            parameterList.add(new Parameter(innerCtx.IDENTIFIER().getText()));
         } else {
             parameterList = new ParameterList();
         }
 
-        Expression expression ;
-        if (innerCtx.propertyAccess() != null) {
-            expression = (Expression) visit(innerCtx.propertyAccess());
+        Node expression;
+        if (innerCtx.getRuleContext(TypeScripteParser.MethodBodyContext.class,0) != null) {
+            expression = (Node) visit(innerCtx.getRuleContext(TypeScripteParser.MethodBodyContext.class,0));
+        } else if (innerCtx.getRuleContext(TypeScripteParser.FunctionCallContext.class,0) != null) {
+            expression = (Node) visit(innerCtx.getRuleContext(TypeScripteParser.FunctionCallContext.class,0));
         } else {
             expression = new Literal("default expression");
         }
-        SymbolTable.addSymbolToCurrentScope("ArrowFunction", "Function", "Parameters: " + parameterList.toString(),innerCtx.getStart().getLine());
+
+        SymbolTable.addSymbolToCurrentScope(
+                "ArrowFunction",
+                "Function",
+                "Parameters: " + parameterList.toString(),
+                innerCtx.getStart().getLine()
+        );
 
         SymbolTable.endCurrentScope();
-        //System.out.println("Exiting ArrowFunction Scope");
-        return new ArrowFunction(parameterList, expression);    }
+
+        return new ArrowFunction(parameterList, expression);
+    }
+
 
     @Override
     public Node visitOperationExpr(TypeScripteParser.OperationExprContext ctx) {
         TypeScripteParser.OperationContext innerCtx = ctx.operation();
 
-        if (innerCtx.PLUS() != null || innerCtx.MINUS() != null || innerCtx.SLASH() != null || innerCtx.STAR() != null || innerCtx.MOD() != null || innerCtx.CLOSED_SYMBOL() != null || innerCtx.lt() != null) {
-            String operator = innerCtx.getChild(1).getText();
-            Expression left = new Identifier(innerCtx.IDENTIFIER().getText());
+        Expression left = null;
+        Expression right = null;
+        String operator = null;
 
-            Expression right = null;
-            if (innerCtx.expression() != null) {
+        // لو عندنا identifier كبداية
+        if (innerCtx.IDENTIFIER() != null) {
+            left = new Identifier(innerCtx.IDENTIFIER().getText());
+        }
+
+        // التعامل مع keys + expression
+        if (innerCtx.keys() != null) {
+            operator = innerCtx.keys().getText();
+
+            // expression ممكن تكون موجودة بعد keys
+            if (innerCtx.expression() != null && !innerCtx.expression().isEmpty()) {
                 right = (Expression) visit(innerCtx.expression());
             }
 
             return new Operation(left, operator, right);
-        } else if ((innerCtx.PLUS() != null && innerCtx.getChild(2).getText().equals("+")) ||
-                (innerCtx.MINUS() != null && innerCtx.getChild(2).getText().equals("-"))) {
-            Expression identifier = new Identifier(innerCtx.IDENTIFIER().getText());
-            String operator = innerCtx.getChild(1).getText() + innerCtx.getChild(2).getText();
-            return new Operation(identifier, operator, null);
-        } else {
-            throw new IllegalArgumentException("Invalid operation");
-        }    }
+        }
+
+        // التعامل مع ++ و --
+        if (innerCtx.PLUS() != null && innerCtx.getChildCount() == 2 && innerCtx.getChild(1).getText().equals("+")) {
+            operator = "++";
+            return new Operation(left, operator, null);
+        } else if (innerCtx.MINUS() != null && innerCtx.getChildCount() == 2 && innerCtx.getChild(1).getText().equals("-")) {
+            operator = "--";
+            return new Operation(left, operator, null);
+        }
+
+        throw new IllegalArgumentException("Invalid operation");
+    }
+
 
     @Override
     public Node visitAssignmentExpr(TypeScripteParser.AssignmentExprContext ctx) {
         TypeScripteParser.AssignmentExpressionContext innerCtx = ctx.assignmentExpression();
-        PropertyAccess propertyAccess = (PropertyAccess) visit(innerCtx.propertyAccess());
-        Expression expression = (Expression) visit(innerCtx.expression());
-        return new AssignmentExpression(propertyAccess, expression);    }
+
+        Expression target = null;
+        if (innerCtx.propertyAccess() != null) {
+            target = (PropertyAccess) visit(innerCtx.propertyAccess());
+        } else if (innerCtx.expression() != null) {
+            target = (Expression) visit(innerCtx.expression());
+        }
+
+        Expression value = (Expression) visit(innerCtx.expression());
+        return new AssignmentExpression(target, value);
+    }
+
 
     @Override
     public Node visitPropertyAccessExpr(TypeScripteParser.PropertyAccessExprContext ctx) {
@@ -650,6 +738,9 @@ private boolean insideArrayLiteral = false;
         if (ctx.NUMBER() != null) {
             Integer integerVal = Integer.parseInt(ctx.NUMBER().getText());
             return new Literal(integerVal);
+        } if (ctx.IDENTIFIER() != null) {
+            String idVal = ctx.IDENTIFIER().getText();
+            return new Literal(idVal);
         }
         if (ctx.TRUE() != null) {
             return new Literal(true);
@@ -659,14 +750,24 @@ private boolean insideArrayLiteral = false;
         String ctxText = ctx.getText();
         throw new UnsupportedOperationException("Unknown literal type: " + ctxText);    }
 
+
     @Override
     public Node visitPropertyAssignment(TypeScripteParser.PropertyAssignmentContext ctx) {
-        String key = ctx.IDENTIFIER().getText();
-        Expression value = (Expression) visit(ctx.expression());
-        if (!insideArrayLiteral) {
-            SymbolTable.addSymbolToCurrentScope(key, "", value.toString(), ctx.getStart().getLine());
-
+        Node keyNode = (Node) visit(ctx.expression(0));
+        Node valueNode = null;
+        if (ctx.expression().size() > 1) {
+            valueNode = (Node) visit(ctx.expression(1));
         }
+
+        Expression key = keyNode instanceof Expression ? (Expression) keyNode : new Literal("unknown");
+        Expression value = valueNode instanceof Expression ? (Expression) valueNode : new Literal("null");
+///
+        if (!insideArrayLiteral) {
+            SymbolTable.addSymbolToCurrentScope(
+                    key.toString(), "", value.toString(), ctx.getStart().getLine()
+            );
+        }
+
         return new PropertyAssignment(key, value);
     }
 
@@ -774,12 +875,10 @@ public Node visitSelfClosingElement(TypeScripteParser.SelfClosingElementContext 
         Text t = new Text(null,null);
         if (ctx.TEXT() != null) {
             String text=ctx.TEXT().getText();
-            System.out.print("text"+ctx.TEXT().getText());
             t.setText(text);
             t.setIdentifier(null);
         } else {
             String text=ctx.IDENTIFIER().getText();
-            System.out.print("text"+ctx.IDENTIFIER().getText());
             t.setText(null);
             t.setIdentifier(text);
         }
@@ -835,8 +934,8 @@ public Node visitSelfClosingElement(TypeScripteParser.SelfClosingElementContext 
         dAtt.setName(name);
         dAtt.setValue(value);
         AttSymbol s3 = new AttSymbol(name, "DirectiveAttribute", value,innerCtx.getStart().getLine());
-        //attSymbolTable.getSymbols().add(s3);
-        analyzer.checkInvalidDirectiveExpression(s3);
+        attSymbolTable.getSymbols().add(s3);
+        //analyzer.checkInvalidDirectiveExpression(s3);
 
         return dAtt;
     }
@@ -858,8 +957,8 @@ public Node visitSelfClosingElement(TypeScripteParser.SelfClosingElementContext 
         eAtt.setName(name);
         eAtt.setValue(value);
         AttSymbol s4 = new AttSymbol(name, "EventAttribute", value,innerCtx.getStart().getLine());
-        //attSymbolTable.getSymbols().add(s4);
-        analyzer.checkEventCallImmediate(s4 );
+        attSymbolTable.getSymbols().add(s4);
+        //analyzer.checkEventCallImmediate(s4 );
         return eAtt;
     }
     @Override

@@ -1,4 +1,4 @@
- import { bootstrapApplication } from '@angular/platform-browser';
+  import { bootstrapApplication } from '@angular/platform-browser';
 import { Component, Injectable } from '@angular/core';
 import { RouterModule, Router, ActivatedRoute, provideRouter } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -13,9 +13,9 @@ export interface Product {
 
 @Injectable({ providedIn: 'root' })
 class ProductService {
-  private productsSubject = new BehaviorSubject<Product[]>([
+  private productsSubject = new BehaviorSubject< Product[]>([
     { name: 'منتج 1', image: 'assets/images/image2.jpg', details: 'تفاصيل المنتج 1' },
-    { name: 'منتج 2', image: 'assets/images/image3.jpg', details: 'تفاصيل المنتج 2' },
+    { name: 'منتج 2', image: 'assets/images/image3.jpg', details: 'تفاصيل المنتج 2' }
   ]);
 
   products$ = this.productsSubject.asObservable();
@@ -64,11 +64,11 @@ class ProductService {
         <img [src]="items[selectedItem!].image" width="150"/>
         <p>{{ items[selectedItem!].details }}</p>
 
-        <button (click)="editItem()">تعديل</button>
+        <button (click)="editIte()">تعديل</button>
         <button (click)="deleteItem()">حذف</button>
       </div>
     </div>
-  `
+  `,
 })
 class ProductListComponent {
   items: Product[] = [];
@@ -119,10 +119,10 @@ class ProductListComponent {
     <br/>
     <button (click)="save()">إضافة</button>
     <button (click)="cancel()">رجوع</button>
-  `
+  `,
 })
 class AddProductComponent {
-  product: Product = { name: '', image: '', details: '' };
+  product: Product = { name: '', image: 'https://i.pinimg.com/736x/b0/33/4d/b0334d3c2d1ed6f5d8006f250c35b135.jpg', details: '' };
 
   constructor(private productService: ProductService, private router: Router) {}
 
@@ -137,8 +137,6 @@ class AddProductComponent {
     this.router.navigate(['/']);
   }
 }
-
-
 @Component({
   selector: 'app-edit-product',
   standalone: true,
@@ -152,10 +150,10 @@ class AddProductComponent {
     <br/>
     <button (click)="save()">حفظ</button>
     <button (click)="cancel()">رجوع</button>
-  `
+  `,
 })
 class EditProductComponent {
-  product: Product = { name: '', image: '', details: '' };
+  product: Product = { name: '', image: 'https://i.pinimg.com/1200x/b0/33/4d/b0334d3c2d1ed6f5d8006f250c35b135.jpg', details: '' };
   index: number = 0;
 
   constructor(
@@ -184,7 +182,7 @@ class EditProductComponent {
   selector: 'app-root',
   standalone: true,
   imports: [RouterModule],
-  template: `<router-outlet></router-outlet>`
+  template: `<router-outlet></router-outlet>`,
 })
 class AppComponent {}
 
@@ -194,7 +192,7 @@ bootstrapApplication(AppComponent, {
       { path: '', component: ProductListComponent },
       { path: 'add', component: AddProductComponent },
       { path: 'edit/:id', component: EditProductComponent },
-      { path: '**', redirectTo: '' },
+      { path: '**', redirectTo: '' }
     ])
   ]
 }).catch(err => console.error(err));

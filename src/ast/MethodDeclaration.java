@@ -1,20 +1,28 @@
 package ast;
 
-public class MethodDeclaration extends Node {
-    String name;
-    ParameterList parameters;
-    Type type;
-    MethodBody body;
+import java.util.ArrayList;
 
-    public MethodDeclaration(String name, ParameterList parameters, Type type, MethodBody body) {
+public class MethodDeclaration extends Statement {
+    public String name;
+    public ParameterList parameters;
+    public ArrayList<Node> body = new ArrayList<>();
+
+    public MethodDeclaration(String name, ParameterList parameters, ArrayList<Node> body) {
         this.name = name;
         this.parameters = parameters;
-        this.type = type;
         this.body = body;
     }
 
     @Override
     public String toString() {
-        return name + "(" + parameters + "): " + type + " " + body;
+        StringBuilder sb = new StringBuilder();
+        sb.append("function ").append(name).append("(").append(parameters).append(") {\n");
+        for (Node stmt : body) {
+            sb.append("  ").append(stmt != null ? stmt.toString() : "null").append("\n");
+        }
+        sb.append("}");
+        return sb.toString();
     }
+
+
 }

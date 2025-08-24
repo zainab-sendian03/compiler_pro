@@ -1,10 +1,9 @@
 package ast;
 
 public class PropertyDeclaration extends Node {
-
-    String name;
-    Type type;
-    Expression value;
+    public String name;
+    public Type type;
+    public Expression value;
 
     public PropertyDeclaration(String name, Type type, Expression value) {
         this.name = name;
@@ -16,6 +15,4 @@ public class PropertyDeclaration extends Node {
     public String toString() {
         return name + ": " + type + " = " + value;
     }
-
-
 }

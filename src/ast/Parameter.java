@@ -8,6 +8,9 @@ public class Parameter extends Node {
         this.name = name;
         this.type = type;
     }
+    public Parameter(String name) {
+        this.name = name;
+    }
 
     @Override
     public String toString() {

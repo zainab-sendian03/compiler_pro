@@ -39,6 +39,13 @@ public class TypeScripteParserBaseVisitor<T> extends AbstractParseTreeVisitor<T>
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitInjectableStmt(TypeScripteParser.InjectableStmtContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitVariableStmt(TypeScripteParser.VariableStmtContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
@@ -75,6 +82,20 @@ public class TypeScripteParserBaseVisitor<T> extends AbstractParseTreeVisitor<T>
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	@Override public T visitIfStmt(TypeScripteParser.IfStmtContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitInjectableDeclaration(TypeScripteParser.InjectableDeclarationContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitInjectableBody(TypeScripteParser.InjectableBodyContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -200,6 +221,13 @@ public class TypeScripteParserBaseVisitor<T> extends AbstractParseTreeVisitor<T>
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitConstructorCall(TypeScripteParser.ConstructorCallContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitMethodDeclaration(TypeScripteParser.MethodDeclarationContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
@@ -305,6 +333,20 @@ public class TypeScripteParserBaseVisitor<T> extends AbstractParseTreeVisitor<T>
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitConstructorCallExpr(TypeScripteParser.ConstructorCallExprContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitConstructorExpr(TypeScripteParser.ConstructorExprContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitLiteral(TypeScripteParser.LiteralContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
@@ -354,7 +396,21 @@ public class TypeScripteParserBaseVisitor<T> extends AbstractParseTreeVisitor<T>
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitGt(TypeScripteParser.GtContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitOperation(TypeScripteParser.OperationContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitKeys(TypeScripteParser.KeysContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -404,6 +460,13 @@ public class TypeScripteParserBaseVisitor<T> extends AbstractParseTreeVisitor<T>
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	@Override public T visitVarReassignment(TypeScripteParser.VarReassignmentContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitConstructor(TypeScripteParser.ConstructorContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

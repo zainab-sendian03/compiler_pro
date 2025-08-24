@@ -3,6 +3,7 @@ package Main;
 import Semantic_Check.SemanticAnalyzer;
 import Visitor.BaseVisitor;
 import antlr.TypeScripteLexer;
+
 import antlr.TypeScripteParser;
 import ast.HtmlRoot;
 import ast.Program;
@@ -25,9 +26,9 @@ public class Main {
         String errorsCode = "Tests/errorsCode.txt";
         String completeCode = "Tests/completeCode.txt";
         String sourcefile = "Tests/sourcefile.txt";
-        //CharStream cs = fromFileName(sourcefile);
+        CharStream cs = fromFileName(completeCode);
         //html
-        CharStream cs = fromFileName(errorsCode);
+        //CharStream cs = fromFileName(htmlCode);
         TypeScripteLexer lexer = new TypeScripteLexer(cs);
         CommonTokenStream token = new CommonTokenStream(lexer);
         TypeScripteParser parser = new TypeScripteParser(token);
@@ -51,10 +52,7 @@ public class Main {
             logger.setUseParentHandlers(false);
             logger.addHandler(fileHandler);
 
-            //this will delete after edit baseVisitor
             analyzer.analyzeAll(AttSymbolTable.getSymbols());
-            //new we will use it Instead of analyzeAll
-            //analyzer.printErrorsGrouped();
             fileHandler.close();
 
         } catch (IOException e) {
@@ -73,16 +71,5 @@ public class Main {
         //System.out.println("HTML AST:");
         //System.out.println(htmlRoot);
         //System.out.println(htmlTree.toStringTree(parser));
-
-
-
-
-
-
-
-
-
-
-
     }
 }

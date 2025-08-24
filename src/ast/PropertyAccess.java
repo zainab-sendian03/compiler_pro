@@ -1,19 +1,17 @@
 package ast;
 
 public class PropertyAccess extends Node implements Expression {
-    String fullChain;
+    public String objectName;
+    public String propertyName;
 
-    public PropertyAccess(String objectName, String fullChain) {
-        this.fullChain = fullChain;
-    }
-
-    @Override
-    public void add(Expression child) {
-
+    public PropertyAccess(String objectName, String propertyName) {
+        this.objectName = objectName;
+        this.propertyName = propertyName;
     }
 
     @Override
     public String toString() {
-        return fullChain;
+        return objectName + "." + propertyName;
     }
 }
+

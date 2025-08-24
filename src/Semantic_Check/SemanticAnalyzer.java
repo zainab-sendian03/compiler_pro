@@ -78,9 +78,7 @@ public class SemanticAnalyzer {
             }
         }
     }
-    /*public void checkInvalidDirectiveExpressions(List<AttSymbol> symbols) {
-
-
+    public void checkInvalidDirectiveExpressions(List<AttSymbol> symbols) {
         for (AttSymbol directive : symbols) {
             if (directive.getType().equals("DirectiveAttribute") &&
                     (directive.getName().equals("ngIf") || directive.getName().equals("ngFor"))) {
@@ -131,8 +129,8 @@ public class SemanticAnalyzer {
                 }
             }
         }
-    }*/
-    /*public void checkInvalidEventCall(List<AttSymbol> symbols) {
+    }
+    public void checkInvalidEventCall(List<AttSymbol> symbols) {
 
         for (AttSymbol directive : symbols) {
             if (directive.getType().equals("EventAttribute")) {
@@ -171,8 +169,8 @@ public class SemanticAnalyzer {
                 }
             }
         }
-    }*/
-    public void checkEventCallImmediate(AttSymbol directive) {
+    }
+    /*public void checkEventCallImmediate(AttSymbol directive) {
         if (!"EventAttribute".equals(directive.getType())) return;
 
         String value = directive.getValue(); // مثلاً "selectItem(i)"
@@ -204,8 +202,8 @@ public class SemanticAnalyzer {
                 eventTable.addError(error);
             }
         }
-    }
-    public void checkInvalidDirectiveExpression(AttSymbol directive) {
+    }*/
+    /*public void checkInvalidDirectiveExpression(AttSymbol directive) {
         if (directive.getType().equals("DirectiveAttribute") &&
                 (directive.getName().equals("ngIf") || directive.getName().equals("ngFor"))) {
 
@@ -260,12 +258,12 @@ public class SemanticAnalyzer {
                 }
             }
         }
-    }
+    }*/
     public void analyzeAll(List<AttSymbol> attSymbol) {
         checkDuplicateProperties();
         checkMismatchType();
-        //checkInvalidDirectiveExpressions( attSymbol);
-        //checkInvalidEventCall(attSymbol);
+        checkInvalidDirectiveExpressions( attSymbol);
+        checkInvalidEventCall(attSymbol);
         printErrorsGrouped();
 
     }

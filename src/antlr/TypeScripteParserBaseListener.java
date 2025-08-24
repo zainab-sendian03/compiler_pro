@@ -53,6 +53,18 @@ public class TypeScripteParserBaseListener implements TypeScripteParserListener 
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterInjectableStmt(TypeScripteParser.InjectableStmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInjectableStmt(TypeScripteParser.InjectableStmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterVariableStmt(TypeScripteParser.VariableStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -120,6 +132,30 @@ public class TypeScripteParserBaseListener implements TypeScripteParserListener 
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitIfStmt(TypeScripteParser.IfStmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterInjectableDeclaration(TypeScripteParser.InjectableDeclarationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInjectableDeclaration(TypeScripteParser.InjectableDeclarationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterInjectableBody(TypeScripteParser.InjectableBodyContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInjectableBody(TypeScripteParser.InjectableBodyContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -329,6 +365,18 @@ public class TypeScripteParserBaseListener implements TypeScripteParserListener 
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterConstructorCall(TypeScripteParser.ConstructorCallContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitConstructorCall(TypeScripteParser.ConstructorCallContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterMethodDeclaration(TypeScripteParser.MethodDeclarationContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -509,6 +557,30 @@ public class TypeScripteParserBaseListener implements TypeScripteParserListener 
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterConstructorCallExpr(TypeScripteParser.ConstructorCallExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitConstructorCallExpr(TypeScripteParser.ConstructorCallExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterConstructorExpr(TypeScripteParser.ConstructorExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitConstructorExpr(TypeScripteParser.ConstructorExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterLiteral(TypeScripteParser.LiteralContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -593,6 +665,18 @@ public class TypeScripteParserBaseListener implements TypeScripteParserListener 
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterGt(TypeScripteParser.GtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitGt(TypeScripteParser.GtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterOperation(TypeScripteParser.OperationContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -600,6 +684,18 @@ public class TypeScripteParserBaseListener implements TypeScripteParserListener 
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitOperation(TypeScripteParser.OperationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterKeys(TypeScripteParser.KeysContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitKeys(TypeScripteParser.KeysContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -684,6 +780,18 @@ public class TypeScripteParserBaseListener implements TypeScripteParserListener 
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitVarReassignment(TypeScripteParser.VarReassignmentContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterConstructor(TypeScripteParser.ConstructorContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitConstructor(TypeScripteParser.ConstructorContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

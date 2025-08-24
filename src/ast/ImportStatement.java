@@ -2,25 +2,21 @@ package ast;
 
 import java.util.ArrayList;
 
-public class ImportStatement extends Statement implements Addable<String>{
-    ArrayList<String> identifiers;
-    String module;
+public class ImportStatement extends Node {
+    public ArrayList<String> identifiers = new ArrayList<>();
+    public String fromModule;
 
-    public ImportStatement(String module) {
-        this.module = module;
-        this.identifiers = new ArrayList<>();
+    public ImportStatement(String fromModule) {
+        this.fromModule = fromModule;
     }
 
-    @Override
-    public void add(String item) {
-        identifiers.add(item);
+    public void addIdentifier(String id) {
+        identifiers.add(id);
     }
 
     @Override
     public String toString() {
-        return "ImportStatement{" +
-                identifiers +
-                " From " + module +
-                '}';
+        return "import { " + String.join(", ", identifiers) + " } from \"" + fromModule + "\";";
     }
+
 }
