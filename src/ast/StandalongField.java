@@ -8,6 +8,10 @@ public class StandalongField extends Field {
     }
 
 
+    @Override
+    public String generate() {
+        return  standalong;
+    }
 
     @Override
     public String toString() {

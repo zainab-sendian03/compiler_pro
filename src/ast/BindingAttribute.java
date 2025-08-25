@@ -24,6 +24,10 @@ public class BindingAttribute extends Content {
     public void setValue(String value) {
         this.value = value;
     }
+    @Override
+    public String generate() {
+        return "[" + name + "]=\"" + value + "\"";
+    }
 
     @Override
     public String toString() {

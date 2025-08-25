@@ -25,6 +25,15 @@ public class Text extends Node {
     public void setIdentifier(String identifier) {
         this.identifier = identifier;
     }
+    @Override
+    public String generate() {
+        if (text != null) {
+            return text;
+        } else if (identifier != null) {
+            return identifier ;
+        }
+        return "";
+    }
 
     @Override
     public String toString() {

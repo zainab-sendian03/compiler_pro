@@ -1,4 +1,4 @@
-  import { bootstrapApplication } from '@angular/platform-browser';
+import { bootstrapApplication } from '@angular/platform-browser';
 import { Component, Injectable } from '@angular/core';
 import { RouterModule, Router, ActivatedRoute, provideRouter } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -64,7 +64,7 @@ class ProductService {
         <img [src]="items[selectedItem!].image" width="150"/>
         <p>{{ items[selectedItem!].details }}</p>
 
-        <button (click)="editIte()">تعديل</button>
+        <button (click)="editItem()">تعديل</button>
         <button (click)="deleteItem()">حذف</button>
       </div>
     </div>
@@ -111,7 +111,7 @@ class ProductListComponent {
   standalone: true,
   imports: [FormsModule, RouterModule],
   template: `
-    <input [(ngModel)]="product.name" placeholder="اسم المنتج"/>
+    <input [(ngModel)]="product.name" placeholder="اسم المنتج"/> 
     <br/>
     <input [(ngModel)]="product.image" placeholder="رابط الصورة"/>
     <br/>
@@ -137,12 +137,14 @@ class AddProductComponent {
     this.router.navigate(['/']);
   }
 }
+
+
 @Component({
   selector: 'app-edit-product',
   standalone: true,
   imports: [FormsModule, RouterModule],
   template: `
-     <input [(ngModel)]="product.name" placeholder="اسم المنتج"/>
+     <input [(ngModel)]="product.name" placeholder="اسم المنتج"/> 
     <br/>
     <input [(ngModel)]="product.image" placeholder="رابط الصورة"/>
     <br/>
@@ -182,7 +184,7 @@ class EditProductComponent {
   selector: 'app-root',
   standalone: true,
   imports: [RouterModule],
-  template: `<router-outlet></router-outlet>`,
+  template: <router-outlet></router-outlet>,
 })
 class AppComponent {}
 
@@ -192,7 +194,18 @@ bootstrapApplication(AppComponent, {
       { path: '', component: ProductListComponent },
       { path: 'add', component: AddProductComponent },
       { path: 'edit/:id', component: EditProductComponent },
-      { path: '**', redirectTo: '' }
+     
+    ])
+  ]
+}).catch(err => console.error(err));
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideRouter([
+      { path: '', component: ProductListComponent },
+      { path: 'add', component: AddProductComponent },
+      { path: 'edit/:id', component: EditProductComponent },
+     
     ])
   ]
 }).catch(err => console.error(err));

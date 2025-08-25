@@ -11,6 +11,10 @@ public class Parameter extends Node {
     public Parameter(String name) {
         this.name = name;
     }
+    @Override
+    public String generate() {
+        return name;
+    }
 
     @Override
     public String toString() {

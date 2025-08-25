@@ -25,6 +25,11 @@ public class TwoWayBindingAttribute extends Content {
     }
 
     @Override
+    public String generate() {
+        return "[(" + name + ")]=\"" + value + "\"";
+    }
+
+    @Override
     public String toString() {
         return "TwoWayBindingAttribute : AttributeName:" + "[(" + name + ")]" + ", AttributeValue:" + value + " ";
     }

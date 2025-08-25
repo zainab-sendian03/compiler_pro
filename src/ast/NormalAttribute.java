@@ -26,6 +26,11 @@ public class NormalAttribute extends Content {
     }
 
     @Override
+    public String generate() {
+        return name + "=\"" + value + "\"";
+    }
+
+    @Override
     public String toString() {
 
         return "NormalAttribute : AttributeName:" + name + ", AttributeValue:" + value + " ";

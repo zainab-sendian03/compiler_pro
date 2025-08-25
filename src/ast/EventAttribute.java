@@ -26,6 +26,11 @@ public class EventAttribute extends Content {
     }
 
     @Override
+    public String generate() {
+        return "(" + name + ")=\"" + value + "\"";
+    }
+
+    @Override
     public String toString() {
         return "EventAttribute : AttributeName:" + "(" + name + ")" + ", AttributeValue:" + value + " ";
     }

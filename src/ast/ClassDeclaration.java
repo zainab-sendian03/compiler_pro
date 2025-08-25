@@ -15,6 +15,17 @@ public class ClassDeclaration extends Node {
     }
 
     @Override
+    public String generate() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("class ").append(name).append(" {\n");
+        for (Node member : body) {
+            sb.append(member.generate());
+        }
+        sb.append("}\n");
+        return sb.toString();
+    }
+
+    @Override
     public String toString() {
         return "class " + name + "{" + body+ "}";
     }

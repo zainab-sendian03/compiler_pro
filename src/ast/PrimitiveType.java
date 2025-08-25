@@ -6,6 +6,10 @@ public class PrimitiveType extends Node  {
     public PrimitiveType(String primitiveName) {
         this.primitiveName = primitiveName;
     }
+    @Override
+    public String generate() {
+        return primitiveName;
+    }
 
     @Override
     public String toString() {

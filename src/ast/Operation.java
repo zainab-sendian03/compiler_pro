@@ -18,6 +18,13 @@ public class Operation extends Node implements Expression {
         this.right = null;
     }
 
+    @Override
+    public String generate() {
+        if (right != null) {
+            return "(" + ((Node) left).generate() + " " + operator + " " + ((Node) right).generate() + ")";
+        }
+        return ((Node) left).generate() + operator + operator;
+    }
 
     @Override
     public String toString() {

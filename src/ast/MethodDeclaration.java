@@ -12,6 +12,20 @@ public class MethodDeclaration extends Statement {
         this.parameters = parameters;
         this.body = body;
     }
+    @Override
+    public String generate() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("  ").append(name).append("(");
+        if (parameters != null) {
+            sb.append(parameters.generate());
+        }
+        sb.append(") {\n");
+        for (Node stmt : body) {
+            sb.append("    ").append(stmt.generate());
+        }
+        sb.append("  }\n");
+        return sb.toString();
+    }
 
     @Override
     public String toString() {

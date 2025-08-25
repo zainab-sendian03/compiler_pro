@@ -18,6 +18,14 @@ public class ImportsField extends Field implements Addable<String>{
     public ArrayList<String> getImports() {
         return imports;
     }
+    @Override
+    public String generate() {
+        StringBuilder sb = new StringBuilder();
+        for (String item : imports) {
+            sb.append(  item );
+        }
+        return sb.toString();
+    }
 
     @Override
     public String toString() {

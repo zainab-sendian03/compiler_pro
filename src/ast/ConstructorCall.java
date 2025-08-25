@@ -10,6 +10,20 @@ public class ConstructorCall extends Node implements Expression {
         this.argument = argument;
         this.genericType = genericType;
     }
+    @Override
+    public String generate() {
+        StringBuilder sb = new StringBuilder("new ");
+        sb.append(className);
+        if (genericType != null) {
+            sb.append("<" + ((Node) genericType).generate() + ">");
+        }
+        sb.append("(");
+        if (argument != null) {
+            sb.append(((Node) argument).generate());
+        }
+        sb.append(")");
+        return sb.toString();
+    }
 
     @Override
     public String toString() {

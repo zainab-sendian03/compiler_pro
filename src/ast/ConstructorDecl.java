@@ -9,6 +9,27 @@ public class ConstructorDecl extends Node{
         this.parameters = parameters;
         this.body = body;
     }
+    @Override
+    public String generate() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("  constructor(");
+        if (parameters != null) {
+            for (int i = 0; i < parameters.size(); i++) {
+                sb.append(((Node) parameters.get(i)).generate());
+                if (i < parameters.size() - 1) {
+                    sb.append(", ");
+                }
+            }
+        }
+        sb.append(") {\n");
+        if (body != null) {
+            for (Statement stmt : body) {
+                sb.append("    ").append(stmt.generate());
+            }
+        }
+        sb.append("  }\n");
+        return sb.toString();
+    }
 
     @Override
     public String toString() {

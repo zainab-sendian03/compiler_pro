@@ -26,6 +26,11 @@ public class DirectiveAttribute extends Content {
     }
 
     @Override
+    public String generate() {
+        return "*" + name + "=\"" + value + "\"";
+    }
+
+    @Override
     public String toString() {
         return "DirectiveAttribute : AttributeName:" + "*" + name  + ", AttributeValue:" + value + " ";
     }

@@ -18,6 +18,17 @@ public class MethodBody extends Statement implements Addable<Node> {
     public ArrayList<Node> getStatements() {
         return statement;
     }
+    @Override
+    public String generate() {
+        StringBuilder sb = new StringBuilder();
+        for (Node stmt : statement) {
+            String generatedCode = stmt.generate();
+            if (generatedCode != null) {
+                sb.append("    ").append(generatedCode);
+            }
+        }
+        return sb.toString();
+    }
 
     @Override
     public String toString() {

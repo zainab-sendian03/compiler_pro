@@ -42,6 +42,18 @@ public class CompleteTag extends Element implements Addable<Node> {
     public void add(Node child){
         elements.add(child);
     }
+
+    @Override
+    public String generate() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(openTag.generate());
+        for (Node element : elements) {
+            sb.append(element.generate());
+        }
+        sb.append(closedTag.generate()).append("\n"); // إضافة سطر جديد بعد وسم الإغلاق
+        return sb.toString();
+    }
+
     @Override
     public String toString() {
 

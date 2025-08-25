@@ -8,6 +8,10 @@ public class VariableDeclaration extends Node implements  Expression {
         this.name = name;
         this.value = value;
     }
+    @Override
+    public String generate() {
+        return "let " + name + " = " + ((Node) value).generate() + ";\n";
+    }
 
     @Override
     public String toString() {

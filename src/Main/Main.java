@@ -1,5 +1,6 @@
 package Main;
 
+import Code_Generation.CodeGeneration;
 import Semantic_Check.SemanticAnalyzer;
 import Visitor.BaseVisitor;
 import antlr.TypeScripteLexer;
@@ -38,6 +39,11 @@ public class Main {
         SemanticAnalyzer analyzer = new SemanticAnalyzer();
         BaseVisitor visitor = new BaseVisitor(analyzer);
         Program program = (Program) visitor.visit(tree);
+
+        System.out.println("code generation start");
+
+        CodeGeneration codeGeneration=new CodeGeneration();
+        codeGeneration.startGenerate(program);
         //html
         //HtmlRoot htmlRoot = (HtmlRoot) visitor.visit(htmlTree);
 
@@ -55,6 +61,7 @@ public class Main {
             analyzer.analyzeAll(AttSymbolTable.getSymbols());
             fileHandler.close();
 
+
         } catch (IOException e) {
             System.err.println("Failed to set up logger: " + e.getMessage());
         }
@@ -63,9 +70,9 @@ public class Main {
         //AttSymbolTable.print();
 
 
-        System.out.println("AST:");
+        //System.out.println("AST:");
         System.out.println(program);
-        SymbolTable.print();
+        //SymbolTable.print();
 
         //html
         //System.out.println("HTML AST:");

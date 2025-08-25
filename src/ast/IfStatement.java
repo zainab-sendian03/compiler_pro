@@ -20,6 +20,28 @@ public class IfStatement extends Node  {
     }
 
     @Override
+    public String generate() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("if (").append(((Node) condition).generate()).append(") {\n");
+        for (Statement stmt : ifBody) {
+            if (stmt != null) { // فحص إضافة: التأكد من أن الكائن ليس null
+                sb.append("  ").append(stmt.generate());
+            }
+        }
+        sb.append("}\n");
+        if (!elseBody.isEmpty()) {
+            sb.append("else {\n");
+            for (Statement stmt : elseBody) {
+                if (stmt != null) { // فحص إضافة: التأكد من أن الكائن ليس null
+                    sb.append("  ").append(stmt.generate());
+                }
+            }
+            sb.append("}\n");
+        }
+        return sb.toString();
+    }
+
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("if(").append(condition).append(") {\n");

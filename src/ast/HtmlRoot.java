@@ -13,6 +13,17 @@ public class HtmlRoot extends Node{
     public List<Node> getChildren() {
         return elements;
     }
+    @Override
+    public String generate() {
+        StringBuilder sb = new StringBuilder();
+        for (Node element : elements) {
+            String generatedCode = element.generate();
+            if (generatedCode != null) {
+                sb.append(generatedCode);
+            }
+        }
+        return sb.toString();
+    }
 
     public void add(Node child){
         elements.add(child);

@@ -34,6 +34,17 @@ public class SelfClosingTag extends Element implements Addable<Node>{
     }
 
     @Override
+    public String generate() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<").append(tagName);
+        for (Node attr : attributes) {
+            sb.append("  ").append(attr.generate());
+        }
+        sb.append(" />");
+        return sb.toString();
+    }
+
+    @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("SelfClosingTag :");

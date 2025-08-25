@@ -1,4 +1,4 @@
 package ast;
 
-public class Element extends Node{
+public abstract class Element extends Node{
 }

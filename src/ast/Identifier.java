@@ -11,7 +11,10 @@ public class Identifier extends Node implements Expression {
         return name;
     }
 
-
+    @Override
+    public String generate() {
+        return name;
+    }
 
     @Override
     public String toString() {

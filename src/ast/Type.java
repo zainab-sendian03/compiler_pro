@@ -15,6 +15,23 @@ public class Type extends Node {
     }
 
     @Override
+    public String generate() {
+        if (typeName != null) {
+            return typeName;
+        } else if (unionTypes != null && !unionTypes.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < unionTypes.size(); i++) {
+                sb.append(unionTypes.get(i).generate());
+                if (i < unionTypes.size() - 1) {
+                    sb.append(" | ");
+                }
+            }
+            return sb.toString();
+        }
+        return "";
+    }
+
+    @Override
     public String toString() {
         if (unionTypes != null && !unionTypes.isEmpty()) {
             return "Type{" +

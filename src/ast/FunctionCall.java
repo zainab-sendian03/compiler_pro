@@ -18,6 +18,30 @@ public class FunctionCall extends Node implements Expression {
     public void addChainedCall(FunctionCall call) {
         chainedCalls.add(call);
     }
+    @Override
+    public String generate() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(functionName).append("(");
+        for (int i = 0; i < arguments.size(); i++) {
+            sb.append(((Node) arguments.get(i)).generate());
+            if (i < arguments.size() - 1) {
+                sb.append(", ");
+            }
+        }
+        sb.append(")");
+        for (FunctionCall call : chainedCalls) {
+            sb.append(".").append(call.functionName).append("(");
+            for (int i = 0; i < call.arguments.size(); i++) {
+                sb.append(((Node) call.arguments.get(i)).generate());
+                if (i < call.arguments.size() - 1) {
+                    sb.append(", ");
+                }
+            }
+            sb.append(")");
+        }
+        return sb.toString();
+    }
+
 
     @Override
     public String toString() {

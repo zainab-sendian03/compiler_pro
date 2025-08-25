@@ -17,6 +17,10 @@
         public Expression getValue() {
             return value;
         }
+        @Override
+        public String generate() {
+            return "";
+        }
 
         @Override
         public String toString() {

@@ -10,6 +10,11 @@ public class PropertyAssignment extends Node {
     }
 
     @Override
+    public String generate() {
+        return ((Node) key).generate() + ": " + ((Node) value).generate();
+    }
+
+    @Override
     public String toString() {
         return key + ":" + value;
     }

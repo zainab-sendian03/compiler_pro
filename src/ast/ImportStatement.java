@@ -13,6 +13,10 @@ public class ImportStatement extends Node {
     public void addIdentifier(String id) {
         identifiers.add(id);
     }
+    @Override
+    public String generate() {
+        return "import { " + String.join(", ", identifiers) + " } from \"" + fromModule + "\";\n";
+    }
 
     @Override
     public String toString() {

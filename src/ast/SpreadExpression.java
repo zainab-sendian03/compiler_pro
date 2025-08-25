@@ -10,6 +10,13 @@ public class SpreadExpression extends Node implements Expression {
     public Expression getInner() {
         return inner;
     }
+    @Override
+    public String generate() {
+        if (inner != null) {
+            return "..." + ((Node) inner).generate();
+        }
+        return "...";
+    }
 
     @Override
     public String toString() {
