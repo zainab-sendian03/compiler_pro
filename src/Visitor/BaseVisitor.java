@@ -11,6 +11,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 public class BaseVisitor extends TypeScripteParserBaseVisitor {
@@ -47,12 +48,10 @@ private boolean insideArrayLiteral = false;
     public Node visitImportStmt(TypeScripteParser.ImportStmtContext ctx) {
         TypeScripteParser.ImportStatementContext innerCtx = ctx.importStatement();
 
-        // module is always STRING
         String module = innerCtx.STRING().getText().replace("\"", "").replace("'", "");
 
         ImportStatement importStatement = new ImportStatement(module);
 
-        // Collect identifiers, components, injectables
         for (TerminalNode id : innerCtx.IDENTIFIER()) {
             importStatement.addIdentifier(id.getText());
         }
@@ -62,7 +61,23 @@ private boolean insideArrayLiteral = false;
         for (TerminalNode inj : innerCtx.INJECTABLE()) {
             importStatement.addIdentifier(inj.getText());
         }
+        for (String importedId : importStatement.identifiers) {
+            SymbolTable.addSymbolToCurrentScope(
+                    importedId,
+                    "Import",
+                    "from " + module,
+                    innerCtx.getStart().getLine());
+            Symbol symbol = new Symbol(   importedId,
+                    "Import",
+                    "from " + module,
+                    SymbolTable.currentScope.getName(),
+                    innerCtx.getStart().getLine());
 
+            SymbolTable.getSymbols().add(symbol);
+
+
+
+        }
         return importStatement;
     }
 
@@ -70,9 +85,24 @@ private boolean insideArrayLiteral = false;
     @Override
     public Node visitInjectableStmt(TypeScripteParser.InjectableStmtContext ctx) {
         TypeScripteParser.InjectableDeclarationContext innerCtx = ctx.injectableDeclaration();
-        String providedIn = innerCtx.getText();
+
+        String providedIn = "";
+        if (innerCtx.injectableBody() != null) {
+            InjectableBody body = (InjectableBody) visit(innerCtx.injectableBody());
+            providedIn = body.getValue();
+        }
+
+        SymbolTable.addSymbolToCurrentScope(
+                "Injectable",
+                "Service",
+                "providedIn: " + providedIn,
+                innerCtx.getStart().getLine()
+        );
+        Symbol symbol = new Symbol( "Injectable", "Service", "providedIn: " + providedIn, SymbolTable.currentScope.getName(), innerCtx.getStart().getLine());
+        SymbolTable.getSymbols().add(symbol);
         return new InjectableDeclaration(providedIn);
     }
+
 
     @Override
     public Node visitInjectableBody(TypeScripteParser.InjectableBodyContext ctx) {
@@ -81,17 +111,21 @@ private boolean insideArrayLiteral = false;
     }
 
 
+
     @Override
     public Node visitComponentStmt(TypeScripteParser.ComponentStmtContext ctx) {
         TypeScripteParser.ComponentDeclarationContext innerCtx = ctx.componentDeclaration();
 
-        // فتح Scope للـ Component
-        SymbolTable.createScope("Component Scope");
+        String componentName = "Component" + innerCtx.getStart().getLine();
+        MyTable.createScope("Component Scope: " + componentName);
+
         ComponentBody componentBody = (ComponentBody) visit(innerCtx.componentBody());
         ComponentDeclaration componentDeclaration = new ComponentDeclaration();
         componentDeclaration.setComponentBody(componentBody);
-        SymbolTable.endCurrentScope();
-        //System.out.println("Exiting Program Scope");
+        analyzer.checkMismatchType();
+        analyzer.checkDuplicateProperties();
+        MyTable.endCurrentScope();
+
         return componentDeclaration;
     }
 
@@ -138,6 +172,7 @@ private boolean insideArrayLiteral = false;
                 objectLiteral.addProperty(property);
             }
         }
+
         return objectLiteral;
     }
 
@@ -146,10 +181,25 @@ private boolean insideArrayLiteral = false;
     public Node visitClassStmt(TypeScripteParser.ClassStmtContext ctx) {
         TypeScripteParser.ClassDeclarationContext innerCtx = ctx.classDeclaration();
 
-        //System.out.println("Entering Class Scope");
-        SymbolTable.createScope("Class Scope");
         String name = innerCtx.IDENTIFIER().getText();
         ClassDeclaration classDeclaration = new ClassDeclaration(name);
+
+        SymbolTable.addSymbolToCurrentScope(
+                name,
+                "Class",
+                "",
+                innerCtx.getStart().getLine()
+        );
+        Symbol symbol = new Symbol(
+                name,
+                "Class",
+                "",
+                SymbolTable.currentScope.getName(),
+                innerCtx.getStart().getLine()
+        );
+        SymbolTable.getSymbols().add(symbol);
+
+        SymbolTable.createScope("Class Scope: " + name);
         if (innerCtx.classBody() != null) {
             ClassBody classBody = (ClassBody) visit(innerCtx.classBody());
             if (classBody != null) {
@@ -158,13 +208,13 @@ private boolean insideArrayLiteral = false;
                 }
             } else {
                 System.err.println("Warning: visit(classBody) returned null for class " + name);
-            }}
-        SymbolTable.addSymbolToCurrentScope(name, "Class", "",innerCtx.getStart().getLine());
-        Symbol symbol = new Symbol(name, "Class", "", SymbolTable.currentScope.getName(),innerCtx.getStart().getLine());
-        SymbolTable.getSymbols().add(symbol);
+            }
+        }
         SymbolTable.endCurrentScope();
-        //System.out.println("Exiting Program Scope");
-        return classDeclaration;    }
+
+        return classDeclaration;
+    }
+
 
     @Override
     public Node visitClassBody(TypeScripteParser.ClassBodyContext ctx) {
@@ -177,7 +227,8 @@ private boolean insideArrayLiteral = false;
                 }
             }
         }
-        return classBody;    }
+        return classBody;
+    }
 
     @Override
     public Node visitForLoopStmt(TypeScripteParser.ForLoopStmtContext ctx) {
@@ -214,7 +265,6 @@ private boolean insideArrayLiteral = false;
     public Node visitIfStmt(TypeScripteParser.IfStmtContext ctx) {
         TypeScripteParser.IfStatementContext innerCtx = ctx.ifStatement();
 
-        // التعامل مع الشرط: جمع كل expressions إذا في أكثر من واحد
         Expression condition;
         if (innerCtx.expression().size() == 1) {
             condition = (Expression) visit(innerCtx.expression(0));
@@ -223,14 +273,11 @@ private boolean insideArrayLiteral = false;
             for (TypeScripteParser.ExpressionContext exprCtx : innerCtx.expression()) {
                 expressions.add((Expression) visit(exprCtx));
             }
-            // ممكن تستخدم BinaryExpression أو AndExpression حسب تصميم AST
             condition = new MultiExpression(expressions);
         }
 
-        // إنشاء AST
         IfStatement ifStmt = new IfStatement(condition);
 
-        // التعامل مع if body
         SymbolTable.createScope("If Scope");
         for (TypeScripteParser.StatementContext stmtCtx : innerCtx.statement()) {
             Statement stmt = (Statement) visit(stmtCtx);
@@ -238,10 +285,8 @@ private boolean insideArrayLiteral = false;
         }
         SymbolTable.endCurrentScope();
 
-        // التعامل مع else body إذا موجود
         if (innerCtx.ELSE() != null) {
             SymbolTable.createScope("Else Scope");
-            // هنا نحتاج فقط statement الموجودة بعد ELSE
             Statement elseStmt = (Statement) visit(innerCtx.statement(innerCtx.statement().size() - 1));
             ifStmt.addToElseBody(elseStmt);
             SymbolTable.endCurrentScope();
@@ -285,6 +330,7 @@ private boolean insideArrayLiteral = false;
                 } else if (innerCtx.primitiveType().literal().STRING() != null) {
                     value = innerCtx.primitiveType().literal().STRING().getText();
                     type = "String";
+
                 } else {
                     value = innerCtx.primitiveType().literal().getText();
                     type =innerCtx.primitiveType().literal().getText();
@@ -298,8 +344,8 @@ private boolean insideArrayLiteral = false;
         if (value == null) {
             value = "";
         }
-        localTable.addSymbolToCurrentScope("selector", value,type,innerCtx.getStart().getLine());
-        localTable.add("selector", SymbolTable.currentScope.getName(),value,type,innerCtx.getStart().getLine());
+        localTable.addSymbolToCurrentScope("selector", value, type, innerCtx.getStart().getLine());
+        localTable.add("selector",value, type   , MyTable.currentScope.getName(),innerCtx.getStart().getLine());
         return new SelectorField(value);
     }
 
@@ -338,7 +384,7 @@ private boolean insideArrayLiteral = false;
             value = "";
         }
         localTable.addSymbolToCurrentScope("standalone", value, type,innerCtx.getStart().getLine());
-        localTable.add("standalone",value, type   , SymbolTable.currentScope.getName(),innerCtx.getStart().getLine());
+        localTable.add("standalone",value, type   , MyTable.currentScope.getName(),innerCtx.getStart().getLine());
             return new StandalongField(value);
     }
 
@@ -364,7 +410,7 @@ private boolean insideArrayLiteral = false;
             importsField.add(importValue);
 
             localTable.addSymbolToCurrentScope("imports",importValue , type, ctx.getStart().getLine());
-            localTable.add("imports",importValue , type, SymbolTable.currentScope.getName(), ctx.getStart().getLine());
+            localTable.add("imports",importValue , type, MyTable.currentScope.getName(), ctx.getStart().getLine());
         }
 
         return importsField;
@@ -420,7 +466,7 @@ private boolean insideArrayLiteral = false;
         }
 
         localTable.addSymbolToCurrentScope("template", value, type, ctx.getStart().getLine());
-        localTable.add("template", value, type, SymbolTable.currentScope.getName(), ctx.getStart().getLine());
+        localTable.add("template", value, type, MyTable.currentScope.getName(), ctx.getStart().getLine());
 
         return templateField;
     }
@@ -432,7 +478,7 @@ private boolean insideArrayLiteral = false;
         String fieldName = innerCtx.getText();
         Expression expression = (Expression) visit(innerCtx.expression());
         localTable.addSymbolToCurrentScope(fieldName, fieldName, expression.toString(),innerCtx.getStart().getLine());
-        localTable.add(fieldName, fieldName, expression.toString(), SymbolTable.currentScope.getName(),innerCtx.getStart().getLine());
+        localTable.add(fieldName, fieldName, expression.toString(), MyTable.currentScope.getName(),innerCtx.getStart().getLine());
         return new OtherField(fieldName, expression);
     }
 
@@ -451,6 +497,20 @@ private boolean insideArrayLiteral = false;
         AttSymbol p = new AttSymbol(name, "", valueStr, ctx.getStart().getLine());
         AttSymbolTable.getSymbols().add(p);
 
+        SymbolTable.addSymbolToCurrentScope(
+                name,
+                ctx.type() != null ? ctx.type().getText() : "any"
+                ,
+                valueStr,
+                ctx.getStart().getLine());
+        Symbol symbol = new Symbol(   name,
+                ctx.type() != null ? ctx.type().getText() : "any"
+                ,
+                valueStr,
+                SymbolTable.currentScope.getName(),
+                ctx.getStart().getLine());
+
+        SymbolTable.getSymbols().add(symbol);
         return new PropertyDeclaration(name, type, value);
     }
 
@@ -461,13 +521,27 @@ private boolean insideArrayLiteral = false;
         Expression genericType = null;
         if (ctx.lt() != null && ctx.type() != null) {
             genericType =new Literal(ctx.type().getText()) {
-            }; // نص النوع مثل "Product[]"
+            };
         }
 
         Expression argument = null;
         if (ctx.expression() != null) {
             argument = (Expression) visit(ctx.expression());
         }
+        SymbolTable.addSymbolToCurrentScope(
+                className,
+                "Constructor",
+                "",
+                ctx.getStart().getLine()
+        );
+        Symbol symbol = new Symbol(
+                className,
+                "Constructor",
+                "",
+                SymbolTable.currentScope.getName(),
+                ctx.getStart().getLine()
+        );
+        SymbolTable.getSymbols().add(symbol);
         return new ConstructorCall(className, argument, genericType);
     }
 
@@ -609,16 +683,30 @@ private boolean insideArrayLiteral = false;
         TypeScripteParser.ArrayLiteralContext innerCtx = ctx.arrayLiteral();
 
         insideArrayLiteral = true;
-        ArrayLiteral arrayLiteral = new ArrayLiteral();
+        ArrayLiteral arrayLiteral = new ArrayLiteral(new ArrayList<>()); // تهيئة
+
         for (int i = 0; i < innerCtx.expression().size(); i++) {
             if (innerCtx.expression(i) != null) {
                 Expression element = (Expression) visit(innerCtx.expression(i));
                 arrayLiteral.addElement(element);
+                //System.out.println("Visited element: " + element);
+
+                if (element instanceof Literal) {
+                    String value = ((Literal) element).getStringValue();
+                    NavigateTable.addNavigate("navigate", value, innerCtx.getStart().getLine());
+                }
+
+
+
             }
         }
+
         insideArrayLiteral = false;
-        return arrayLiteral;
+
+        return arrayLiteral; // رجعنا ArrayLiteral كامل
     }
+
+
 
     @Override
     public Node visitExprStmt(TypeScripteParser.ExprStmtContext ctx) {
@@ -668,6 +756,15 @@ private boolean insideArrayLiteral = false;
                 innerCtx.getStart().getLine()
         );
 
+        Symbol symbol = new Symbol(
+                functionName,
+                "FunctionCall",
+                "Arguments: " + arguments,
+                SymbolTable.currentScope.getName(),
+                innerCtx.getStart().getLine()
+        );
+        SymbolTable.getSymbols().add(symbol);
+
         return functionCall;
     }
 
@@ -678,7 +775,6 @@ private boolean insideArrayLiteral = false;
 
         SymbolTable.createScope("ArrowFunction Scope");
 
-        // التعامل مع الـ parameters
         ParameterList parameterList;
         if (innerCtx.parameterList() != null) {
             parameterList = (ParameterList) visit(innerCtx.parameterList());
@@ -705,6 +801,14 @@ private boolean insideArrayLiteral = false;
                 innerCtx.getStart().getLine()
         );
 
+        Symbol symbol = new Symbol(
+                "ArrowFunction",
+                "Function",
+                "Parameters: " + parameterList.toString(),
+                SymbolTable.currentScope.getName(),
+                innerCtx.getStart().getLine()
+        );
+        SymbolTable.getSymbols().add(symbol);
         SymbolTable.endCurrentScope();
 
         return new ArrowFunction(parameterList, expression);
@@ -819,11 +923,21 @@ private boolean insideArrayLiteral = false;
 
         Expression key = keyNode instanceof Expression ? (Expression) keyNode : new Literal("unknown");
         Expression value = valueNode instanceof Expression ? (Expression) valueNode : new Literal("null");
-///
+
         if (!insideArrayLiteral) {
             SymbolTable.addSymbolToCurrentScope(
                     key.toString(), "", value.toString(), ctx.getStart().getLine()
             );
+        }
+
+        Symbol symbol = new Symbol(
+                key.toString(), "", value.toString(),
+                SymbolTable.currentScope.getName(),
+                ctx.getStart().getLine()
+        );
+        SymbolTable.getSymbols().add(symbol);
+        if (key.toString().equals("path")) {
+            NavigateTable.addNavigate("route", value.toString(),ctx.getStart().getLine());
         }
 
         return new PropertyAssignment(key, value);

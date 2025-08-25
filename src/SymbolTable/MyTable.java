@@ -22,25 +22,26 @@ public class MyTable {
 
 
     public static void createScope(String name) {
-        Scope newScope = new Scope(name, currentScope);
-        scopes.add(newScope);
-        currentScope = newScope; // تحديث النطاق الحالي
-        //  System.out.println("Scope created: " + name);
+        Scope newScope = new Scope(name, getCurrentScope());
+        scopes.push(newScope);
+        currentScope = newScope;
     }
 
     public static void endCurrentScope() {
-        if (currentScope != null) {
-            //     System.out.println("Scope ended: " + currentScope.getName());
-            currentScope = currentScope.getParentScope(); // العودة إلى النطاق الأب
+        if (!scopes.isEmpty()) {
+            Scope ended = scopes.pop();
+            currentScope = getCurrentScope();
+          //  System.out.println("Scope ended: " + ended.getName());
         } else {
             System.out.println("No scope to end!");
         }
     }
+
     public  void addSymbolToCurrentScope(String name, String value, String type, int lineNum) {
         Scope currentScope = getCurrentScope();
 
         if (currentScope == null) {
-            System.out.println("No current scope to add symbol!");
+           System.out.println("No current scope to add symbol!");
             return;
         }
         Symbol symbol = new Symbol(name, type, value, currentScope.getName(), lineNum);
@@ -54,8 +55,8 @@ public class MyTable {
             System.out.printf("%s\t\t%s\t\t%s\t\t%s\t\t%d%n",
                     property.getPropertyName(),
                    property.getValue(),
+                    property.getScope(),
                    property.getType(),
-                   property.getScope(),
                     property.getLine()
 
 

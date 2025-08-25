@@ -1,10 +1,7 @@
 package Semantic_Check;
 
-import SymbolTable.Scope;
-import SymbolTable.Symbol;
-import SymbolTable.AttSymbol;
-import SymbolTable.TagSymbolTable;
-import SymbolTable.MyTable;
+import SymbolTable.*;
+
 import static Main.Main.logger;
 
 import java.util.*;
@@ -15,6 +12,7 @@ public class SemanticAnalyzer {
     DuplicatePropertyDefinition duplicate = new DuplicatePropertyDefinition();
     MismatchTypeOfProperty mismatchTypeOfPropertyTable = new MismatchTypeOfProperty();
     InvalidDirectiveExpression directiveTable =new InvalidDirectiveExpression();
+    InvalidRouteNavigation navigateTable= new InvalidRouteNavigation();
     InvalidEventCall eventTable =new InvalidEventCall();
     MismatchedTagError tagsTable = new MismatchedTagError();
     private static final Map<String, String> predefinedTypes = new HashMap<>();
@@ -119,8 +117,6 @@ public class SemanticAnalyzer {
         }
     }
     public void checkInvalidEventCall(List<AttSymbol> symbols) {
-
-
         for (AttSymbol directive : symbols) {
             if (directive.getType().equals("EventAttribute")) {
                 String value = directive.getValue(); // مثل "selectItem(i)"
@@ -176,10 +172,68 @@ public class SemanticAnalyzer {
             }
         }
     }
+    private String cleanRoute(String route) {
+        // إزالة quotes
+        if ((route.startsWith("'") && route.endsWith("'")) || (route.startsWith("\"") && route.endsWith("\""))) {
+            route = route.substring(1, route.length() - 1);
+        }
+        // إزالة "/" في البداية
+        if (route.startsWith("/")) route = route.substring(1);
+        // إزالة "/" في النهاية
+        // تجاهل أي شيء بعد ":"
+        if (route.contains(":")) route = route.substring(0, route.indexOf(":"));
+        if (route.endsWith("/")) route = route.substring(0, route.length() - 1);
+
+        return route;
+    }
+
+
+    public void checkInvalidRouteNavigation() {
+        List<NavigateSymbol> allNavigates = NavigateTable.getAllNavigates();
+        List<String> routePaths = new ArrayList<>();
+
+        for (NavigateSymbol nav : allNavigates) {
+            if (nav.getValue().equals("route")) {
+                routePaths.add(cleanRoute(nav.getType()));
+                System.out.println(cleanRoute(nav.getType()));
+            }
+        }
+
+        for (NavigateSymbol navCall : allNavigates) {
+            if (navCall.getValue().equals("navigate")) {
+                String path = cleanRoute(navCall.getType());
+                System.out.println(cleanRoute(navCall.getType()));
+
+                if (path.equals("product") || path.equals("products")) continue;
+
+                boolean matched = false;
+                for (String route : routePaths) {
+                    if (path.equals(route)) {
+                        matched = true;
+                        break;
+                    }
+                }
+
+                if (!matched) {
+                    SemanticError error = new SemanticError(
+                            "Invalid route navigation: '" + navCall.getType() + "'",
+                            navCall.getValue(),
+                            navCall.getType(),
+                            navCall.getLineNumber()
+                    );
+                    navigateTable.addError(error);
+                    System.out.println("❌ Invalid navigate: " + navCall.getType() + " at line " + navCall.getLineNumber());
+                }
+            }
+        }
+    }
+
+
     public void analyzeAll(List<AttSymbol> attSymbol) {
         checkDuplicateProperties();
         checkMismatchType();
         checkInvalidDirectiveExpressions( attSymbol);
+            checkInvalidRouteNavigation();
         checkInvalidEventCall( attSymbol);
         printErrorsGrouped();
 
@@ -203,6 +257,10 @@ public class SemanticAnalyzer {
         }
         logger.warning("\n=== Mismatched Tag Errors ===");
         for (SemanticError error : tagsTable.getErrors()) {
+            logger.warning(error.toString());
+        }
+        logger.warning("\n=== Invalid Route Navigation Errors ===");
+        for (SemanticError error : navigateTable.getErrors()) {
             logger.warning(error.toString());
         }
     }

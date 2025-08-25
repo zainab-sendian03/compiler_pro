@@ -49,6 +49,7 @@ public class Scope {
         return null;
     }
 
+
     @Override
     public String toString() {
         return "Scope{name='" + name + "', symbols=" + symbols + "}";

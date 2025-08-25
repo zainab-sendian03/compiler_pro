@@ -9,6 +9,14 @@ public class ArrayLiteral extends Node implements Expression {
         elements.add(expr);
     }
 
+    public ArrayLiteral(ArrayList<Expression> elements) {
+        this.elements = elements;
+    }
+
+    public ArrayList<Expression> getElements() {
+        return elements;
+    }
+
     @Override
     public String toString() {
         return elements.toString();

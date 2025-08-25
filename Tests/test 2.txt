@@ -42,7 +42,7 @@ class ProductService {
   selector: 'app-product-list',
   standalone: true,
   imports: [RouterModule, CommonModule],
-  template: '',
+  template: ``,
 })
 class ProductListComponent {
   items: Product[] = [];
@@ -83,7 +83,7 @@ class ProductListComponent {
   selector: 'app-add-product',
   standalone: true,
   imports: [FormsModule, RouterModule],
-  template: '',
+  template: ``,
 })
 class AddProductComponent {
   product: Product = { name: '', image: 'https://i.pinimg.com/736x/b0/33/4d/b0334d3c2d1ed6f5d8006f250c35b135.jpg', details: '' };
@@ -98,14 +98,15 @@ class AddProductComponent {
   }
 
   cancel() {
-    this.router.navigate(['/']);
+    this.router.navigate(['/ooo']);
   }
 }
 @Component({
   selector: 'app-edit-product',
   standalone: true,
   imports: [FormsModule, RouterModule],
-  template: '',
+  template: ``,
+
 })
 class AppComponent {}
 bootstrapApplication(AppComponent, {
@@ -113,8 +114,7 @@ bootstrapApplication(AppComponent, {
     provideRouter([
       { path: '', component: ProductListComponent },
       { path: 'add', component: AddProductComponent },
-      { path: 'edit/:id', component: EditProductComponent },
-      { path: '**', redirectTo: '' }
+      { path: 'edit/:id', component: EditProductComponent }
     ])
   ]
 }).catch(err => console.error(err));
