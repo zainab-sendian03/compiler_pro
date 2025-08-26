@@ -21,6 +21,17 @@ public class Literal extends Node  implements Expression {
         this.boolValue = boolValue;
     }
 
+    public String getStringValue() {
+        return stringValue;
+    }
+
+    public Integer getIntValue() {
+        return intValue;
+    }
+
+    public Boolean getBoolValue() {
+        return boolValue;
+    }
     @Override
     public String generate() {
         if (stringValue != null) return "'" + stringValue + "'";
@@ -28,7 +39,6 @@ public class Literal extends Node  implements Expression {
         if (boolValue != null) return boolValue.toString();
         return "null";
     }
-
 
     @Override
     public String toString() {

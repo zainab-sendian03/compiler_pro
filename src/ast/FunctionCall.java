@@ -18,6 +18,18 @@ public class FunctionCall extends Node implements Expression {
     public void addChainedCall(FunctionCall call) {
         chainedCalls.add(call);
     }
+
+    public String getFunctionName() {
+        return functionName;
+    }
+
+    public ArrayList<Expression> getArguments() {
+        return arguments;
+    }
+
+    public ArrayList<FunctionCall> getChainedCalls() {
+        return chainedCalls;
+    }
     @Override
     public String generate() {
         StringBuilder sb = new StringBuilder();

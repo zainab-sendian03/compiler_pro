@@ -12,6 +12,7 @@ public class SemanticAnalyzer {
     DuplicatePropertyDefinition duplicate = new DuplicatePropertyDefinition();
     MismatchTypeOfProperty mismatchTypeOfPropertyTable = new MismatchTypeOfProperty();
     InvalidDirectiveExpression directiveTable =new InvalidDirectiveExpression();
+    InvalidRouteNavigation navigateTable= new InvalidRouteNavigation();
     InvalidEventCall eventTable =new InvalidEventCall();
     MismatchedTagError tagsTable = new MismatchedTagError();
     private static final Map<String, String> predefinedTypes = new HashMap<>();
@@ -61,24 +62,9 @@ public class SemanticAnalyzer {
         }
 
     }
-    public void checkTagMatching(String closedTagName, int line, TagSymbolTable tagSymbolTable, String scope) {
-        Stack<String> stack = tagSymbolTable.getTagStack();
-        if (!stack.isEmpty() && stack.peek().equals(closedTagName)) {
-            stack.pop();
-        } else {
-            SemanticError error = new SemanticError(
-                    "Mismatched closing tag: </" + closedTagName + ">",
-                    closedTagName,
-                    scope,
-                    line
-            );
-            tagsTable.addError(error);
-            if (!stack.isEmpty()) {
-                stack.pop();
-            }
-        }
-    }
     public void checkInvalidDirectiveExpressions(List<AttSymbol> symbols) {
+
+
         for (AttSymbol directive : symbols) {
             if (directive.getType().equals("DirectiveAttribute") &&
                     (directive.getName().equals("ngIf") || directive.getName().equals("ngFor"))) {
@@ -109,14 +95,14 @@ public class SemanticAnalyzer {
                     boolean found = false;
                     for (AttSymbol symbol : symbols) {
                         if (symbol.getName().equals(variableToCheck)
-                                ) {
+                        ) {
                             found = true;
                             break;
                         }
                     }
                     if (!found) {
                         String message = "Directive '" + directive.getName() +
-                                "' uses undefined variable: '" + variableToCheck + "'.";
+                                "' uses undefined variable/expression: '" + variableToCheck + "'.";
 
                         SemanticError error = new SemanticError(
                                 message,
@@ -131,7 +117,6 @@ public class SemanticAnalyzer {
         }
     }
     public void checkInvalidEventCall(List<AttSymbol> symbols) {
-
         for (AttSymbol directive : symbols) {
             if (directive.getType().equals("EventAttribute")) {
                 String value = directive.getValue(); // مثل "selectItem(i)"
@@ -151,7 +136,7 @@ public class SemanticAnalyzer {
                     for (AttSymbol symbol : symbols) {
                         if (symbol.getType().equals("Function")
                                 && symbol.getName().equals(functionName)
-                                ) {
+                        ) {
                             found = true;
                             break;
                         }
@@ -161,7 +146,7 @@ public class SemanticAnalyzer {
                         SemanticError error = new SemanticError(
                                 "Calling undefined function: '" + functionName + "' from event '" + directive.getName() + "'",
                                 directive.getName(),
-                                "div ",
+                                "div",
                                 directive.getLineNumber()
                         );
                         eventTable.addError(error);
@@ -170,100 +155,86 @@ public class SemanticAnalyzer {
             }
         }
     }
-    /*public void checkEventCallImmediate(AttSymbol directive) {
-        if (!"EventAttribute".equals(directive.getType())) return;
-
-        String value = directive.getValue(); // مثلاً "selectItem(i)"
-        Pattern pattern = Pattern.compile("^\\s*([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(");
-        Matcher matcher = pattern.matcher(value);
-
-        String functionName = null;
-        if (matcher.find()) {
-            functionName = matcher.group(1); // مثل: selectItem
-        }
-
-        if (functionName != null) {
-            boolean found = false;
-
-            for (AttSymbol symbol : AttSymbolTable.getSymbols()) {
-                if ("Function".equals(symbol.getType()) && symbol.getName().equals(functionName)) {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found) {
-                SemanticError error = new SemanticError(
-                        "Calling undefined function: '" + functionName + "' from event '" + directive.getName() + "'",
-                        directive.getName(),
-                        "div",
-                        directive.getLineNumber()
-                );
-                eventTable.addError(error);
+    public void checkTagMatching(String closedTagName, int line, TagSymbolTable tagSymbolTable, String scope) {
+        Stack<String> stack = tagSymbolTable.getTagStack();
+        if (!stack.isEmpty() && stack.peek().equals(closedTagName)) {
+            stack.pop();
+        } else {
+            SemanticError error = new SemanticError(
+                    "Mismatched closing tag: </" + closedTagName + ">",
+                    closedTagName,
+                    scope,
+                    line
+            );
+            tagsTable.addError(error);
+            if (!stack.isEmpty()) {
+                stack.pop();
             }
         }
-    }*/
-    /*public void checkInvalidDirectiveExpression(AttSymbol directive) {
-        if (directive.getType().equals("DirectiveAttribute") &&
-                (directive.getName().equals("ngIf") || directive.getName().equals("ngFor"))) {
+    }
+    private String cleanRoute(String route) {
+        // إزالة quotes
+        if ((route.startsWith("'") && route.endsWith("'")) || (route.startsWith("\"") && route.endsWith("\""))) {
+            route = route.substring(1, route.length() - 1);
+        }
+        // إزالة "/" في البداية
+        if (route.startsWith("/")) route = route.substring(1);
+        // إزالة "/" في النهاية
+        // تجاهل أي شيء بعد ":"
+        if (route.contains(":")) route = route.substring(0, route.indexOf(":"));
+        if (route.endsWith("/")) route = route.substring(0, route.length() - 1);
 
-            String expression = directive.getValue();
-            String variableToCheck = null;
+        return route;
+    }
 
-            if (directive.getName().equals("ngIf")) {
-                // إزالة علامات التنصيص لو موجودة
-                if ((expression.startsWith("\"") && expression.endsWith("\"")) ||
-                        (expression.startsWith("'") && expression.endsWith("'"))) {
-                    expression = expression.substring(1, expression.length() - 1);
-                }
 
-                // التقاط أول identifier
-                Pattern pattern = Pattern.compile("\\b[a-zA-Z_][a-zA-Z0-9_]*\\b");
-                Matcher matcher = pattern.matcher(expression);
-                if (matcher.find()) {
-                    variableToCheck = matcher.group();
-                }
+    public void checkInvalidRouteNavigation() {
+        List<NavigateSymbol> allNavigates = NavigateTable.getAllNavigates();
+        List<String> routePaths = new ArrayList<>();
 
-            } else if (directive.getName().equals("ngFor")) {
-                // نبحث عن الجزء بعد كلمة of
-                Pattern pattern = Pattern.compile("of\\s+([\\w\\.]+)");
-                Matcher matcher = pattern.matcher(expression);
-                if (matcher.find()) {
-                    variableToCheck = matcher.group(1);
-                }
+        for (NavigateSymbol nav : allNavigates) {
+            if (nav.getValue().equals("route")) {
+                routePaths.add(cleanRoute(nav.getType()));
+                System.out.println(cleanRoute(nav.getType()));
             }
+        }
 
-            // التحقق من وجود المتغير بالـ symbol table
-            if (variableToCheck != null) {
-                boolean found = false;
+        for (NavigateSymbol navCall : allNavigates) {
+            if (navCall.getValue().equals("navigate")) {
+                String path = cleanRoute(navCall.getType());
+                System.out.println(cleanRoute(navCall.getType()));
 
+                if (path.equals("product") || path.equals("products")) continue;
 
-                for (AttSymbol symbol : AttSymbolTable.getSymbols()) {
-                    if (symbol.getName().equals(variableToCheck)) {
-                        found = true;
+                boolean matched = false;
+                for (String route : routePaths) {
+                    if (path.equals(route)) {
+                        matched = true;
                         break;
                     }
                 }
-                if (!found) {
-                    String message = "Directive '" + directive.getName() +
-                            "' uses undefined variable: '" + variableToCheck + "'.";
 
+                if (!matched) {
                     SemanticError error = new SemanticError(
-                            message,
-                            directive.getName(),
-                            "div", // ممكن لاحقاً تاخدها من الـ AST node نفسه بدل ما تكون ثابتة
-                            directive.getLineNumber()
+                            "Invalid route navigation: '" + navCall.getType() + "'",
+                            navCall.getValue(),
+                            navCall.getType(),
+                            navCall.getLineNumber()
                     );
-                    directiveTable.addError(error);
+                    navigateTable.addError(error);
+                    System.out.println("❌ Invalid navigate: " + navCall.getType() + " at line " + navCall.getLineNumber());
                 }
             }
         }
-    }*/
+    }
+
+
     public void analyzeAll(List<AttSymbol> attSymbol) {
         checkDuplicateProperties();
         checkMismatchType();
         checkInvalidDirectiveExpressions( attSymbol);
-        checkInvalidEventCall(attSymbol);
+        checkInvalidRouteNavigation();
+        checkInvalidEventCall( attSymbol);
         printErrorsGrouped();
 
     }
@@ -288,6 +259,9 @@ public class SemanticAnalyzer {
         for (SemanticError error : tagsTable.getErrors()) {
             logger.warning(error.toString());
         }
+        logger.warning("\n=== Invalid Route Navigation Errors ===");
+        for (SemanticError error : navigateTable.getErrors()) {
+            logger.warning(error.toString());
+        }
     }
 }
-

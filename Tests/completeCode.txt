@@ -1,3 +1,4 @@
+
 import { bootstrapApplication } from '@angular/platform-browser';
 import { Component, Injectable } from '@angular/core';
 import { RouterModule, Router, ActivatedRoute, provideRouter } from '@angular/router';
@@ -111,7 +112,7 @@ class ProductListComponent {
   standalone: true,
   imports: [FormsModule, RouterModule],
   template: `
-    <input [(ngModel)]="product.name" placeholder="اسم المنتج"/> 
+    <input [(ngModel)]="product.name" placeholder="اسم المنتج"/>
     <br/>
     <input [(ngModel)]="product.image" placeholder="رابط الصورة"/>
     <br/>
@@ -138,13 +139,12 @@ class AddProductComponent {
   }
 }
 
-
 @Component({
   selector: 'app-edit-product',
   standalone: true,
   imports: [FormsModule, RouterModule],
   template: `
-     <input [(ngModel)]="product.name" placeholder="اسم المنتج"/> 
+     <input [(ngModel)]="product.name" placeholder="اسم المنتج"/>
     <br/>
     <input [(ngModel)]="product.image" placeholder="رابط الصورة"/>
     <br/>
@@ -184,7 +184,7 @@ class EditProductComponent {
   selector: 'app-root',
   standalone: true,
   imports: [RouterModule],
-  template: <router-outlet></router-outlet>,
+  template: '<router-outlet> </router-outlet>',
 })
 class AppComponent {}
 
@@ -193,19 +193,10 @@ bootstrapApplication(AppComponent, {
     provideRouter([
       { path: '', component: ProductListComponent },
       { path: 'add', component: AddProductComponent },
-      { path: 'edit/:id', component: EditProductComponent },
+      { path: 'edit/:id', component: EditProductComponent }
      
     ])
   ]
 }).catch(err => console.error(err));
 
-bootstrapApplication(AppComponent, {
-  providers: [
-    provideRouter([
-      { path: '', component: ProductListComponent },
-      { path: 'add', component: AddProductComponent },
-      { path: 'edit/:id', component: EditProductComponent },
-     
-    ])
-  ]
-}).catch(err => console.error(err));
+

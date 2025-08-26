@@ -9,6 +9,13 @@ public class ArrayLiteral extends Node implements Expression {
         elements.add(expr);
     }
 
+    public ArrayLiteral(ArrayList<Expression> elements) {
+        this.elements = elements;
+    }
+
+    public ArrayList<Expression> getElements() {
+        return elements;
+    }
     @Override
     public String generate() {
         StringBuilder sb = new StringBuilder();
@@ -28,4 +35,3 @@ public class ArrayLiteral extends Node implements Expression {
         return elements.toString();
     }
 }
-

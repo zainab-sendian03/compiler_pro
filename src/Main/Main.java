@@ -71,7 +71,7 @@ public class Main {
 
 
         //System.out.println("AST:");
-        System.out.println(program);
+        //System.out.println(program);
         //SymbolTable.print();
 
         //html
