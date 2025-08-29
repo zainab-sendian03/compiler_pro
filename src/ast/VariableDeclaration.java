@@ -8,16 +8,9 @@ public class VariableDeclaration extends Node implements  Expression {
         this.name = name;
         this.value = value;
     }
-    
     @Override
     public String generate() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("let ").append(name);
-        if (value != null) {
-            sb.append(" = ").append(((Node) value).generate());
-        }
-        sb.append(";\n");
-        return sb.toString();
+        return "let " + name + " = " + ((Node) value).generate() + ";\n";
     }
 
     @Override

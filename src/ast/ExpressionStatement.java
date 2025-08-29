@@ -6,11 +6,9 @@ public class ExpressionStatement extends Statement {
     public ExpressionStatement(Expression expression) {
         this.expression = expression;
     }
-    
     @Override
     public String generate() {
-        if (expression == null) return "";
-        return ((Node) expression).generate() + ";\n";
+        return ((Node) expression)+ ";\n";
     }
 
     @Override

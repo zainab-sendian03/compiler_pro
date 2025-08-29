@@ -1,5 +1,4 @@
-// Generated from C:/Users/HP ALL IN ONE/Desktop/4th projects/compiler_pro/src/antlr/TypeScripteLexer.g4 by ANTLR 4.13.2
-package antlr;
+// Generated from C:/Users/HP ALL IN ONE/Desktop/4th projects/compiler_pro/out/production/project/antlr/TypeScripteLexer.g4 by ANTLR 4.13.2
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;

@@ -28,4 +28,3 @@ public class ClosedTag extends Node {
     }
 
 }
-

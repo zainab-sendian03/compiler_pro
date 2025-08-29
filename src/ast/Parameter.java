@@ -11,10 +11,8 @@ public class Parameter extends Node {
     public Parameter(String name) {
         this.name = name;
     }
-    
     @Override
     public String generate() {
-        // تجاهل type في JavaScript
         return name;
     }
 

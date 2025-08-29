@@ -1,8 +1,10 @@
 package ast;
-public class PropertyDeclaration extends Node {
+
+public class PropertyDeclaration extends Node implements Expression{
     public String name;
     public Type type;
     public Expression value;
+
     public PropertyDeclaration(String name, Type type, Expression value) {
         this.name = name;
         this.type = type;
@@ -10,14 +12,13 @@ public class PropertyDeclaration extends Node {
     }
     @Override
     public String generate() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(name);
-        if (this.value != null) {
-            sb.append(" = ").append(((Node) this.value).generate());
+        String declaration = name;
+        if (value != null) {
+            declaration += " = " + ((Node) value).generate();
         }
-        sb.append(";\n");
-        return sb.toString();
+        return "  " + declaration + ";\n";
     }
+
     @Override
     public String toString() {
         return name + ": " + type + " = " + value;

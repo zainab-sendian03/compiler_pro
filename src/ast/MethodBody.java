@@ -20,13 +20,11 @@ public class MethodBody extends Statement implements Addable<Node> {
     }
     @Override
     public String generate() {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder("{\n");
         for (Node stmt : statement) {
-            String generatedCode = stmt.generate();
-            if (generatedCode != null) {
-                sb.append("    ").append(generatedCode);
-            }
+            sb.append("  ").append(stmt.generate()).append("\n");
         }
+        sb.append("}");
         return sb.toString();
     }
 

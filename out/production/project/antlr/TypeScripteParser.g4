@@ -188,9 +188,8 @@ operation
 keys:PLUS | MINUS | STAR | SLASH | MOD | CLOSED_SYMBOL| lt | ANDAND | OROR | NOTEQUALS |GREATERTHAN;
 
 assignmentExpression
-  : propertyAccess EQUALS expression
+  : (propertyAccess | arrayLiteral ) EQUALS expression
   | propertyAccess EQUALS EQUALS expression
-  | arrayLiteral EQUALS expression
   ;
 
 propertyAccess
@@ -216,9 +215,8 @@ variableDeclaration
   ;
 
 constructor
-    : CONSTRUCTOR LPAREN propertyDeclaration (COMMA propertyDeclaration)* RPAREN LBRACE functionCall? RBRACE
+    : CONSTRUCTOR LPAREN propertyDeclaration (COMMA propertyDeclaration)* RPAREN LBRACE statement* RBRACE
     ;
-
 
 htmlRoot
     : element* EOF

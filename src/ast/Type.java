@@ -34,13 +34,9 @@ public class Type extends Node {
     @Override
     public String toString() {
         if (unionTypes != null && !unionTypes.isEmpty()) {
-            return "Type{" +
-                    "unionTypes=" + unionTypes +
-                    '}';
+            return unionTypes.toString();
         } else {
-            return "Type{" +
-                    "typeName='" + typeName + '\'' +
-                    '}';
+            return typeName;
         }
     }
 

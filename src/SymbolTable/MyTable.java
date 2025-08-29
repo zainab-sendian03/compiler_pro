@@ -8,7 +8,7 @@ public class MyTable {
     public static Scope currentScope = null;
 
     public static Deque<Scope> getScopeStack() {
-            return scopes;
+        return scopes;
     }
 
     public static Scope getCurrentScope() {
@@ -22,20 +22,21 @@ public class MyTable {
 
 
     public static void createScope(String name) {
-        Scope newScope = new Scope(name, currentScope);
-        scopes.add(newScope);
-        currentScope = newScope; // تحديث النطاق الحالي
-        //  System.out.println("Scope created: " + name);
+        Scope newScope = new Scope(name, getCurrentScope());
+        scopes.push(newScope);
+        currentScope = newScope;
     }
 
     public static void endCurrentScope() {
-        if (currentScope != null) {
-            //     System.out.println("Scope ended: " + currentScope.getName());
-            currentScope = currentScope.getParentScope(); // العودة إلى النطاق الأب
+        if (!scopes.isEmpty()) {
+            Scope ended = scopes.pop();
+            currentScope = getCurrentScope();
+            //  System.out.println("Scope ended: " + ended.getName());
         } else {
             System.out.println("No scope to end!");
         }
     }
+
     public  void addSymbolToCurrentScope(String name, String value, String type, int lineNum) {
         Scope currentScope = getCurrentScope();
 
@@ -53,9 +54,9 @@ public class MyTable {
         for (Property property : Property) {
             System.out.printf("%s\t\t%s\t\t%s\t\t%s\t\t%d%n",
                     property.getPropertyName(),
-                   property.getValue(),
-                   property.getType(),
-                   property.getScope(),
+                    property.getValue(),
+                    property.getScope(),
+                    property.getType(),
                     property.getLine()
 
 
@@ -64,8 +65,7 @@ public class MyTable {
 
         }
     }
-        }
-
+}
 
 
 

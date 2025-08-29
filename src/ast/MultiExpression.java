@@ -12,7 +12,6 @@ public class MultiExpression extends Node implements Expression {
     public List<Expression> getExpressions() {
         return expressions;
     }
-    
     @Override
     public String generate() {
         StringBuilder sb = new StringBuilder();
@@ -24,10 +23,8 @@ public class MultiExpression extends Node implements Expression {
         }
         return sb.toString();
     }
-    
     @Override
     public String toString() {
         return expressions.toString();
     }
 }
-

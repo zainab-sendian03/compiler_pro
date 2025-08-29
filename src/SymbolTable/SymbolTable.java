@@ -26,7 +26,6 @@ public class SymbolTable {
                     s.getType(),
                     s.getValue(),
                     s.getScope(),
-                    s.getKind(),
                     s.getLineNumber());
             System.out.println("____________________________________________________________________________________");
 

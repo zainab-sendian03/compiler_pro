@@ -20,12 +20,11 @@ public class ImportsField extends Field implements Addable<String>{
     }
     @Override
     public String generate() {
-        StringBuilder jsBuilder = new StringBuilder();
-        jsBuilder.append("// Imports: ").append(String.join(", ", imports)).append("\n");
-        for (String importItem : imports) {
-            jsBuilder.append("// Import: ").append(importItem).append("\n");
+        StringBuilder sb = new StringBuilder();
+        for (String item : imports) {
+            sb.append(  item );
         }
-        return jsBuilder.toString();
+        return sb.toString();
     }
 
     @Override

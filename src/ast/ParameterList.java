@@ -8,7 +8,6 @@ public class ParameterList extends Node {
     public void add(Parameter param) {
         parameters.add(param);
     }
-    
     @Override
     public String generate() {
         StringBuilder sb = new StringBuilder();
@@ -32,4 +31,5 @@ public class ParameterList extends Node {
         }
         return sb.toString();
     }
+
 }

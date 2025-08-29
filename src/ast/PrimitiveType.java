@@ -1,7 +1,7 @@
 package ast;
 
 public class PrimitiveType extends Node  {
-     String primitiveName;
+    String primitiveName;
 
     public PrimitiveType(String primitiveName) {
         this.primitiveName = primitiveName;

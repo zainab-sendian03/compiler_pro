@@ -20,18 +20,19 @@ public class Operation extends Node implements Expression {
 
     @Override
     public String generate() {
-        if (right != null) {
-            return "(" + ((Node) left).generate() + " " + operator + " " + ((Node) right).generate() + ")";
-        }
-        return "(" + ((Node) left).generate() + operator + operator + ")";
+        String leftStr = (left != null) ? left.toString() : "null";
+        String rightStr = (right != null) ? right.toString() : "";
+        if (right != null) return "(" + leftStr + " " + operator + " " + rightStr + ")";
+        return leftStr + operator + operator; // ++ أو --
     }
+
 
     @Override
     public String toString() {
         if (left != null && right != null) {
             return "(" + left + " " + operator + " " + right + ")";
         } else if (left != null) {
-            return "(" + left + operator + operator + ")";
+            return "(" + left + operator +operator + ")";
         }
         return "(" + operator + ")";
     }

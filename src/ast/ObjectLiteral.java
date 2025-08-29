@@ -19,10 +19,7 @@ public class ObjectLiteral extends Node implements Expression {
                 sb.append(",\n");
             }
         }
-        if (!properties.isEmpty()) {
-            sb.append("\n");
-        }
-        sb.append("}");
+        sb.append("\n}");
         return sb.toString();
     }
 

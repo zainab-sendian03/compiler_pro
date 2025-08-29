@@ -1,77 +1,51 @@
 package ast;
+
 import java.util.ArrayList;
-public class FunctionCall extends Node implements Expression {
-    public String functionName;
-    public Expression caller; // Added for property access like 'this.myFunction()'
-    public ArrayList<Expression> arguments = new ArrayList<>();
-    public ArrayList<FunctionCall> chainedCalls = new ArrayList<>();
+import java.util.List;
+
+public class FunctionCall extends Statement implements Expression{
+    private final String functionName;
+    private final List<Node> arguments = new ArrayList<>();
+    private final List<FunctionCall> chainedCalls = new ArrayList<>();
+
     public FunctionCall(String functionName) {
         this.functionName = functionName;
     }
-    public FunctionCall(Expression caller, String functionName) { // New constructor
-        this.caller = caller;
-        this.functionName = functionName;
-    }
-    public void addArgument(Expression expr) {
+
+    public void addArgument(Node expr) {
         arguments.add(expr);
     }
+
     public void addChainedCall(FunctionCall call) {
         chainedCalls.add(call);
     }
-    public String getFunctionName() {
-        return functionName;
-    }
-    public ArrayList<Expression> getArguments() {
-        return arguments;
-    }
-    public ArrayList<FunctionCall> getChainedCalls() {
-        return chainedCalls;
-    }
+
     @Override
     public String generate() {
-        // التعامل مع bootstrapApplication بشكل خاص
-        if ("bootstrapApplication".equals(functionName)) {
-            return "// bootstrapApplication will be handled by Angular runtime\n";
-        }
-        
         StringBuilder sb = new StringBuilder();
-        if (caller != null) {
-            sb.append(((Node) caller).generate()).append(".");
-        }
         sb.append(functionName).append("(");
         for (int i = 0; i < arguments.size(); i++) {
-            sb.append(((Node) arguments.get(i)).generate());
-            if (i < arguments.size() - 1) {
-                sb.append(", ");
-            }
-        }
-        sb.append(")");
-        for (FunctionCall call : chainedCalls) {
-            sb.append(".").append(call.functionName).append("(");
-            for (int i = 0; i < call.arguments.size(); i++) {
-                sb.append(((Node) call.arguments.get(i)).generate());
-                if (i < arguments.size() - 1) {
-                    sb.append(", ");
-                }
-            }
-            sb.append(")");
-        }
-        return sb.toString();
-    }
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        if (caller != null) {
-            sb.append(caller).append(".");
-        }
-        sb.append(functionName).append("(");
-        for (int i = 0; i < arguments.size(); i++) {
-            sb.append(arguments.get(i));
+            sb.append(arguments.get(i).generate());
             if (i < arguments.size() - 1) sb.append(", ");
         }
         sb.append(")");
-        if (!chainedCalls.isEmpty()) {
-            sb.append(".").append(chainedCalls);
+        for (FunctionCall chained : chainedCalls) {
+            sb.append(".").append(chained.generate());
+        }
+        return sb.toString();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(functionName).append("(");
+        for (int i = 0; i < arguments.size(); i++) {
+            sb.append(arguments.get(i).generate());
+            if (i < arguments.size() - 1) sb.append(", ");
+        }
+        sb.append(")");
+        for (FunctionCall chained : chainedCalls) {
+            sb.append(".").append(chained.generate());
         }
         return sb.toString();
     }

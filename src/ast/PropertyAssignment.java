@@ -11,10 +11,7 @@ public class PropertyAssignment extends Node {
 
     @Override
     public String generate() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(((Node) key).generate()).append(": ");
-        sb.append(((Node) value).generate());
-        return sb.toString();
+        return ((Node) key).generate() + ": " + ((Node) value).generate();
     }
 
     @Override
