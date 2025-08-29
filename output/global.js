@@ -16,7 +16,7 @@ function safeGet(obj, prop, fallback=null){ try { return obj[prop]; } catch(e){ 
 
 // original import from @angular/forms : { FormsModule }
 
-
+// original import from rxjs : { BehaviorSubject }
 
 // original import from @angular/common : { CommonModule }
 
@@ -85,7 +85,7 @@ standalone = true;
 
   render() {
     if (!this.container) return;
-    this.container.innerHTML = `<button onclick="addItem()">إضافةمنتججديد</button><div style="display: flex"><div style="width: 30%;">${items.map((item, i) => `<div  onclick="selectItem(i)"><p>${item.name}</p><img src="${item.image}" width="100"/></div>`).join('')}</div>${(selectedItem !== null) ? `<div style="margin-left: 20px;" ><h3>${items[selectedItem].name}</h3><img src="${items[selectedItem].image}" width="150"/><p>${items[selectedItem].details}</p><button onclick="editItem()">تعديل</button><button onclick="deleteItem()">حذف</button></div>` : ``}</div>`;
+    this.container.innerHTML = `<button onclick="addItem()">إضافةمنتججديد</button><div style="display: flex"><div style="width: 30%;">${items.map((item, i) => `<div  onclick="selectItem(i)"><p>${item.name}</p><img src="${item.image}" width="100"/></div>`).join('')}</div>${(selectedItem !== null) ? `<div style="margin-left: 20px;" ><h3>${items[selectedItem!].name}</h3><img src="${items[selectedItem!].image}" width="150"/><p>${items[selectedItem!].details}</p><button onclick="editItem()">تعديل</button><button onclick="deleteItem()">حذف</button></div>` : ``}</div>`;
   }
 }
 
@@ -126,7 +126,7 @@ standalone = true;
 
   render() {
     if (!this.container) return;
-    this.container.innerHTML = `<input value="${product.name}" on input="product.name = this.value" placeholder="اسم المنتج"/><br/><input value="${product.image}" on input="product.image = this.value" placeholder="رابط الصورة"/><br/><input value="${product.details}" on input="product.details = this.value" placeholder="تفاصيل المنتج"/><br/><button onclick="save()">إضافة</button><button onclick="cancel()">رجوع</button>`;
+    this.container.innerHTML = `<input value="${product.name}" oninput="product.name = this.value" placeholder="اسم المنتج"/><br/><input value="${product.image}" oninput="product.image = this.value" placeholder="رابط الصورة"/><br/><input value="${product.details}" oninput="product.details = this.value" placeholder="تفاصيل المنتج"/><br/><button onclick="save()">إضافة</button><button onclick="cancel()">رجوع</button>`;
   }
 }
 
@@ -141,7 +141,7 @@ product = {
   save() {
     if (this.product.name, this.product.image, this.product.details) {
   this.productService.addProduct({
-  ...this.product
+  this.product: 'null'
 });
   this.router.navigate(['/']);
 }
@@ -163,7 +163,7 @@ standalone = true;
 
   render() {
     if (!this.container) return;
-    this.container.innerHTML = `<input value="${product.name}" on input="product.name = this.value" placeholder="اسم المنتج"/><br/><input value="${product.image}" on input="product.image = this.value" placeholder="رابط الصورة"/><br/><input value="${product.details}" on input="product.details = this.value" placeholder="تفاصيل المنتج"/><br/><button onclick="save()">حفظ</button><button onclick="cancel()">رجوع</button>`;
+    this.container.innerHTML = `<input value="${product.name}" oninput="product.name = this.value" placeholder="اسم المنتج"/><br/><input value="${product.image}" oninput="product.image = this.value" placeholder="رابط الصورة"/><br/><input value="${product.details}" oninput="product.details = this.value" placeholder="تفاصيل المنتج"/><br/><button onclick="save()">حفظ</button><button onclick="cancel()">رجوع</button>`;
   }
 }
 

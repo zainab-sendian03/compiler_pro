@@ -6,18 +6,18 @@
         <PerGrammarGenerationSettings>
           <option name="fileName" value="$PROJECT_DIR$/src/antlr/TypeScripteLexer.g4" />
           <option name="autoGen" value="true" />
-          <option name="outputDir" value="C:\Users\USER\Desktop\4th-2\Compiler2\New folder\compiler_pro" />
-          <option name="libDir" value="C:\Users\USER\Desktop\4th-2\Compiler2\New folder\compiler_pro" />
+          <option name="outputDir" value="" />
+          <option name="libDir" value="" />
           <option name="encoding" value="" />
-          <option name="pkg" value="gen" />
+          <option name="pkg" value="" />
           <option name="language" value="" />
           <option name="generateVisitor" value="true" />
         </PerGrammarGenerationSettings>
         <PerGrammarGenerationSettings>
           <option name="fileName" value="$PROJECT_DIR$/src/antlr/TypeScripteParser.g4" />
           <option name="autoGen" value="true" />
-          <option name="outputDir" value="C:\Users\USER\Desktop\4th-2\Compiler2\New folder\compiler_pro\src" />
-          <option name="libDir" value="C:\Users\USER\Desktop\4th-2\Compiler2\New folder\compiler_pro\src" />
+          <option name="outputDir" value="" />
+          <option name="libDir" value="" />
           <option name="encoding" value="" />
           <option name="pkg" value="" />
           <option name="language" value="" />
@@ -26,7 +26,7 @@
       </list>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_19">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_19" project-jdk-name="21" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
 </project>

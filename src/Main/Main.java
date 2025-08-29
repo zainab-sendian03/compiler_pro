@@ -3,22 +3,22 @@ package Main;
 import Code_Generation.CodeGeneration;
 import Semantic_Check.SemanticAnalyzer;
 import Visitor.BaseVisitor;
-import antlr.TypeScripteLexer;
 
+import antlr.TypeScripteLexer;
 import antlr.TypeScripteParser;
-import ast.HtmlRoot;
 import ast.Program;
-import ast.TemplateField;
+
+import SymbolTable.*;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-import SymbolTable.*;
 
 
 import java.io.IOException;
 import java.util.logging.*;
 
 import static org.antlr.v4.runtime.CharStreams.fromFileName;
+
 
 public class Main {
     public static Logger logger = Logger.getLogger("MyLog");
@@ -75,7 +75,7 @@ public class Main {
 
 
         System.out.println("AST:");
-        //System.out.println(program);
+       System.out.println(program);
         //SymbolTable.print();
 
         //html

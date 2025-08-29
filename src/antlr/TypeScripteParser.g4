@@ -220,6 +220,10 @@ constructor
     ;
 
 
+htmlRoot
+    : element* EOF
+    ;
+
 element
   : completeTag     #CompleteElement
   | selfClosingTag  #SelfClosingElement

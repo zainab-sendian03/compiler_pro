@@ -1,4 +1,4 @@
-// Generated from C:/Users/USER/Desktop/4th-2/Compiler2/New folder/compiler_pro/src/antlr/TypeScripteParser.g4 by ANTLR 4.13.2
+// Generated from C:/Users/HP ALL IN ONE/Desktop/4th projects/compiler_pro/src/antlr/TypeScripteParser.g4 by ANTLR 4.13.2
 package antlr;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
