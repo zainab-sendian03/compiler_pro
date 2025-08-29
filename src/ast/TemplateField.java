@@ -28,16 +28,20 @@ public class TemplateField extends Field  {
     public List<Node> getElements() {
         return elements;
     }
+
     @Override
     public String generate() {
-        StringBuilder sb = new StringBuilder();
-        // لا تضيف template نفسه لأنه فيه raw code رح يكرر
-        for (Node element : elements) {
-            sb.append(element.generate());
-        }
-        return sb.toString();
-    }
+        StringBuilder htmlBuilder = new StringBuilder();
 
+        // Generate HTML from elements, handling directives and bindings
+        for (Node element : elements) {
+            if (element != null) {
+                htmlBuilder.append(element.generate());
+            }
+        }
+
+        return "`" + htmlBuilder.toString() + "`";
+    }
 
     @Override
     public String toString() {

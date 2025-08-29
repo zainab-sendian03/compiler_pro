@@ -13,17 +13,19 @@ public class Program extends Node {
     public List<Node> getStatements(){
         return statements;
     }
+
     @Override
     public String generate() {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder jsBuilder = new StringBuilder();
+
+        // توليد JS لكل statement في البرنامج
         for (Node stmt : statements) {
-            String generatedCode = stmt.generate();
-            if (generatedCode != null) {
-                sb.append(generatedCode);
-            }
+            jsBuilder.append(stmt.generate()).append("\n");
         }
-        return sb.toString();
+
+        return jsBuilder.toString(); // نرجع كل كود JS المتولد
     }
+
 
     @Override
     public String toString() {

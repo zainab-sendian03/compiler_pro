@@ -16,6 +16,7 @@ public class ArrayLiteral extends Node implements Expression {
     public ArrayList<Expression> getElements() {
         return elements;
     }
+    
     @Override
     public String generate() {
         StringBuilder sb = new StringBuilder();

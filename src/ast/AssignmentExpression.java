@@ -8,11 +8,14 @@ public class AssignmentExpression extends Node implements Expression {
         this.target = target;
         this.value = value;
     }
+    
     @Override
     public String generate() {
+        if (target == null || value == null) {
+            return "";
+        }
         return ((Node) target).generate() + " = " + ((Node) value).generate();
     }
-
 
     @Override
     public String toString() {

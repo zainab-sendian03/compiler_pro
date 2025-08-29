@@ -6,13 +6,14 @@ public class PropertyAccess extends Node implements Expression {
     public PropertyAccess(String objectName, String propertyName) {
         this.objectName = objectName;
     }
+    
     @Override
     public String generate() {
-        return objectName ;
+        return objectName;
     }
 
     @Override
     public String toString() {
-        return objectName ;
+        return objectName;
     }
 }

@@ -1,6 +1,7 @@
 package ast;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CompleteTag extends Element implements Addable<Node> {
     int i=0;
@@ -45,13 +46,35 @@ public class CompleteTag extends Element implements Addable<Node> {
 
     @Override
     public String generate() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(openTag.generate());
-        for (Node element : elements) {
-            sb.append(element.generate());
+        // Find the directive attribute first
+        DirectiveAttribute directive = null;
+        for (Node attr : openTag.getAttributes()) {
+            if (attr instanceof DirectiveAttribute) {
+                directive = (DirectiveAttribute) attr;
+                break;
+            }
         }
-        sb.append(closedTag.generate()).append("\n"); // إضافة سطر جديد بعد وسم الإغلاق
-        return sb.toString();
+
+        // Generate the inner content first
+        String childrenContent = this.elements.stream()
+                .map(Node::generate)
+                .collect(Collectors.joining(""));
+
+        if (directive != null) {
+            // Generate the HTML for the tag itself (without the directive attribute)
+            String tagHtml = openTag.generate() + childrenContent + closedTag.generate();
+            // Pass the generated HTML to the directive's generate method
+            return directive.generate(tagHtml);
+        } else {
+            // Standard generation if no directive is found
+            StringBuilder builder = new StringBuilder();
+            builder.append(this.openTag.generate());
+            builder.append(childrenContent);
+            if (this.closedTag != null) {
+                builder.append(this.closedTag.generate());
+            }
+            return builder.toString();
+        }
     }
 
     @Override

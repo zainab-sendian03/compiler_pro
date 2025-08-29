@@ -90,6 +90,7 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
         if (innerCtx.injectableBody() != null) {
             InjectableBody body = (InjectableBody) visit(innerCtx.injectableBody());
             providedIn = body.getValue();
+
         }
 
         SymbolTable.addSymbolToCurrentScope(
@@ -106,7 +107,8 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
 
     @Override
     public Node visitInjectableBody(TypeScripteParser.InjectableBodyContext ctx) {
-        String providedIn = ctx.getText();
+        String providedIn = ctx.STRING().getText();
+
         return new InjectableBody(providedIn);
     }
 
@@ -858,15 +860,23 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
         TypeScripteParser.AssignmentExpressionContext innerCtx = ctx.assignmentExpression();
 
         Expression target = null;
+        Expression value = null;
+
+        // left-hand side
         if (innerCtx.propertyAccess() != null) {
-            target = (PropertyAccess) visit(innerCtx.propertyAccess());
-        } else if (innerCtx.expression() != null) {
-            target = (Expression) visit(innerCtx.expression());
+            target = (Expression) visit(innerCtx.propertyAccess());
+        } else if (innerCtx.arrayLiteral() != null) {
+            target = (Expression) visit(innerCtx.arrayLiteral());
         }
 
-        Expression value = (Expression) visit(innerCtx.expression());
+        // right-hand side
+        if (innerCtx.expression() != null) {
+            value = (Expression) visit(innerCtx.expression());
+        }
+
         return new AssignmentExpression(target, value);
     }
+
 
 
     @Override
@@ -1038,6 +1048,10 @@ public Node visitSelfClosingElement(TypeScripteParser.SelfClosingElementContext 
     public Node visitAngularExpression(TypeScripteParser.AngularExpressionContext ctx) {
         AngularExpression e = new AngularExpression(null);
         String expression = ctx.ANGULAR_EXPRESSION().getText();
+        if (expression.startsWith("{{") && expression.endsWith("}}")) {
+            expression = expression.substring(2, expression.length() - 2).trim();
+        }
+        System.out.print(expression);
         e.setExpression(expression);
         return e;
     }

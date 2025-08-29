@@ -1,41 +1,52 @@
 package ast;
 import java.util.ArrayList;
-
 public class ConstructorDecl extends Node{
     public ArrayList<PropertyDeclaration> parameters = new ArrayList<>();
     public ArrayList<Statement> body = new ArrayList<>();
-
     public ConstructorDecl(ArrayList<PropertyDeclaration> parameters, ArrayList<Statement> body) {
         this.parameters = parameters;
         this.body = body;
     }
-    @Override
-    public String generate() {
+
+    // لاحظ: نستقبل properties من ClassBody لنولّدها تلقائياً داخل constructor
+    // نولّد الكونستركتر مع خصائص الكلاس
+    public String generate(ArrayList<PropertyDeclaration> props) {
         StringBuilder sb = new StringBuilder();
         sb.append("  constructor(");
-        if (parameters != null) {
-            for (int i = 0; i < parameters.size(); i++) {
-                sb.append(((Node) parameters.get(i)).generate());
-                if (i < parameters.size() - 1) {
-                    sb.append(", ");
-                }
+
+        // نحدد أي parameters نستخدم: props من ClassBody أو الموجودين داخله
+        ArrayList<PropertyDeclaration> paramsToUse =
+                (props != null && !props.isEmpty()) ? props : parameters;
+
+        if (paramsToUse != null && !paramsToUse.isEmpty()) {
+            for (int i = 0; i < paramsToUse.size(); i++) {
+                sb.append(paramsToUse.get(i).generate());
+                if (i < paramsToUse.size() - 1) sb.append(", ");
             }
         }
+
         sb.append(") {\n");
-        if (body != null) {
-            for (Statement stmt : body) {
-                sb.append("    ").append(stmt.generate());
+
+        // جسم الكونستركتر (functionCall أو أي Statement)
+        if (body != null && !body.isEmpty()) {
+            for (Node stmt : body) {
+                sb.append("    ").append(stmt.generate()).append("\n");
             }
         }
+
         sb.append("  }\n");
         return sb.toString();
     }
 
     @Override
+    public String generate() {
+        return generate(null);
+    }
+
+    
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("Constructor(");
-
-        // خصائص
         if (parameters != null && !parameters.isEmpty()) {
             sb.append("properties=[");
             for (int i = 0; i < parameters.size(); i++) {
@@ -53,7 +64,6 @@ public class ConstructorDecl extends Node{
             }
             sb.append("]");
         }
-
         sb.append(")");
         return sb.toString();
     }

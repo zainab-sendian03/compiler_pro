@@ -1,6 +1,7 @@
 package ast;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 public class MethodDeclaration extends Statement {
     public String name;
@@ -12,20 +13,23 @@ public class MethodDeclaration extends Statement {
         this.parameters = parameters;
         this.body = body;
     }
+
     @Override
     public String generate() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("  ").append(name).append("(");
-        if (parameters != null) {
-            sb.append(parameters.generate());
+        String params = parameters != null ? parameters.generate() : "";
+
+        StringBuilder bodySb = new StringBuilder();
+        if (body != null) {
+            for (Node stmt : body) {
+                if (stmt != null) {
+                    bodySb.append("    ").append(stmt.generate()).append("\n");
+                }
+            }
         }
-        sb.append(") {\n");
-        for (Node stmt : body) {
-            sb.append("    ").append(stmt.generate());
-        }
-        sb.append("  }\n");
-        return sb.toString();
+
+        return "  " + this.name + "(" + params + ") {\n" + bodySb + "  }\n";
     }
+
 
     @Override
     public String toString() {
@@ -37,6 +41,4 @@ public class MethodDeclaration extends Statement {
         sb.append("}");
         return sb.toString();
     }
-
-
 }

@@ -80,8 +80,6 @@ ANGULAR_EXPRESSION : '{{'  .*? '}}'  ;
 TEXT: [\p{L}_][\p{L}\p{N}_]*;
 
 
-
-
 // Modes for HTML parsing
 mode TAG;
 TAG_NAME: [a-z][a-z0-9\-]* -> popMode;

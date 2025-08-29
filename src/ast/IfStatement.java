@@ -24,19 +24,19 @@ public class IfStatement extends Node  {
         StringBuilder sb = new StringBuilder();
         sb.append("if (").append(((Node) condition).generate()).append(") {\n");
         for (Statement stmt : ifBody) {
-            if (stmt != null) { // فحص إضافة: التأكد من أن الكائن ليس null
-                sb.append("  ").append(stmt.generate());
+            if (stmt != null) {
+                sb.append("  ").append(((Node) stmt).generate());
             }
         }
-        sb.append("}\n");
+        sb.append("}");
         if (!elseBody.isEmpty()) {
-            sb.append("else {\n");
+            sb.append(" else {\n");
             for (Statement stmt : elseBody) {
-                if (stmt != null) { // فحص إضافة: التأكد من أن الكائن ليس null
-                    sb.append("  ").append(stmt.generate());
+                if (stmt != null) {
+                    sb.append("  ").append(((Node) stmt).generate());
                 }
             }
-            sb.append("}\n");
+            sb.append("}");
         }
         return sb.toString();
     }

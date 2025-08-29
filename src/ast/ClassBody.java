@@ -16,14 +16,24 @@ public class ClassBody extends Node implements Addable<Node>{
     @Override
     public String generate() {
         StringBuilder sb = new StringBuilder();
-        for (Node member : members) {
-            String generatedCode = member.generate();
-            if (generatedCode != null) {
-                sb.append(generatedCode);
+
+        // نولّد كل أعضاء الـ ClassBody (members)
+        if (members != null && !members.isEmpty()) {
+            for (Node member : members) {
+                // إذا العضو هو PropertyDeclaration، نولده كـ parameter للكونستركتر
+                if (member instanceof PropertyDeclaration) {
+                    sb.append("  ").append(((PropertyDeclaration) member).generate()).append(";\n");
+                } else {
+                    // بقية الأنواع تولّد بشكل طبيعي
+                    sb.append(member.generate());
+                }
             }
         }
+
         return sb.toString();
     }
+
+
     @Override
     public String toString() {
         return members.toString();

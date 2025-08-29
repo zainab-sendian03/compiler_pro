@@ -23,7 +23,7 @@ public class Operation extends Node implements Expression {
         if (right != null) {
             return "(" + ((Node) left).generate() + " " + operator + " " + ((Node) right).generate() + ")";
         }
-        return ((Node) left).generate() + operator + operator;
+        return "(" + ((Node) left).generate() + operator + operator + ")";
     }
 
     @Override
@@ -31,7 +31,7 @@ public class Operation extends Node implements Expression {
         if (left != null && right != null) {
             return "(" + left + " " + operator + " " + right + ")";
         } else if (left != null) {
-            return "(" + left + operator +operator + ")";
+            return "(" + left + operator + operator + ")";
         }
         return "(" + operator + ")";
     }

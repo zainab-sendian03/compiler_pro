@@ -8,6 +8,7 @@ import antlr.TypeScripteLexer;
 import antlr.TypeScripteParser;
 import ast.HtmlRoot;
 import ast.Program;
+import ast.TemplateField;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -39,11 +40,14 @@ public class Main {
         SemanticAnalyzer analyzer = new SemanticAnalyzer();
         BaseVisitor visitor = new BaseVisitor(analyzer);
         Program program = (Program) visitor.visit(tree);
-
         System.out.println("code generation start");
-
         CodeGeneration codeGeneration=new CodeGeneration();
         codeGeneration.startGenerate(program);
+        System.out.println("Code generation finished. Check 'output' directory.");
+
+// إضافة العناصر للtemplate
+       // String htmlCode = template.generateHTML(); // HTML خالص
+        //String templateLiteral = template.generate(); // Template literal للاستخدام في JS
         //html
         //HtmlRoot htmlRoot = (HtmlRoot) visitor.visit(htmlTree);
 
@@ -70,7 +74,7 @@ public class Main {
         //AttSymbolTable.print();
 
 
-        //System.out.println("AST:");
+        System.out.println("AST:");
         //System.out.println(program);
         //SymbolTable.print();
 

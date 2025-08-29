@@ -32,9 +32,18 @@ public class Literal extends Node  implements Expression {
     public Boolean getBoolValue() {
         return boolValue;
     }
+    
     @Override
     public String generate() {
-        if (stringValue != null) return "'" + stringValue + "'";
+        if (stringValue != null) {
+            // إذا كان string يحتوي على quotes، أزلها
+            String cleanString = stringValue;
+            if ((cleanString.startsWith("\"") && cleanString.endsWith("\"")) ||
+                (cleanString.startsWith("'") && cleanString.endsWith("'"))) {
+                cleanString = cleanString.substring(1, cleanString.length() - 1);
+            }
+            return "'" + cleanString + "'";
+        }
         if (intValue != null) return intValue.toString();
         if (boolValue != null) return boolValue.toString();
         return "null";

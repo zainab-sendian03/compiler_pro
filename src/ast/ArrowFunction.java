@@ -8,16 +8,21 @@ public class ArrowFunction extends Statement{
         this.parameters = parameters;
         this.body = body;
     }
+    
     @Override
     public String generate() {
         StringBuilder sb = new StringBuilder();
-        sb.append("(").append(parameters.generate()).append(") => {\n");
+        sb.append("(");
+        if (parameters != null) {
+            sb.append(parameters.generate());
+        }
+        sb.append(") => {\n");
         if (body instanceof Statement) {
-            sb.append("  ").append(((Statement) body).generate());
+            sb.append("  ").append(((Node) body).generate());
         } else if (body instanceof Expression) {
             sb.append("  return ").append(((Node) body).generate()).append(";\n");
         }
-        sb.append("}\n");
+        sb.append("}");
         return sb.toString();
     }
 
@@ -25,5 +30,4 @@ public class ArrowFunction extends Statement{
     public String toString() {
         return parameters + " => " + body;
     }
-
 }

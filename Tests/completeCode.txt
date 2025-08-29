@@ -13,6 +13,7 @@ export interface Product {
 }
 
 @Injectable({ providedIn: 'root' })
+
 class ProductService {
   private productsSubject = new BehaviorSubject< Product[]>([
     { name: 'منتج 1', image: 'assets/images/image2.jpg', details: 'تفاصيل المنتج 1' },

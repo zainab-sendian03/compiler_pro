@@ -1,4 +1,5 @@
 package ast;
+
 public class TwoWayBindingAttribute extends Content {
     private String name;
     private String value;
@@ -26,12 +27,12 @@ public class TwoWayBindingAttribute extends Content {
 
     @Override
     public String generate() {
-        return "[(" + name + ")]=\"" + value + "\"";
+        // يولد سمة القيمة وحدث الإدخال لربط ثنائي الاتجاه
+        return "value=\"${" + value + "}\" oninput=\"" + value + " = this.value\"";
     }
 
     @Override
     public String toString() {
-        return "TwoWayBindingAttribute : AttributeName:" + "[(" + name + ")]" + ", AttributeValue:" + value + " ";
+        return "TwoWayBindingAttribute : AttributeName:" + name + ", AttributeValue:" + value + " ";
     }
 }
-

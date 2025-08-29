@@ -9,7 +9,6 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
 
   template: `
- <button (click)="addItem()">إضافة منتج جديد</button>
 
     <div style="display: flex">
       <!-- القائمة -->
@@ -25,9 +24,6 @@ import { CommonModule } from '@angular/common';
         <h3>{{ items[selectedItem!].name }}</h3>
         <img [src]="items[selectedItem!].image" width="150"/>
         <p>{{ items[selectedItem!].details }}</p>
-
-        <button (click)="editItem()">تعديل</button>
-        <button (click)="deleteItem()">حذف</button>
       </div>
     </div>
   `,

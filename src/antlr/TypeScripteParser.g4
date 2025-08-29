@@ -219,22 +219,17 @@ constructor
     : CONSTRUCTOR LPAREN propertyDeclaration (COMMA propertyDeclaration)* RPAREN LBRACE functionCall? RBRACE
     ;
 
-htmlRoot
-    : element* EOF
-    ;
-// القواعد لتحليل العناصر (الوسوم)
+
 element
   : completeTag     #CompleteElement
   | selfClosingTag  #SelfClosingElement
   ;
 
 
-// القواعد لتحليل الوسوم الكاملة (التي تحتوي على فتح وإغلاق)
 completeTag
     : openTag (element | angularExpression|text )* closedTag
     ;
 
-// القواعد لتحليل الوسوم الذاتية الإغلاق
 selfClosingTag
     : OPEN_SYMBOL TAG_NAME content* SLASHSELF CLOSED_SYMBOL
     ;
@@ -252,7 +247,6 @@ angularExpression
     ;
 text:TEXT | IDENTIFIER ;
 
-// القواعد لتحليل السمات
 content
   : normalAttribute     #NormalAttr
   | bindingAttribute    #BindingAttr

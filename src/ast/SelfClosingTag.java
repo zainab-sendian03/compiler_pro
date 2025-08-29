@@ -1,6 +1,7 @@
 package ast;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SelfClosingTag extends Element implements Addable<Node>{
     private String tagName;
@@ -33,15 +34,25 @@ public class SelfClosingTag extends Element implements Addable<Node>{
         attributes.add(item);
     }
 
+
     @Override
     public String generate() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("<").append(tagName);
-        for (Node attr : attributes) {
-            sb.append("  ").append(attr.generate());
+        StringBuilder builder = new StringBuilder();
+
+        // 1. ابدأ بـ "<" واسم الوسم
+        builder.append("<").append(this.tagName);
+
+        // 2. قم بتوليد الخصائص (نفس المنطق المستخدم في OpenTag)
+        if (this.attributes != null && !this.attributes.isEmpty()) {
+            builder.append(" ");
+            builder.append(this.attributes.stream()
+                    .map(Node::generate)
+                    .collect(Collectors.joining(" ")));
         }
-        sb.append(" />");
-        return sb.toString();
+        // 3. أغلق الوسم بـ ">"
+        builder.append("/>");
+
+        return builder.toString();
     }
 
     @Override

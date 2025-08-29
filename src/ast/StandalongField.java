@@ -10,7 +10,10 @@ public class StandalongField extends Field {
 
     @Override
     public String generate() {
-        return  standalong;
+        StringBuilder jsBuilder = new StringBuilder();
+        jsBuilder.append("// Standalone: ").append(standalong).append("\n");
+        jsBuilder.append("standalone = ").append(standalong).append(";\n");
+        return jsBuilder.toString();
     }
 
     @Override

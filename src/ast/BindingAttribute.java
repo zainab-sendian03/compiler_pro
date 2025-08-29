@@ -1,6 +1,5 @@
 package ast;
 
-// القاعدة: bindingAttribute
 public class BindingAttribute extends Content {
     private String name;
     private String value;
@@ -9,6 +8,7 @@ public class BindingAttribute extends Content {
         this.name = name;
         this.value = value;
     }
+
     public String getName() {
         return name;
     }
@@ -24,13 +24,14 @@ public class BindingAttribute extends Content {
     public void setValue(String value) {
         this.value = value;
     }
-    @Override
-    public String generate() {
-        return "[" + name + "]=\"" + value + "\"";
-    }
 
     @Override
+    public String generate() {
+        // تحويل binding attribute إلى Template Literal
+        return name + "=\"${" + value + "}\"";
+    }
+    @Override
     public String toString() {
-        return "BindingAttribute : AttributeName:" + "[" + name + "]" + ", AttributeValue:" + value + "";
+        return "BindingAttribute : AttributeName:" + name + ", AttributeValue:" + value + " ";
     }
 }
