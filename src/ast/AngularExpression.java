@@ -15,6 +15,10 @@ public class AngularExpression extends Node {
         this.expression = expression;
     }
     @Override
+    public String generate() {
+        return "{{" + expression + "}}";
+    }
+    @Override
     public String toString() {
         return "AngularExpression:"  + expression ;
     }}

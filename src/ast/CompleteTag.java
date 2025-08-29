@@ -2,7 +2,7 @@ package ast;
 
 import java.util.List;
 
-public class CompleteTag extends Node implements Addable<Node> {
+public class CompleteTag extends Element implements Addable<Node> {
     int i=0;
     private OpenTag openTag;
     private List<Node> elements;
@@ -38,10 +38,21 @@ public class CompleteTag extends Node implements Addable<Node> {
         return closedTag;
     }
 
-    @Override
     public void add(Node child){
         elements.add(child);
     }
+
+    @Override
+    public String generate() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(openTag.generate());
+        for (Node element : elements) {
+            sb.append(element.generate());
+        }
+        sb.append(closedTag.generate()).append("\n"); // إضافة سطر جديد بعد وسم الإغلاق
+        return sb.toString();
+    }
+
     @Override
     public String toString() {
 
@@ -58,15 +69,3 @@ public class CompleteTag extends Node implements Addable<Node> {
         return builder.toString();
 
     }}
-
-//    @Override
-//    public String toString() {
-//        StringBuilder builder = new StringBuilder();
-//        builder.append(openTag.toString()).append("\n");
-//        for (Node child : elements) {
-//            builder.append(child.toString()).append("\n");
-//        }
-//        builder.append(closedTag.toString()).append("\n");
-//        return builder.toString();
-//    }
-

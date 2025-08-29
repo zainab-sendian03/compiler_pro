@@ -1,8 +1,8 @@
 package ast;
 
 
-public interface Expression {
-    void add(Expression child);
+public interface Expression{
 
+    String generate();
 }
 

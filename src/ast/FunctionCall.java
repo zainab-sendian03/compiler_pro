@@ -1,31 +1,38 @@
 package ast;
 
 import java.util.ArrayList;
+import java.util.List;
 
-
-public class FunctionCall extends Node  implements Expression,Addable<FunctionCall> {
-    String functionName;
-    ArrayList<Expression> arguments;
-    ArrayList<FunctionCall> chainedCalls;
+public class FunctionCall extends Statement implements Expression{
+    private final String functionName;
+    private final List<Node> arguments = new ArrayList<>();
+    private final List<FunctionCall> chainedCalls = new ArrayList<>();
 
     public FunctionCall(String functionName) {
         this.functionName = functionName;
-        this.arguments = new ArrayList<>();
-        this.chainedCalls = new ArrayList<>();
+    }
+
+    public void addArgument(Node expr) {
+        arguments.add(expr);
     }
 
     public void addChainedCall(FunctionCall call) {
-        this.chainedCalls.add(call);
+        chainedCalls.add(call);
     }
 
     @Override
-    public void add(Expression child) {
-        arguments.add(child);
-    }
-
-    @Override
-    public void add(FunctionCall item) {
-        chainedCalls.add(item);
+    public String generate() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(functionName).append("(");
+        for (int i = 0; i < arguments.size(); i++) {
+            sb.append(arguments.get(i).generate());
+            if (i < arguments.size() - 1) sb.append(", ");
+        }
+        sb.append(")");
+        for (FunctionCall chained : chainedCalls) {
+            sb.append(".").append(chained.generate());
+        }
+        return sb.toString();
     }
 
     @Override
@@ -33,10 +40,13 @@ public class FunctionCall extends Node  implements Expression,Addable<FunctionCa
         StringBuilder sb = new StringBuilder();
         sb.append(functionName).append("(");
         for (int i = 0; i < arguments.size(); i++) {
-            sb.append(arguments.get(i).toString());
+            sb.append(arguments.get(i).generate());
             if (i < arguments.size() - 1) sb.append(", ");
         }
         sb.append(")");
+        for (FunctionCall chained : chainedCalls) {
+            sb.append(".").append(chained.generate());
+        }
         return sb.toString();
     }
 }

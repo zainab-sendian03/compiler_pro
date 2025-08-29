@@ -10,6 +10,7 @@ program
 statement
    : importStatement       #ImportStmt
    | componentDeclaration  #ComponentStmt
+   | injectableDeclaration #InjectableStmt
    | variableDeclaration   #VariableStmt
    | objectLiteral         #ObjectLiteralStmt
    | expressionStatement   #ExprStmt
@@ -19,9 +20,16 @@ statement
    ;
 
 
+injectableDeclaration
+  : AT INJECTABLE LPAREN LBRACE injectableBody RBRACE RPAREN
+  ;
+
+injectableBody
+  : PROVIDEDIN COLON STRING
+  ;
 
 importStatement
-  : IMPORT LBRACE (IDENTIFIER |COMPONENT) (COMMA (IDENTIFIER |COMPONENT))* RBRACE FROM STRING SEMICOLON
+  : IMPORT LBRACE (IDENTIFIER |COMPONENT) (COMMA (IDENTIFIER |COMPONENT | INJECTABLE))* RBRACE FROM STRING SEMICOLON
   ;
 
 componentDeclaration
@@ -50,7 +58,7 @@ templateField
   ;
 
 backTemplate
-    : BACKTICK element BACKTICK
+    : BACKTICK element* BACKTICK
     ;
 
 importsField
@@ -66,19 +74,26 @@ otherFields
   ;
 
 classDeclaration
-  : EXPORT CLASS IDENTIFIER classBody
+  : (EXPORT CLASS IDENTIFIER |
+  EXPORT INTERFACE IDENTIFIER |
+  CLASS IDENTIFIER )classBody
   ;
 
 classBody
-  : LBRACE (propertyDeclaration | methodDeclaration)* RBRACE
+  : LBRACE (propertyDeclaration | methodDeclaration | constructor)* RBRACE
   ;
 
 propertyDeclaration
-  : IDENTIFIER COLON? type? EQUALS expression SEMICOLON?
+  : (PUBLIC | PRIVATE | PROTECTED)? IDENTIFIER DOLAR? COLON? type? (EQUALS expression)? SEMICOLON?
   ;
 
+constructorCall
+  : NEW IDENTIFIER ( lt type gt)? LPAREN expression RPAREN
+  ;
+
+
 methodDeclaration
-  : IDENTIFIER LPAREN parameterList? RPAREN COLON type methodBody
+  : IDENTIFIER LPAREN parameterList? RPAREN (COLON type)? methodBody
   ;
 
 parameterList
@@ -91,11 +106,12 @@ parameter
   ;
 
 methodBody
-  : LBRACE statement* RBRACE
+  : LBRACE RETURN? statement* RBRACE
   ;
 
 type
   : primitiveType
+  | primitiveType lt type (COMMA type)* gt
   | primitiveType PIPE type;
 
 
@@ -117,6 +133,8 @@ expression
   | assignmentExpression     #AssignmentExpr
   | propertyAccess           #PropertyAccessExpr
   | variableDeclaration      #VarDeclExpr
+  | constructorCall          #ConstructorCallExpr
+  | constructor              #ConstructorExpr
   ;
 
 
@@ -126,46 +144,58 @@ literal
   | TRUE
   | FALSE
   | NULL
+  | IDENTIFIER
   ;
 
 arrayLiteral
-  : LBRACKET (expression (COMMA expression)*)? RBRACKET
+  : IDENTIFIER? LBRACKET (expression | DOTDOTDOT expression)? (COMMA (expression | DOTDOTDOT expression)*)? RBRACKET
+  | LBRACKET (expression (COMMA expression)*)? RBRACKET
   ;
 
 objectLiteral
-  : LBRACE (propertyAssignment (COMMA propertyAssignment)*)? RBRACE
+  : LBRACE DOTDOTDOT? (propertyAssignment (COMMA propertyAssignment)*)? RBRACE
   ;
 
 propertyAssignment
-  : IDENTIFIER COLON expression
+  : expression (COLON expression)*
   ;
 
- functionCall
-      : (IDENTIFIER | propertyAccess) LPAREN (expression (COMMA expression)*)?
-      RPAREN (DOT IDENTIFIER LPAREN (expression (COMMA expression)*)? RPAREN)*
-      ;
+functionCall
+    : (IDENTIFIER | propertyAccess)
+      LPAREN (expression (COMMA expression)*)? RPAREN
+      (DOT IDENTIFIER LPAREN (expression (COMMA expression)*)? RPAREN)* propertyAccess? SEMICOLON?
+    ;
+
 
 arrowFunction
-  : LPAREN parameterList RPAREN ARROW propertyAccess
-  ;
+    : (LPAREN parameterList RPAREN | IDENTIFIER) ARROW (methodBody | functionCall)
+    ;
 
-lt:  OPEN_SYMBOL SPASE;
 
+
+lt:
+ OPEN_SYMBOL SPASE
+ ;
+gt:
+  CLOSED_SYMBOL
+ ;
 operation
-  : IDENTIFIER (PLUS | MINUS | STAR | SLASH | MOD | CLOSED_SYMBOL| lt) expression
+  : IDENTIFIER? keys expression
   | IDENTIFIER (PLUS PLUS)
   | IDENTIFIER (MINUS MINUS)
   ;
 
+keys:PLUS | MINUS | STAR | SLASH | MOD | CLOSED_SYMBOL| lt | ANDAND | OROR | NOTEQUALS |GREATERTHAN;
+
 assignmentExpression
-  : propertyAccess EQUALS expression
+  : (propertyAccess | arrayLiteral ) EQUALS expression
   | propertyAccess EQUALS EQUALS expression
   ;
 
 propertyAccess
-  : IDENTIFIER (DOT IDENTIFIER)*
-  | IDENTIFIER DOT functionCall
-  ;
+    : (THIS | IDENTIFIER) (DOT IDENTIFIER DOLAR? | DOT arrayLiteral)* (OROR literal)?
+    ;
+
 
 expressionStatement
   : expression SEMICOLON
@@ -176,7 +206,7 @@ forLoop
   ;
 
 ifStatement
-  : IF LPAREN expression RPAREN LBRACE statement RBRACE (ELSE LBRACE? statement RBRACE?)?
+  : IF LPAREN expression (keys expression)* RPAREN LBRACE? statement* RBRACE? (ELSE LBRACE? statement RBRACE?)?
   ;
 
 variableDeclaration
@@ -184,7 +214,14 @@ variableDeclaration
   | IDENTIFIER EQUALS expression                                #VarReassignment
   ;
 
+constructor
+    : CONSTRUCTOR LPAREN propertyDeclaration (COMMA propertyDeclaration)* RPAREN LBRACE statement* RBRACE
+    ;
 
+
+htmlRoot
+    : element* EOF
+    ;
 // القواعد لتحليل العناصر (الوسوم)
 element
   : completeTag     #CompleteElement
@@ -194,7 +231,7 @@ element
 
 // القواعد لتحليل الوسوم الكاملة (التي تحتوي على فتح وإغلاق)
 completeTag
-    : openTag (element|angularExpression)* closedTag
+    : openTag (element | angularExpression|text )* closedTag
     ;
 
 // القواعد لتحليل الوسوم الذاتية الإغلاق
@@ -213,6 +250,7 @@ closedTag
 angularExpression
     : ANGULAR_EXPRESSION
     ;
+text:TEXT | IDENTIFIER ;
 
 // القواعد لتحليل السمات
 content
@@ -220,6 +258,7 @@ content
   | bindingAttribute    #BindingAttr
   | direvtiveAttribute  #DirectiveAttr
   | eventAttribute      #EventAttr
+  | twoWayBindingAttribute #TwoWayBindingAttr
   ;
 
 
@@ -237,4 +276,8 @@ direvtiveAttribute
 
 eventAttribute
     : LPAREN IDENTIFIER RPAREN EQUALS STRING
+    ;
+
+twoWayBindingAttribute
+    : LBRACKET LPAREN IDENTIFIER RPAREN RBRACKET EQUALS STRING
     ;

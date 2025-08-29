@@ -1,4 +1,4 @@
-// Generated from C:/Users/HP ALL IN ONE/IdeaProjects/code/src/antlr/TypeScripteParser.g4 by ANTLR 4.13.2
+// Generated from C:/Users/HP ALL IN ONE/Desktop/4th projects/compiler_pro/src/antlr/TypeScripteParser.g4 by ANTLR 4.13.2
 package antlr;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -30,6 +30,13 @@ public interface TypeScripteParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitComponentStmt(TypeScripteParser.ComponentStmtContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code InjectableStmt}
+	 * labeled alternative in {@link TypeScripteParser#statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInjectableStmt(TypeScripteParser.InjectableStmtContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code VariableStmt}
 	 * labeled alternative in {@link TypeScripteParser#statement}.
@@ -72,6 +79,18 @@ public interface TypeScripteParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitIfStmt(TypeScripteParser.IfStmtContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link TypeScripteParser#injectableDeclaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInjectableDeclaration(TypeScripteParser.InjectableDeclarationContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link TypeScripteParser#injectableBody}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInjectableBody(TypeScripteParser.InjectableBodyContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link TypeScripteParser#importStatement}.
 	 * @param ctx the parse tree
@@ -180,6 +199,12 @@ public interface TypeScripteParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitPropertyDeclaration(TypeScripteParser.PropertyDeclarationContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link TypeScripteParser#constructorCall}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitConstructorCall(TypeScripteParser.ConstructorCallContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link TypeScripteParser#methodDeclaration}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -279,6 +304,20 @@ public interface TypeScripteParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitVarDeclExpr(TypeScripteParser.VarDeclExprContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code ConstructorCallExpr}
+	 * labeled alternative in {@link TypeScripteParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitConstructorCallExpr(TypeScripteParser.ConstructorCallExprContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ConstructorExpr}
+	 * labeled alternative in {@link TypeScripteParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitConstructorExpr(TypeScripteParser.ConstructorExprContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link TypeScripteParser#literal}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -321,11 +360,24 @@ public interface TypeScripteParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitLt(TypeScripteParser.LtContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link TypeScripteParser#gt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGt(TypeScripteParser.GtContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link TypeScripteParser#operation}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitOperation(TypeScripteParser.OperationContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code keys}
+	 * labeled alternative in {@link TypeScripteParser#ImportStmtComponentStmtInjectableStmtVariableStmtObjectLiteralStmtExprStmtClassStmtForLoopStmtIfStmtSelectorFldStandaloneFldImportsFldTemplateFldOtherFldsLiteralExprArrayExprObjectExprFunctionCallExprArrowFunctionExprOperationExprAssignmentExprPropertyAccessExprVarDeclExprConstructorCallExprConstructorExprVarDeclWithKeywordVarReassignmentCompleteElementSelfClosingElementNormalAttrBindingAttrDirectiveAttrEventAttrTwoWayBindingAttr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitKeys(TypeScripteParser.KeysContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link TypeScripteParser#assignmentExpression}.
 	 * @param ctx the parse tree
@@ -371,6 +423,18 @@ public interface TypeScripteParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitVarReassignment(TypeScripteParser.VarReassignmentContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link TypeScripteParser#constructor}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitConstructor(TypeScripteParser.ConstructorContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link TypeScripteParser#htmlRoot}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitHtmlRoot(TypeScripteParser.HtmlRootContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code CompleteElement}
 	 * labeled alternative in {@link TypeScripteParser#element}.
 	 * @param ctx the parse tree
@@ -415,6 +479,12 @@ public interface TypeScripteParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitAngularExpression(TypeScripteParser.AngularExpressionContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link TypeScripteParser#text}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitText(TypeScripteParser.TextContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code NormalAttr}
 	 * labeled alternative in {@link TypeScripteParser#content}.
 	 * @param ctx the parse tree
@@ -443,6 +513,13 @@ public interface TypeScripteParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitEventAttr(TypeScripteParser.EventAttrContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code TwoWayBindingAttr}
+	 * labeled alternative in {@link TypeScripteParser#content}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTwoWayBindingAttr(TypeScripteParser.TwoWayBindingAttrContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link TypeScripteParser#normalAttribute}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -466,4 +543,10 @@ public interface TypeScripteParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitEventAttribute(TypeScripteParser.EventAttributeContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link TypeScripteParser#twoWayBindingAttribute}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTwoWayBindingAttribute(TypeScripteParser.TwoWayBindingAttributeContext ctx);
 }

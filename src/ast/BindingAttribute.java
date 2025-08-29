@@ -1,7 +1,7 @@
 package ast;
 
 // القاعدة: bindingAttribute
-public class BindingAttribute extends Node {
+public class BindingAttribute extends Content {
     private String name;
     private String value;
 
@@ -23,6 +23,10 @@ public class BindingAttribute extends Node {
 
     public void setValue(String value) {
         this.value = value;
+    }
+    @Override
+    public String generate() {
+        return "[" + name + "]=\"" + value + "\"";
     }
 
     @Override

@@ -1,10 +1,14 @@
 package ast;
 
 public class PrimitiveType extends Node  {
-     String primitiveName;
+    String primitiveName;
 
     public PrimitiveType(String primitiveName) {
         this.primitiveName = primitiveName;
+    }
+    @Override
+    public String generate() {
+        return primitiveName;
     }
 
     @Override

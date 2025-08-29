@@ -2,19 +2,34 @@ package ast;
 
 import java.util.ArrayList;
 
-public class ParameterList extends Node  {
-    private final ArrayList<Parameter> parameters;
+public class ParameterList extends Node {
+    public ArrayList<Parameter> parameters = new ArrayList<>();
 
-    public ParameterList() {
-        this.parameters = new ArrayList<>();
+    public void add(Parameter param) {
+        parameters.add(param);
     }
-
-    public void addParameter(Parameter parameter) {
-        this.parameters.add(parameter);
+    @Override
+    public String generate() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < parameters.size(); i++) {
+            sb.append(parameters.get(i).generate());
+            if (i < parameters.size() - 1) {
+                sb.append(", ");
+            }
+        }
+        return sb.toString();
     }
 
     @Override
     public String toString() {
-        return parameters.toString();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < parameters.size(); i++) {
+            sb.append(parameters.get(i));
+            if (i < parameters.size() - 1) {
+                sb.append(", ");
+            }
+        }
+        return sb.toString();
     }
+
 }

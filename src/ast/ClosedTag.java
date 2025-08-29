@@ -17,15 +17,14 @@ public class ClosedTag extends Node {
     public void setTagName(String tagName) {
         this.tagName = tagName;
     }
+    @Override
+    public String generate() {
+        return "</" + tagName + ">";
+    }
 
     @Override
     public String toString() {
         return "TagName:"  + tagName  ;
     }
 
-//    @Override
-//    public String toString() {
-//        return "</" + tagName + ">";
-//    }
 }
-

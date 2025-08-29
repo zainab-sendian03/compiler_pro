@@ -2,27 +2,31 @@ package ast;
 
 import java.util.ArrayList;
 
-public class ClassDeclaration extends Node implements Addable<Node>{
-    String name;
-    ArrayList<Node> body;
+public class ClassDeclaration extends Node {
+    public String name;
+    public ArrayList<Node> body = new ArrayList<>();
 
     public ClassDeclaration(String name) {
         this.name = name;
-        this.body = new ArrayList<>();
     }
 
+    public void add(Node node) {
+        body.add(node);
+    }
 
     @Override
-    public void add(Node child) {
-        body.add(child);
+    public String generate() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("class ").append(name).append(" {\n");
+        for (Node member : body) {
+            sb.append(member.generate());
+        }
+        sb.append("}\n");
+        return sb.toString();
     }
 
     @Override
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (Node ast : body) {
-            stringBuilder.append(ast).append("\n");
-        }
-        return stringBuilder.toString();
+        return "class " + name + "{" + body+ "}";
     }
 }

@@ -1,19 +1,49 @@
 package ast;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PropertyAccess extends Node implements Expression {
-    String fullChain;
+    private boolean isThis;
+    private String base;
+    private List<Accessor> accessors = new ArrayList<>();
 
-    public PropertyAccess(String objectName, String fullChain) {
-        this.fullChain = fullChain;
+    // جديد: قيمة OR إذا كانت موجودة
+    private Literal orLiteral = null;
+
+    public PropertyAccess(boolean isThis, String base) {
+        this.isThis = isThis;
+        this.base = base;
+    }
+
+    public void addAccessor(Accessor accessor) {
+        accessors.add(accessor);
+    }
+
+    // جديد: لتعيين قيمة OR
+    public void setOrLiteral(Literal literal) {
+        this.orLiteral = literal;
     }
 
     @Override
-    public void add(Expression child) {
+    public String generate() {
+        StringBuilder sb = new StringBuilder();
 
-    }
+        if (isThis) {
+            sb.append("this");
+        } else if (base != null) {
+            sb.append(base);
+        }
 
-    @Override
-    public String toString() {
-        return fullChain;
+        for (Accessor acc : accessors) {
+            sb.append(acc.generate());
+        }
+
+        // لو فيه or literal
+        if (orLiteral != null) {
+            sb.append(" || ").append(orLiteral.generate());
+        }
+
+        return sb.toString();
     }
 }

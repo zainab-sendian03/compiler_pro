@@ -2,7 +2,7 @@ package ast;
 
 import java.util.List;
 
-public class SelfClosingTag extends Node implements Addable<Node>{
+public class SelfClosingTag extends Element implements Addable<Node>{
     private String tagName;
     private List<Node> attributes;
 
@@ -34,31 +34,36 @@ public class SelfClosingTag extends Node implements Addable<Node>{
     }
 
     @Override
+    public String generate() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<").append(tagName);
+        for (Node attr : attributes) {
+            sb.append("  ").append(attr.generate());
+        }
+        sb.append(" />");
+        return sb.toString();
+    }
+    @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("SelfClosingTag :");
         builder.append("TagName:").append(tagName).append(",").append("\n");
         builder.append("Attributes:[\n");
         for (Node child : attributes) {
-            builder.append(" ").append(child.toString()).append(",\n");
+            if (child != null) {
+                builder.append(" ").append(child.toString()).append(",\n");
+            } else {
+                builder.append(" null,\n"); // للتوضيح إذا في عنصر ناقص
+            }
         }
         builder.append("]" + "\n");
-        return  builder.toString();
+        return builder.toString();
     }
+
 }
 
 
 
-//    @Override
-//    public String toString() {
-//        StringBuilder builder = new StringBuilder();
-//        builder.append("<"+ tagName +" ");
-//        for (ContentNode child : attributes) {
-//            builder.append(child.toString());
-//        }
-//        builder.append("/>"+"\n");
-//        return builder.toString();
-//    }
 
 
 

@@ -1,37 +1,28 @@
 package ast;
 
-public class Literal extends Node  implements Expression {
-    String stringValue;
-    Integer intValue;
-    Boolean boolValue;
+import ast.Expression;
+import ast.Node;
 
-
-    public Literal() {
+public class Literal extends Node implements Expression {
+    private final Object value;
+    public Literal(Object value) {
+        this.value = value;
+    }
+    public  Literal(){
+        this.value = null;
     }
 
-    public Literal(String stringValue) {
-        this.stringValue = stringValue;
-    }
-
-    public Literal(Integer intValue) {
-        this.intValue = intValue;
-    }
-
-    public Literal(Boolean boolValue) {
-        this.boolValue = boolValue;
-    }
-
-    @Override
-    public void add(Expression child) {
-
+    public Object getValue() {
+        return value;
     }
 
     @Override
     public String toString() {
-        if (stringValue != null) return stringValue;
-        if (intValue != null) return intValue.toString();
-        if (boolValue != null) return boolValue.toString();
-        return "null";
+        return value == null ? "null" : value.toString();
     }
 
+    @Override
+    public String generate() {
+        return value == null ? "null" : value.toString();
+    }
 }

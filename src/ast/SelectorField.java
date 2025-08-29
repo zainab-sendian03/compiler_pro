@@ -7,6 +7,10 @@ public class SelectorField extends Field{
         this.selector = selector;
     }
 
+    @Override
+    public String generate() {
+        return  selector ;
+    }
 
     @Override
     public String toString() {

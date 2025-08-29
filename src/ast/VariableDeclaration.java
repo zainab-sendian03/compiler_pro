@@ -1,30 +1,20 @@
 package ast;
 
-public class VariableDeclaration extends Node {
-    String name;
-    Type type;
-    Expression value;
+public class VariableDeclaration extends Node implements  Expression {
+    public String name;
+    public Expression value;
 
-    public String getName() {
-        return name;
-    }
-
-    public Type getType() {
-        return type;
-    }
-
-    public Expression getValue() {
-        return value;
-    }
-
-    public VariableDeclaration(String name, Type type, Expression value) {
+    public VariableDeclaration(String name, Expression value) {
         this.name = name;
-        this.type = type;
         this.value = value;
+    }
+    @Override
+    public String generate() {
+        return "let " + name + " = " + ((Node) value).generate() + ";\n";
     }
 
     @Override
     public String toString() {
-        return type + " " + name + " = " + value;
+        return name + " = " + value;
     }
 }

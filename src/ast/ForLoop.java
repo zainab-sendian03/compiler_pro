@@ -22,6 +22,17 @@ public class ForLoop extends Node implements Addable<Node>{
     }
 
     @Override
+    public String generate() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("for (").append(init.generate()).append("; ").append(((Node) condition).generate()).append("; ").append(((Node) operation).generate()).append(") {\n");
+        for (Node stmt : body) {
+            sb.append("  ").append(((Statement) stmt).generate());
+        }
+        sb.append("}\n");
+        return sb.toString();
+    }
+
+    @Override
     public String toString() {
         return "for (" + init + "; " + condition + "; " + operation + ") "+
                 "\n"

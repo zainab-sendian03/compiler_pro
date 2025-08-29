@@ -2,7 +2,7 @@ package ast;
 
 import java.util.ArrayList;
 
-public class MethodBody extends Node implements Addable<Node>{
+public class MethodBody extends Statement implements Addable<Node> {
 
     ArrayList<Node> statement;
 
@@ -15,10 +15,21 @@ public class MethodBody extends Node implements Addable<Node>{
         statement.add(child);
     }
 
+    public ArrayList<Node> getStatements() {
+        return statement;
+    }
+    @Override
+    public String generate() {
+        StringBuilder sb = new StringBuilder("{\n");
+        for (Node stmt : statement) {
+            sb.append("  ").append(stmt.generate()).append("\n");
+        }
+        sb.append("}");
+        return sb.toString();
+    }
+
     @Override
     public String toString() {
         return statement.toString();
     }
-
-
 }

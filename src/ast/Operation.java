@@ -19,9 +19,13 @@ public class Operation extends Node implements Expression {
     }
 
     @Override
-    public void add(Expression child) {
-
+    public String generate() {
+        String leftStr = (left != null) ? left.toString() : "null";
+        String rightStr = (right != null) ? right.toString() : "";
+        if (right != null) return "(" + leftStr + " " + operator + " " + rightStr + ")";
+        return leftStr + operator + operator; // ++ أو --
     }
+
 
     @Override
     public String toString() {

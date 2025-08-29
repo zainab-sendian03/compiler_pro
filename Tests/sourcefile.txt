@@ -1,50 +1,200 @@
 import { bootstrapApplication } from '@angular/platform-browser';
-import { Component } from '@angular/core';
+import { Component, Injectable } from '@angular/core';
+import { RouterModule, Router, ActivatedRoute, provideRouter } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { BehaviorSubject } from 'rxjs';
 import { CommonModule } from '@angular/common';
 
+export interface Product {
+  name: string;
+  image: string;
+  details: string;
+}
+
+@Injectable({ providedIn: 'root' })
+class ProductService {
+  private productsSubject = new BehaviorSubject< Product[]>([
+    { name: 'منتج 1', image: 'assets/images/image2.jpg', details: 'تفاصيل المنتج 1' },
+    { name: 'منتج 2', image: 'assets/images/image3.jpg', details: 'تفاصيل المنتج 2' }
+  ]);
+
+  products$ = this.productsSubject.asObservable();
+
+  addProduct(product: Product) {
+    const products = this.productsSubject.value;
+    this.productsSubject.next([...products, product]);
+  }
+
+  updateProduct(index: number, product: Product) {
+    const products = this.productsSubject.value;
+    products[index] = product;
+    this.productsSubject.next([...products]);
+  }
+
+  deleteProduct(index: number) {
+    const products = this.productsSubject.value;
+    products.splice(index, 1);
+    this.productsSubject.next([...products]);
+  }
+
+  getProduct(index: number): Product | null {
+    return this.productsSubject.value[index] || null;
+  }
+}
+
+@Component({
+  selector: 'app-product-list',
+  standalone: true,
+  imports: [RouterModule, CommonModule],
+  template: `
+    <button (click)="addItem()">إضافة منتج جديد</button>
+
+    <div style="display: flex">
+      <!-- القائمة -->
+      <div style="width: 30%;">
+        <div *ngFor="let item of items; let i = index" (click)="selectItem(i)">
+          <p>{{ item.name }}</p>
+          <img [src]="item.image" width="100"/>
+        </div>
+      </div>
+
+      <!-- التفاصيل -->
+      <div style="margin-left: 20px;" *ngIf="selectedItem !== null">
+        <h3>{{ items[selectedItem!].name }}</h3>
+        <img [src]="items[selectedItem!].image" width="150"/>
+        <p>{{ items[selectedItem!].details }}</p>
+
+        <button (click)="editItem()">تعديل</button>
+        <button (click)="deleteItem()">حذف</button>
+      </div>
+    </div>
+  `,
+})
+class ProductListComponent {
+  items: Product[] = [];
+  selectedItem: number | null = null;
+
+ constructor(private productService: ProductService, private router: Router) {
+  this.productService.products$.subscribe(products => {
+    this.items = products;
+    if (this.selectedItem !== null && this.selectedItem >= products.length) {
+      this.selectedItem = null;
+    }
+  });
+}
+
+
+  selectItem(index: number) {
+    this.selectedItem = index;
+  }
+
+  deleteItem() {
+    if (this.selectedItem !== null) {
+      this.productService.deleteProduct(this.selectedItem);
+      this.selectedItem = null;
+    }
+  }
+
+  editItem() {
+    if (this.selectedItem !== null) {
+      this.router.navigate(['/edit', this.selectedItem]);
+    }
+  }
+
+  addItem() {
+    this.router.navigate(['/add']);
+  }
+}
+
+@Component({
+  selector: 'app-add-product',
+  standalone: true,
+  imports: [FormsModule, RouterModule],
+  template: `
+    <input [(ngModel)]="product.name" placeholder="اسم المنتج"/>
+    <br/>
+    <input [(ngModel)]="product.image" placeholder="رابط الصورة"/>
+    <br/>
+    <input [(ngModel)]="product.details" placeholder="تفاصيل المنتج"/>
+    <br/>
+    <button (click)="save()">إضافة</button>
+    <button (click)="cancel()">رجوع</button>
+  `,
+})
+class AddProductComponent {
+  product: Product = { name: '', image: 'https://i.pinimg.com/736x/b0/33/4d/b0334d3c2d1ed6f5d8006f250c35b135.jpg', details: '' };
+
+  constructor(private productService: ProductService, private router: Router) {}
+
+  save() {
+    if (this.product.name && this.product.image && this.product.details) {
+      this.productService.addProduct({ ...this.product });
+      this.router.navigate(['/']);
+    }
+  }
+
+  cancel() {
+    this.router.navigate(['/']);
+  }
+}
+
+
+@Component({
+  selector: 'app-edit-product',
+  standalone: true,
+  imports: [FormsModule, RouterModule],
+  template: `
+     <input [(ngModel)]="product.name" placeholder="اسم المنتج"/>
+    <br/>
+    <input [(ngModel)]="product.image" placeholder="رابط الصورة"/>
+    <br/>
+    <input [(ngModel)]="product.details" placeholder="تفاصيل المنتج"/>
+    <br/>
+    <button (click)="save()">حفظ</button>
+    <button (click)="cancel()">رجوع</button>
+  `,
+})
+class EditProductComponent {
+  product: Product = { name: '', image: 'https://i.pinimg.com/1200x/b0/33/4d/b0334d3c2d1ed6f5d8006f250c35b135.jpg', details: '' };
+  index: number = 0;
+
+  constructor(
+    private productService: ProductService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {
+    this.route.params.subscribe(params => {
+      this.index = +params['id'];
+      const prod = this.productService.getProduct(this.index);
+      if (prod) this.product = { ...prod };
+    });
+  }
+
+  save() {
+    this.productService.updateProduct(this.index, this.product);
+    this.router.navigate(['/']);
+  }
+
+  cancel() {
+    this.router.navigate(['/']);
+  }
+}
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule],
-
-  template: `
-      <div style="display: flex">
-        <div style="width: 30%;">
-
-          <div *ngFor="let item of items; let i = index" (click)="selectItem(i)">
-            <p>{{ item.name }}</p>
-            <img [src]="item.image" alt="{{ item.name }}" style="width: 200px; height: 200px;"/>
-          </div>
-        </div>
-
-        <div *ngIf="selectedItem !== null">
-          <h2>{{ items[selectedItem].name }}</h2>
-          <img [src]="items[selectedItem].image" alt="{{ items[selectedItem].name }}" style="width: 230px; height: 230px;"/>
-          <p>{{ items[selectedItem].details }}</p>
-        </div>
-      </div>
-  `,
+  imports: [RouterModule],
+  template: `<router-outlet></router-outlet>`,
 })
-export class AppComponent {
-  items = [
-    { name: 'Product 1', image: 123, details: 'Beautiful' },
-    { name: 'Product 2', image: 'assets/images/image2.jpg', details: 'Sweet' },
-    { name: 'Product 3', image: 'assets/images/image3.jpg', details: 'Nice' }
-  ];
+class AppComponent {}
 
-  selectedItem: number | null = null;
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideRouter([
+      { path: '', component: ProductListComponent },
+      { path: 'add', component: AddProductComponent },
+      { path: 'edit/:id', component: EditProductComponent }
 
-  selectItem(index: number): void {
-    this.selectedItem = index;
-  }
-}
-
-bootstrapApplication(AppComponent)
-  .catch((err) => console.error(err));
-
-
-
-
-
-
+    ])
+  ]
+}).catch(err => console.error(err));
