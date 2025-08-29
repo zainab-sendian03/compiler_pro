@@ -8,16 +8,12 @@ public class ClassDeclaration extends Node {
 
     public ClassDeclaration(String name) {
         this.name = name;
-        this.body = new ArrayList<>();
     }
 
     public void add(Node node) {
         body.add(node);
     }
 
-    public void add(Node node) {
-        body.add(node);
-    }
     @Override
     public String generate() {
         StringBuilder sb = new StringBuilder();

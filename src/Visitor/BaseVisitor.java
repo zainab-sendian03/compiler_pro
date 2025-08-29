@@ -9,7 +9,6 @@ import ast.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -213,7 +212,6 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
 
         return classDeclaration;
     }
-
 
     @Override
     public Node visitClassBody(TypeScripteParser.ClassBodyContext ctx) {
@@ -772,63 +770,9 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
 
         return functionCall;
     }
-        Symbol symbol = new Symbol(
-                functionName,
-                "FunctionCall",
-                "Arguments: " + arguments,
-                SymbolTable.currentScope.getName(),
-                innerCtx.getStart().getLine()
-        );
-        SymbolTable.getSymbols().add(symbol);
-
-        return functionCall;
-    }
 
 
-    @Override
-    public Node visitArrowFunctionExpr(TypeScripteParser.ArrowFunctionExprContext ctx) {
-        TypeScripteParser.ArrowFunctionContext innerCtx = ctx.arrowFunction();
 
-        SymbolTable.createScope("ArrowFunction Scope");
-
-        ParameterList parameterList;
-        if (innerCtx.parameterList() != null) {
-            parameterList = (ParameterList) visit(innerCtx.parameterList());
-        } else if (innerCtx.IDENTIFIER() != null) {
-            parameterList = new ParameterList();
-            parameterList.add(new Parameter(innerCtx.IDENTIFIER().getText()));
-        } else {
-            parameterList = new ParameterList();
-        }
-
-        Node expression;
-        if (innerCtx.getRuleContext(TypeScripteParser.MethodBodyContext.class,0) != null) {
-            expression = (Node) visit(innerCtx.getRuleContext(TypeScripteParser.MethodBodyContext.class,0));
-        } else if (innerCtx.getRuleContext(TypeScripteParser.FunctionCallContext.class,0) != null) {
-            expression = (Node) visit(innerCtx.getRuleContext(TypeScripteParser.FunctionCallContext.class,0));
-        } else {
-            expression = new Literal("default expression");
-        }
-
-        SymbolTable.addSymbolToCurrentScope(
-                "ArrowFunction",
-                "Function",
-                "Parameters: " + parameterList.toString(),
-                innerCtx.getStart().getLine()
-        );
-
-        Symbol symbol = new Symbol(
-                "ArrowFunction",
-                "Function",
-                "Parameters: " + parameterList.toString(),
-                SymbolTable.currentScope.getName(),
-                innerCtx.getStart().getLine()
-        );
-        SymbolTable.getSymbols().add(symbol);
-        SymbolTable.endCurrentScope();
-
-        return new ArrowFunction(parameterList, expression);
-    }
 
 
     @Override

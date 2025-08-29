@@ -2,6 +2,7 @@
 === Duplicate Property Definition ===
 
 === Mismatch Type of Property ===
+Error in scope 'Component Scope: Component184' on symbol 'template' at line 188: Mismatch type for 'template' in scope 'Component Scope: Component184': expected 'String' but got 'template:'<router-outlet> </router-outlet>''
 
 ===  Invalid Directive Expression Errors ===
 

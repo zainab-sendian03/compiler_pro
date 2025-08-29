@@ -46,4 +46,26 @@ public class PropertyAccess extends Node implements Expression {
 
         return sb.toString();
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        if (isThis) {
+            sb.append("this");
+        } else if (base != null) {
+            sb.append(base);
+        }
+
+        for (Accessor acc : accessors) {
+            sb.append(acc.generate());
+        }
+
+        // لو فيه or literal
+        if (orLiteral != null) {
+            sb.append(" || ").append(orLiteral.generate());
+        }
+
+        return sb.toString();
+    }
 }
