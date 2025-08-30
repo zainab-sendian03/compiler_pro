@@ -2,6 +2,7 @@ package ast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class FunctionCall extends Statement implements Expression{
     private final String functionName;
@@ -23,6 +24,11 @@ public class FunctionCall extends Statement implements Expression{
     @Override
     public String generate() {
         StringBuilder sb = new StringBuilder();
+        if (Objects.equals(functionName, "bootstrapApplication")) {
+            sb.append("const myApp = new MyComponent('app')");
+            return sb.toString();
+        }
+
         sb.append(functionName).append("(");
         for (int i = 0; i < arguments.size(); i++) {
             sb.append(arguments.get(i).generate());

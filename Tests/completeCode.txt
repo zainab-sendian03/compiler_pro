@@ -16,8 +16,8 @@ export interface Product {
 
 class ProductService {
   private productsSubject = new BehaviorSubject< Product[]>([
-    { name: 'منتج 1', image: 'assets/images/image2.jpg', details: 'تفاصيل المنتج 1' },
-    { name: 'منتج 2', image: 'assets/images/image3.jpg', details: 'تفاصيل المنتج 2' }
+    { 'منتج 1',  'https://i.pinimg.com/736x/b0/33/4d/b0334d3c2d1ed6f5d8006f250c35b135.jpg',  'تفاصيل المنتج 1' },
+    {'منتج 2',  'https://i.pinimg.com/736x/b0/33/4d/b0334d3c2d1ed6f5d8006f250c35b135.jpg',  'تفاصيل المنتج 2' }
   ]);
 
   products$ = this.productsSubject.asObservable();
@@ -87,7 +87,7 @@ class ProductListComponent {
 
 
   selectItem(index: number) {
-    this.selectedItem = index;
+    this.selectedItem =   index;
   }
 
   deleteItem() {
@@ -195,7 +195,6 @@ bootstrapApplication(AppComponent, {
       { path: '', component: ProductListComponent },
       { path: 'add', component: AddProductComponent },
       { path: 'edit/:id', component: EditProductComponent }
-     
     ])
   ]
 }).catch(err => console.error(err));

@@ -2,6 +2,7 @@ package ast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class TemplateField extends Field  {
     private  String template;
@@ -31,17 +32,27 @@ public class TemplateField extends Field  {
 
     @Override
     public String generate() {
-        StringBuilder htmlBuilder = new StringBuilder();
+        StringBuilder builder = new StringBuilder();
 
-        // Generate HTML from elements, handling directives and bindings
-        for (Node element : elements) {
-            if (element != null) {
-                htmlBuilder.append(element.generate());
-            }
-        }
+        // افترض أن هذه الـ TemplateField هي الـ root component
+        builder.append("render() {\n");
+        builder.append("  const container = this.root.container;\n");
 
-        return "`" + htmlBuilder.toString() + "`";
+        // جمع كل عناصر HTML داخليًا
+        String innerHTML = elements.stream()
+                .map(Node::generate)
+                .collect(Collectors.joining("\n"));
+
+        builder.append("  container.innerHTML = `\n")
+                .append(innerHTML)
+                .append("\n`;\n");
+        builder.append("}\n");
+
+        return builder.toString();
     }
+
+
+
 
     @Override
     public String toString() {

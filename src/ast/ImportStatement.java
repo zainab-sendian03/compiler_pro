@@ -15,7 +15,7 @@ public class ImportStatement extends Node {
     }
     @Override
     public String generate() {
-        return "import { " + String.join(", ", identifiers) + " } from \"" + fromModule + "\";\n";
+        return "";
     }
 
     @Override

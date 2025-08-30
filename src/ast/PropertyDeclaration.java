@@ -12,12 +12,16 @@ public class PropertyDeclaration extends Node implements Expression{
     }
     @Override
     public String generate() {
-        String declaration = name;
-        if (value != null) {
-            declaration += " = " + ((Node) value).generate();
+        StringBuilder sb = new StringBuilder();
+        sb.append(this.name);
+        if (this.value != null) {
+            sb.append(" = ").append(((Node) this.value).generate());
         }
-        return "  " + declaration + ";\n";
+
+        return sb.toString();
     }
+
+
 
     @Override
     public String toString() {

@@ -677,13 +677,49 @@ public class TypeScripteParserBaseListener implements TypeScripteParserListener 
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterOperation(TypeScripteParser.OperationContext ctx) { }
+	@Override public void enterUnaryOrArray(TypeScripteParser.UnaryOrArrayContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitOperation(TypeScripteParser.OperationContext ctx) { }
+	@Override public void exitUnaryOrArray(TypeScripteParser.UnaryOrArrayContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterIncrement(TypeScripteParser.IncrementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIncrement(TypeScripteParser.IncrementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterDecrement(TypeScripteParser.DecrementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitDecrement(TypeScripteParser.DecrementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterArrayAccess(TypeScripteParser.ArrayAccessContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitArrayAccess(TypeScripteParser.ArrayAccessContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -701,13 +737,37 @@ public class TypeScripteParserBaseListener implements TypeScripteParserListener 
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterAssignmentExpression(TypeScripteParser.AssignmentExpressionContext ctx) { }
+	@Override public void enterPropExpy(TypeScripteParser.PropExpyContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitAssignmentExpression(TypeScripteParser.AssignmentExpressionContext ctx) { }
+	@Override public void exitPropExpy(TypeScripteParser.PropExpyContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterArrayExpy(TypeScripteParser.ArrayExpyContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitArrayExpy(TypeScripteParser.ArrayExpyContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterPropp(TypeScripteParser.ProppContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitPropp(TypeScripteParser.ProppContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -792,18 +852,6 @@ public class TypeScripteParserBaseListener implements TypeScripteParserListener 
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitConstructor(TypeScripteParser.ConstructorContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterHtmlRoot(TypeScripteParser.HtmlRootContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitHtmlRoot(TypeScripteParser.HtmlRootContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

@@ -10,6 +10,10 @@ public class ConstructorDecl extends Node{
         this.body = body;
     }
 
+    public ArrayList<PropertyDeclaration> getParameters() {
+        return parameters;
+    }
+
     @Override
     public String generate() {
         StringBuilder sb = new StringBuilder();
@@ -19,6 +23,9 @@ public class ConstructorDecl extends Node{
             if (i < parameters.size() - 1) sb.append(", ");
         }
         sb.append(") {\n");
+        for (PropertyDeclaration param : parameters) {
+            sb.append("    this.").append(param.name).append(" = ").append(param.name).append(";\n");
+        }
         for (Node stmt : body) {
             sb.append("  ").append(stmt.generate()).append("\n"); // هنا generate لكل statement
         }
@@ -36,9 +43,13 @@ public class ConstructorDecl extends Node{
             if (i < parameters.size() - 1) sb.append(", ");
         }
         sb.append(") {\n");
-        for (Node stmt : body) {
-            sb.append("  ").append(stmt.generate()).append("\n"); // هنا generate لكل statement
+        for (PropertyDeclaration param : parameters) {
+            sb.append("    this.").append(param.name).append(" = ").append(param.name).append(";\n");
         }
+
+        for (Node stmt : body) {
+            sb.append("  ").append(stmt.generate()).append("\n");
+                 }
         sb.append("}");
         return sb.toString();
     }

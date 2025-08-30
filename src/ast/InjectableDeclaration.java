@@ -9,15 +9,15 @@ public class InjectableDeclaration extends Node {
 
     @Override
     public String generate() {
-        StringBuilder jsBuilder = new StringBuilder();
-        jsBuilder.append("// Injectable Service\n");
-        jsBuilder.append("class InjectableService {\n");
-        jsBuilder.append("  constructor() {\n");
-
-        jsBuilder.append("    this.providedIn = ").append(providedIn).append(";\n");
-        jsBuilder.append("  }\n");
-        jsBuilder.append("}\n\n");
-        return jsBuilder.toString();
+//        StringBuilder jsBuilder = new StringBuilder();
+//        jsBuilder.append("// Injectable Service\n");
+//        jsBuilder.append("class InjectableService {\n");
+//        jsBuilder.append("  constructor() {\n");
+//
+//        jsBuilder.append("    this.providedIn = ").append(providedIn).append(";\n");
+//        jsBuilder.append("  }\n");
+//        jsBuilder.append("}\n\n");
+        return "";
     }
 
     @Override

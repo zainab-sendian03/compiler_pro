@@ -27,8 +27,11 @@ public class TwoWayBindingAttribute extends Content {
 
     @Override
     public String generate() {
-        // يولد سمة القيمة وحدث الإدخال لربط ثنائي الاتجاه
-        return "value=\"${" + value + "}\" oninput=\"" + value + " = this.value\"";
+        String[] parts = value.split("\\.");
+        String componentName = parts[0];
+        String propertyName = parts[1];
+
+        return "value=\"${" + value + "}\" oninput=\"myApp." + componentName + "." + propertyName + " = this.value\"";
     }
 
     @Override

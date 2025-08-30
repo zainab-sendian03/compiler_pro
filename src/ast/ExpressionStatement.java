@@ -8,8 +8,9 @@ public class ExpressionStatement extends Statement {
     }
     @Override
     public String generate() {
-        return ((Node) expression)+ ";\n";
+        return ((Node) expression).generate() + ";\n";
     }
+
 
     @Override
     public String toString() {

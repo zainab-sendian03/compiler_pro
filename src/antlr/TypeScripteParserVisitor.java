@@ -366,24 +366,59 @@ public interface TypeScripteParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitGt(TypeScripteParser.GtContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link TypeScripteParser#operation}.
+	 * Visit a parse tree produced by the {@code unaryOrArray}
+	 * labeled alternative in {@link TypeScripteParser#operation}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitOperation(TypeScripteParser.OperationContext ctx);
+	T visitUnaryOrArray(TypeScripteParser.UnaryOrArrayContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code increment}
+	 * labeled alternative in {@link TypeScripteParser#operation}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIncrement(TypeScripteParser.IncrementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code decrement}
+	 * labeled alternative in {@link TypeScripteParser#operation}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDecrement(TypeScripteParser.DecrementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link TypeScripteParser#arrayAccess}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitArrayAccess(TypeScripteParser.ArrayAccessContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code keys}
-	 * labeled alternative in {@link TypeScripteParser#ImportStmtComponentStmtInjectableStmtVariableStmtObjectLiteralStmtExprStmtClassStmtForLoopStmtIfStmtSelectorFldStandaloneFldImportsFldTemplateFldOtherFldsLiteralExprArrayExprObjectExprFunctionCallExprArrowFunctionExprOperationExprAssignmentExprPropertyAccessExprVarDeclExprConstructorCallExprConstructorExprVarDeclWithKeywordVarReassignmentCompleteElementSelfClosingElementNormalAttrBindingAttrDirectiveAttrEventAttrTwoWayBindingAttr}.
+	 * labeled alternative in {@link TypeScripteParser#ImportStmtComponentStmtInjectableStmtVariableStmtObjectLiteralStmtExprStmtClassStmtForLoopStmtIfStmtSelectorFldStandaloneFldImportsFldTemplateFldOtherFldsLiteralExprArrayExprObjectExprFunctionCallExprArrowFunctionExprOperationExprAssignmentExprPropertyAccessExprVarDeclExprConstructorCallExprConstructorExprunaryOrArrayincrementdecrementPropExpyArrayExpyVarDeclWithKeywordVarReassignmentCompleteElementSelfClosingElementNormalAttrBindingAttrDirectiveAttrEventAttrTwoWayBindingAttr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitKeys(TypeScripteParser.KeysContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link TypeScripteParser#assignmentExpression}.
+	 * Visit a parse tree produced by the {@code PropExpy}
+	 * labeled alternative in {@link TypeScripteParser#assignmentExpression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitAssignmentExpression(TypeScripteParser.AssignmentExpressionContext ctx);
+	T visitPropExpy(TypeScripteParser.PropExpyContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ArrayExpy}
+	 * labeled alternative in {@link TypeScripteParser#assignmentExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitArrayExpy(TypeScripteParser.ArrayExpyContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link TypeScripteParser#propp}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPropp(TypeScripteParser.ProppContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link TypeScripteParser#propertyAccess}.
 	 * @param ctx the parse tree
@@ -428,12 +463,6 @@ public interface TypeScripteParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitConstructor(TypeScripteParser.ConstructorContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link TypeScripteParser#htmlRoot}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitHtmlRoot(TypeScripteParser.HtmlRootContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code CompleteElement}
 	 * labeled alternative in {@link TypeScripteParser#element}.

@@ -162,13 +162,26 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
 
     @Override
     public Node visitObjectExpr(TypeScripteParser.ObjectExprContext ctx) {
+        TypeScripteParser.ObjectLiteralContext innerCtx = ctx.objectLiteral();
+
         ObjectLiteral objectLiteral = new ObjectLiteral();
 
-        if (ctx.objectLiteral().propertyAssignment() != null) {
-            for (int i = 0; i < ctx.objectLiteral().propertyAssignment().size(); i++) {
-                PropertyAssignment property = (PropertyAssignment) visit(ctx.objectLiteral().propertyAssignment(i));
-                objectLiteral.addProperty(property);
-            }
+        // إذا في DOTDOTDOT
+        if (innerCtx.DOTDOTDOT() != null) {
+            // عادة الـ expression بيكون أول propertyAssignment
+            TypeScripteParser.PropertyAssignmentContext spreadCtx = innerCtx.propertyAssignment(0);
+            Expression spreadExpr = (Expression) visit(spreadCtx.expression(0)); // expression داخل propertyAssignment
+            objectLiteral.addProperty(new SpreadExpression(spreadExpr));
+        }
+
+        // بقية property assignments
+        for (int i = 0; i < innerCtx.propertyAssignment().size(); i++) {
+            TypeScripteParser.PropertyAssignmentContext paCtx = innerCtx.propertyAssignment(i);
+            // تجاهل الأول إذا كان spread لأنه زودناه فوق
+            if (innerCtx.DOTDOTDOT() != null && i == 0) continue;
+
+            PropertyAssignment property = (PropertyAssignment) visit(paCtx);
+            objectLiteral.addProperty(property);
         }
 
         return objectLiteral;
@@ -743,7 +756,6 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
     }
 
 
-
     @Override
     public Node visitFunctionCallExpr(TypeScripteParser.FunctionCallExprContext ctx) {
         TypeScripteParser.FunctionCallContext innerCtx = ctx.functionCall();
@@ -772,122 +784,95 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
     }
 
 
-
-
-
     @Override
     public Node visitOperationExpr(TypeScripteParser.OperationExprContext ctx) {
-        TypeScripteParser.OperationContext innerCtx = ctx.operation();
+        return (Node) visit(ctx.operation()); // نمرر مباشرة للـ operation
+    }
 
+    // unaryOrArray
+    @Override
+    public Node visitUnaryOrArray(TypeScripteParser.UnaryOrArrayContext ctx) {
         Expression left = null;
-        Expression right = null;
-        String operator = null;
 
-        // لو عندنا identifier كبداية
-        if (innerCtx.IDENTIFIER() != null) {
-            left = new Identifier(innerCtx.IDENTIFIER().getText());
-        }
+        // identifier
+        if (ctx.IDENTIFIER() != null) {
+            left = new Identifier(ctx.IDENTIFIER().getText());
 
-        // التعامل مع keys + expression
-        if (innerCtx.keys() != null) {
-            operator = innerCtx.keys().getText();
-
-            // expression ممكن تكون موجودة بعد keys
-            if (innerCtx.expression() != null && !innerCtx.expression().isEmpty()) {
-                right = (Expression) visit(innerCtx.expression());
+            // array access
+            if (ctx.arrayAccess() != null) {
+                Expression indexExpr = (Expression) visit(ctx.arrayAccess().expression());
+                left = new ArrayAccess(left, indexExpr);
             }
-
-            return new Operation(left, operator, right);
         }
 
-        // التعامل مع ++ و --
-        if (innerCtx.PLUS() != null && innerCtx.getChildCount() == 2 && innerCtx.getChild(1).getText().equals("+")) {
-            operator = "++";
-            return new Operation(left, operator, null);
-        } else if (innerCtx.MINUS() != null && innerCtx.getChildCount() == 2 && innerCtx.getChild(1).getText().equals("-")) {
-            operator = "--";
-            return new Operation(left, operator, null);
+        // unary + / -
+        if (ctx.PLUS() != null) {
+            return new UnaryExpression("+", left);
+        } else if (ctx.MINUS() != null) {
+            return new UnaryExpression("-", left);
         }
 
-        throw new IllegalArgumentException("Invalid operation");
+        return (Node) left;
+    }
+
+    // increment (IDENTIFIER++)
+    @Override
+    public Node visitIncrement(TypeScripteParser.IncrementContext ctx) {
+        Expression left = new Identifier(ctx.IDENTIFIER().getText());
+        return new UnaryExpression("++", left);
+    }
+
+    // decrement (IDENTIFIER--)
+    @Override
+    public Node visitDecrement(TypeScripteParser.DecrementContext ctx) {
+        Expression left = new Identifier(ctx.IDENTIFIER().getText());
+        return new UnaryExpression("--", left);
     }
 
 
     @Override
-    public Node visitAssignmentExpr(TypeScripteParser.AssignmentExprContext ctx) {
-        TypeScripteParser.AssignmentExpressionContext innerCtx = ctx.assignmentExpression();
+    public Node visitPropExpy(TypeScripteParser.PropExpyContext ctx) {
+        // propp = IDENTIFIER DOT IDENTIFIER
+        String objectName = ctx.propp().IDENTIFIER(0).getText();
+        String propertyName = ctx.propp().IDENTIFIER(1).getText();
 
-        Expression target = null;
+        PropAccess propertyAccess = new PropAccess(objectName, propertyName);
+        Expression value = (Expression) visit(ctx.expression());
 
-        if (innerCtx.propertyAccess() != null) {
-            target = (Expression) visit(innerCtx.propertyAccess());
-        } else if (innerCtx.arrayLiteral() != null) {
-            TypeScripteParser.ArrayLiteralContext arrCtx = innerCtx.arrayLiteral();
-            if (arrCtx.IDENTIFIER() != null && arrCtx.LBRACKET() != null && arrCtx.expression().size() == 1) {
-                Expression array = new Identifier(arrCtx.IDENTIFIER().getText());
-                Expression indexExpr = (Expression) visit(arrCtx.expression(0));
+        return new AssignmentExpression(propertyAccess, value);
+    }
+    @Override
+    public Node visitArrayExpy(TypeScripteParser.ArrayExpyContext ctx) {
+        // الطرف اليساري دائمًا arrayLiteral
+        Expression target = (Expression) visit(ctx.arrayLiteral());
 
-                target = new ArrayAccess(array, indexExpr);
-            } else {
-                target = (Expression) visit(arrCtx);
-            }
-        }
+        // الطرف اليميني
+        Expression value = (Expression) visit(ctx.expression());
 
-        Expression value = (Expression) visit(innerCtx.expression());
-        if (target instanceof PropertyAccess) {
-            // مثال: this.selectedItem = null
-            PropertyAccess pa = (PropertyAccess) target;
-
-            // في الكود المولد بالـ AST، لما تصادفي RHS literal null:
-            if (value instanceof Literal && ((Literal) value).getValue() == null) {
-                // صحح assignment لتعيين الحقل داخل الـ object
-                return new AssignmentExpression(target, value);
-            }
-        }
         return new AssignmentExpression(target, value);
     }
-
-
     @Override
     public Node visitPropertyAccessExpr(TypeScripteParser.PropertyAccessExprContext ctx) {
-        if (ctx.getChildCount() < 1) {
-            throw new IllegalArgumentException("Invalid property access: no children found.");
-        }
+        String base=ctx.getChild(0).getText();
 
-        boolean isThis = "this".equals(ctx.getChild(0).getText());
-        String baseIdentifier = isThis ? null : ctx.getChild(0).getText();
-        PropertyAccess pa = new PropertyAccess(isThis, baseIdentifier);
 
-        int i = 1;
-        while (i < ctx.getChildCount()) {
-            String childText = ctx.getChild(i).getText();
+        PropertyAccess pa = new PropertyAccess(base);
 
-            if (".".equals(childText)) {
-                TypeScripteParser.ArrayLiteralContext arrayCtx = null;
-
-                // تحقق إذا التالي arrayLiteral
-                if (ctx.getChild(i + 1) instanceof TypeScripteParser.ArrayLiteralContext) {
-                    arrayCtx = (TypeScripteParser.ArrayLiteralContext) ctx.getChild(i + 1);
-                    ArrayLiteral arr = new ArrayLiteral();
-                    // هنا ممكن تضيفي parsing لعناصر الـ array إذا بدك
-                    pa.addAccessor(new Accessor(arr));
-                } else {
-                    // يعتبر IDENTIFIER عادي
-                    pa.addAccessor(new Accessor(ctx.getChild(i + 1).getText()));
-                }
-                i += 2;
-            } else if ("||".equals(childText)) {
-                // التالي literal
-                Object literalValue = ctx.getChild(i + 1).getText();
-                pa.setOrLiteral(new Literal((String) literalValue));
-                break; // بعد OROR ما في chaining
-            } else {
-                i++; // تخطي أي شيء غير متوقع
+        for (int i = 1; i < ctx.getChildCount(); i++) {
+            String text = ctx.getChild(i).getText();
+            if (".".equals(text)) {
+                String next = ctx.getChild(i + 1).getText();
+                pa.addAccessor(new Accessor(next));
+                i++;
+            } else if ("||".equals(text)) {
+                pa.setOrLiteral(new Literal(ctx.getChild(i + 1).getText()));
+                break;
             }
         }
 
         return pa;
     }
+
 
 
     @Override
@@ -902,14 +887,12 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
         if (ctx.NUMBER() != null) {
             Integer integerVal = Integer.parseInt(ctx.NUMBER().getText());
             return new Literal(integerVal);
-        } if (ctx.IDENTIFIER() != null) {
-            String idVal = ctx.IDENTIFIER().getText();
-            return new Literal(idVal);
         }
         if (ctx.IDENTIFIER() != null) {
             String idVal = ctx.IDENTIFIER().getText();
             return new Literal(idVal);
         }
+
         if (ctx.TRUE() != null) {
             return new Literal(true);
         } else if (ctx.FALSE() != null) {
@@ -949,18 +932,18 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
         return new PropertyAssignment(key, value);
     }
 
-    @Override
-    public Node visitHtmlRoot(TypeScripteParser.HtmlRootContext ctx) {
-        SymbolTable.createScope("HTML Scope");
-        HtmlRoot root=new HtmlRoot( new ArrayList<>());
-        for (int i = 0; i < ctx.element().size(); i++) {
-            if (ctx.element(i) != null) {
-                root.getChildren().add((Node) visit(ctx.element(i)));
-            }
-        }
-        SymbolTable.endCurrentScope();
-        return root;
-    }
+//    @Override
+//    public Node visitHtmlRoot(TypeScripteParser.HtmlRootContext ctx) {
+//        SymbolTable.createScope("HTML Scope");
+//        HtmlRoot root=new HtmlRoot( new ArrayList<>());
+//        for (int i = 0; i < ctx.element().size(); i++) {
+//            if (ctx.element(i) != null) {
+//                root.getChildren().add((Node) visit(ctx.element(i)));
+//            }
+//        }
+//        SymbolTable.endCurrentScope();
+//        return root;
+//    }
 
     @Override
     public Element visitCompleteElement(TypeScripteParser.CompleteElementContext ctx) {
@@ -982,12 +965,11 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
                     completeTag.getChildren().add((Node) visit(innerCtx.getChild(i)));
                 } else if (innerCtx.getChild(i) instanceof TypeScripteParser.AngularExpressionContext) {
                     completeTag.getChildren().add((Node) visit(innerCtx.getChild(i)));
-                }
-              else if (innerCtx.getChild(i) instanceof TypeScripteParser.TextContext) {
-                completeTag.getChildren().add((Node) visit(innerCtx.getChild(i)));
+                } else if (innerCtx.getChild(i) instanceof TypeScripteParser.TextContext) {
+                    completeTag.getChildren().add((Node) visit(innerCtx.getChild(i)));
                 }
 
-           }
+            }
         }
         if (innerCtx.closedTag() != null) {
             completeTag.setClosedTag((ClosedTag) visit(innerCtx.closedTag()));
@@ -1054,13 +1036,13 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
 
     @Override
     public Node visitText(TypeScripteParser.TextContext ctx) {
-        Text t = new Text(null,null);
+        Text t = new Text(null, null);
         if (ctx.TEXT() != null) {
-            String text=ctx.TEXT().getText();
+            String text = ctx.TEXT().getText();
             t.setText(text);
             t.setIdentifier(null);
         } else {
-            String text=ctx.IDENTIFIER().getText();
+            String text = ctx.IDENTIFIER().getText();
             t.setText(null);
             t.setIdentifier(text);
         }
@@ -1143,6 +1125,7 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
         //analyzer.checkEventCallImmediate(s4 );
         return eAtt;
     }
+
     @Override
     public Node visitTwoWayBindingAttr(TypeScripteParser.TwoWayBindingAttrContext ctx) {
 
@@ -1158,7 +1141,7 @@ public class BaseVisitor extends TypeScripteParserBaseVisitor {
         value = value.substring(1, value.length() - 1);
         tAtt.setName(name);
         tAtt.setValue(value);
-        AttSymbol s5 = new AttSymbol(name, "TwoWayBindingAttribute", value,innerCtx.getStart().getLine());
+        AttSymbol s5 = new AttSymbol(name, "TwoWayBindingAttribute", value, innerCtx.getStart().getLine());
         attSymbolTable.getSymbols().add(s5);
         return tAtt;
     }

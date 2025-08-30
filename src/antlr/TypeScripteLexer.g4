@@ -32,7 +32,6 @@ TEMPLATE: 'template';
 IMPORTS: 'imports';
 STANDALONE: 'standalone';
 CONST: 'const';
-THIS:'this';
 LET: 'let';
 TRUE: 'true';
 FALSE: 'false';

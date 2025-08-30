@@ -46,36 +46,37 @@ public class CompleteTag extends Element implements Addable<Node> {
 
     @Override
     public String generate() {
-        // Find the directive attribute first
-        DirectiveAttribute directive = null;
-        for (Node attr : openTag.getAttributes()) {
-            if (attr instanceof DirectiveAttribute) {
-                directive = (DirectiveAttribute) attr;
-                break;
-            }
-        }
-
-        // Generate the inner content first
-        String childrenContent = this.elements.stream()
+        String childHtml = elements.stream()
                 .map(Node::generate)
                 .collect(Collectors.joining(""));
 
-        if (directive != null) {
-            // Generate the HTML for the tag itself (without the directive attribute)
-            String tagHtml = openTag.generate() + childrenContent + closedTag.generate();
-            // Pass the generated HTML to the directive's generate method
-            return directive.generate(tagHtml);
-        } else {
-            // Standard generation if no directive is found
-            StringBuilder builder = new StringBuilder();
-            builder.append(this.openTag.generate());
-            builder.append(childrenContent);
-            if (this.closedTag != null) {
-                builder.append(this.closedTag.generate());
+        for (Node attr : openTag.getAttributes()) {
+            if (attr instanceof DirectiveAttribute) {
+                if (((DirectiveAttribute) attr).getName().equals("ngIf")) {
+                    String fullTag = createFullTag(childHtml);
+                    return ((DirectiveAttribute) attr).generate(fullTag);
+                }
             }
-            return builder.toString();
         }
+
+        for (Node attr : openTag.getAttributes()) {
+            if (attr instanceof DirectiveAttribute) {
+                if (((DirectiveAttribute) attr).getName().equals("ngFor")) {
+                    String tagContent = createFullTag(childHtml);
+                    return ((DirectiveAttribute) attr).generate(tagContent);
+                }
+            }
+        }
+        return createFullTag(childHtml);
     }
+
+    private String createFullTag(String childHtml) {
+        String openTagStr = openTag.generate();
+        String closeTagStr = (closedTag != null) ? closedTag.generate() : "";
+        return openTagStr + childHtml + closeTagStr;
+    }
+
+
 
     @Override
     public String toString() {
@@ -93,6 +94,3 @@ public class CompleteTag extends Element implements Addable<Node> {
         return builder.toString();
 
     }}
-
-
-

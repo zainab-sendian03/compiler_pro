@@ -1,7 +1,7 @@
 package ast;
 
 
-public interface Expression {
-
+public interface Expression{
+    String generate();
 }
 

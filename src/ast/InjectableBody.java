@@ -18,7 +18,7 @@ public class InjectableBody extends Node {
     }
     @Override
     public String generate() {
-        return "providedIn: '" + value + "'";
+        return "";
     }
 
     @Override

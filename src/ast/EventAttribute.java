@@ -19,10 +19,22 @@ public class EventAttribute extends Content {
         this.value = value;
     }
 
+    // مثال على generate() في EventAttribute.java
     @Override
     public String generate() {
-        // تحويل event attribute إلى onclick في HTML
-        return "onclick=\"" + value + "\"";
+        String componentName = getComponentName();
+        return "on" + name + "=\"myApp." + componentName + "." + value + "\"";
+    }
+
+    private String getComponentName() {
+        if (value.contains("listComponent")) {
+            return "listComponent";
+        } else if (value.contains("addComponent")) {
+            return "addComponent";
+        } else if (value.contains("editComponent")) {
+            return "editComponent";
+        }
+        return "listComponent";
     }
 
     @Override

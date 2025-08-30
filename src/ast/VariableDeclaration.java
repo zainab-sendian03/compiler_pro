@@ -10,7 +10,7 @@ public class VariableDeclaration extends Node implements  Expression {
     }
     @Override
     public String generate() {
-        return "let " + name + " = " + ((Node) value).generate() + ";\n";
+        return "const " + name + " = " + ((Node) value).generate() + ";\n";
     }
 
     @Override

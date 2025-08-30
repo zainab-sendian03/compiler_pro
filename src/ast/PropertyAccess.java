@@ -4,23 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PropertyAccess extends Node implements Expression {
-    private boolean isThis;
-    private String base;
-    private List<Accessor> accessors = new ArrayList<>();
+    private final String base; // بدل String
+    private final List<Accessor> accessors = new ArrayList<>(); // لكل DOT IDENTIFIER أو arrayLiteral
+    private Literal orLiteral = null; // لو فيه || literal
 
-    // جديد: قيمة OR إذا كانت موجودة
-    private Literal orLiteral = null;
-
-    public PropertyAccess(boolean isThis, String base) {
-        this.isThis = isThis;
+    public PropertyAccess(String base) {
         this.base = base;
     }
+
 
     public void addAccessor(Accessor accessor) {
         accessors.add(accessor);
     }
 
-    // جديد: لتعيين قيمة OR
     public void setOrLiteral(Literal literal) {
         this.orLiteral = literal;
     }
@@ -28,44 +24,18 @@ public class PropertyAccess extends Node implements Expression {
     @Override
     public String generate() {
         StringBuilder sb = new StringBuilder();
-
-        if (isThis) {
-            sb.append("this");
-        } else if (base != null) {
-            sb.append(base);
-        }
-
+        sb.append(base);
         for (Accessor acc : accessors) {
             sb.append(acc.generate());
         }
-
-        // لو فيه or literal
         if (orLiteral != null) {
             sb.append(" || ").append(orLiteral.generate());
         }
-
         return sb.toString();
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-
-        if (isThis) {
-            sb.append("this");
-        } else if (base != null) {
-            sb.append(base);
-        }
-
-        for (Accessor acc : accessors) {
-            sb.append(acc.generate());
-        }
-
-        // لو فيه or literal
-        if (orLiteral != null) {
-            sb.append(" || ").append(orLiteral.generate());
-        }
-
-        return sb.toString();
+        return generate();
     }
 }

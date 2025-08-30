@@ -180,20 +180,27 @@ gt:
   CLOSED_SYMBOL
  ;
 operation
-  : IDENTIFIER? keys expression
-  | IDENTIFIER (PLUS PLUS)
-  | IDENTIFIER (MINUS MINUS)
-  ;
+    : (PLUS | MINUS)? IDENTIFIER arrayAccess?       #unaryOrArray
+    | IDENTIFIER (PLUS PLUS)                        #increment
+    | IDENTIFIER (MINUS MINUS)                      #decrement
+    ;
+
+arrayAccess
+    : LBRACKET expression RBRACKET
+    ;
 
 keys:PLUS | MINUS | STAR | SLASH | MOD | CLOSED_SYMBOL| lt | ANDAND | OROR | NOTEQUALS |GREATERTHAN;
 
 assignmentExpression
-  : (propertyAccess | arrayLiteral ) EQUALS expression
-  | propertyAccess EQUALS EQUALS expression
-  ;
+  : propp   EQUALS  expression #PropExpy
+  | arrayLiteral  EQUALS  expression #ArrayExpy
 
+  ;
+propp:
+IDENTIFIER DOT IDENTIFIER
+;
 propertyAccess
-    : (THIS | IDENTIFIER) (DOT IDENTIFIER DOLAR? | DOT arrayLiteral)* (OROR literal)?
+    : IDENTIFIER (DOT IDENTIFIER DOLAR? | DOT arrayLiteral)* (OROR literal)?
     ;
 
 
@@ -216,10 +223,6 @@ variableDeclaration
 
 constructor
     : CONSTRUCTOR LPAREN propertyDeclaration (COMMA propertyDeclaration)* RPAREN LBRACE statement* RBRACE
-    ;
-
-htmlRoot
-    : element* EOF
     ;
 
 element
